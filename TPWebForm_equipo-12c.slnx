@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="AppGestionNegocio.Dominio/AppGestionNegocio.Dominio.csproj" Id="62e5c7bc-cb4f-4c08-8386-cc5450011754" />
+  <Project Path="AppGestionNegocio.Negocio/AppGestionNegocio.Negocio.csproj" Id="6b9f3c11-e912-4865-b7da-a492b936836c" />
+  <Project Path="AppGestionNegocio.Web/AppGestionNegocio.Web.csproj" Id="7ae5243f-98a2-4591-ad82-2b7707b9c0b6" />
+</Solution>
