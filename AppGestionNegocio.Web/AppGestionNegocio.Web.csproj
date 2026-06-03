@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Acceso.aspx" />
+    <Content Include="ClienteFormulario.aspx" />
     <Content Include="Global.asax" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -76,6 +77,13 @@
     </Compile>
     <Compile Include="Acceso.aspx.designer.cs">
       <DependentUpon>Acceso.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ClienteFormulario.aspx.cs">
+      <DependentUpon>ClienteFormulario.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ClienteFormulario.aspx.designer.cs">
+      <DependentUpon>ClienteFormulario.aspx</DependentUpon>
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
