@@ -65,7 +65,6 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
-<<<<<<< HEAD
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
@@ -77,11 +76,9 @@
     <Content Include="Content\bootstrap-reboot.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
-=======
     <Content Include="Acceso.aspx" />
     <Content Include="ArticuloFormulario.aspx" />
     <Content Include="ClienteFormulario.aspx" />
->>>>>>> main
     <Content Include="Global.asax" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
@@ -253,12 +250,10 @@
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
-<<<<<<< HEAD
     <TypeScriptCompile Include="Scripts\index.d.ts" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
-=======
     <ProjectReference Include="..\AppGestionNegocio.Dominio\AppGestionNegocio.Dominio.csproj">
       <Project>{62e5c7bc-cb4f-4c08-8386-cc5450011754}</Project>
       <Name>AppGestionNegocio.Dominio</Name>
@@ -267,7 +262,6 @@
       <Project>{6b9f3c11-e912-4865-b7da-a492b936836c}</Project>
       <Name>AppGestionNegocio.Negocio</Name>
     </ProjectReference>
->>>>>>> main
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -278,11 +272,13 @@
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
+   -->
+	   
   <Target Name="BeforeBuild">
   </Target>
   <Target Name="AfterBuild">
   </Target>
-  -->
+
   <ProjectExtensions>
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
