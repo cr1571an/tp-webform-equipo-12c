@@ -18,6 +18,7 @@ namespace AppGestionNegocio.Dominio
         public string Cp { get; set; }
         public string Domicilio { get; set; }
         public List<Venta> Ventas { get; set; }
+        public bool Activo { get; set; }
         public override string ToString()
         {
             return Nombre + " " + Apellido;
