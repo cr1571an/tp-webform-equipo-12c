@@ -5,7 +5,7 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using AppGestionNegocio.Dominio;
-//using AppGestionNegocio.Negocio;
+using AppGestionNegocio.Negocio;
 
 namespace AppGestionNegocio.Web
 {
@@ -13,7 +13,7 @@ namespace AppGestionNegocio.Web
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            /*if (!IsPostBack)
+            if (!IsPostBack)
             {
                 try
                 {
@@ -26,7 +26,7 @@ namespace AppGestionNegocio.Web
                 {
                     Session.Add("error", ex.ToString());
                 }
-            }*/
+            }
         }
 
         protected void dgvClientes_PageIndexChanging(object sender, GridViewPageEventArgs e)
