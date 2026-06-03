@@ -43,6 +43,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=2.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -62,6 +65,7 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
@@ -73,6 +77,11 @@
     <Content Include="Content\bootstrap-reboot.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+=======
+    <Content Include="Acceso.aspx" />
+    <Content Include="ArticuloFormulario.aspx" />
+    <Content Include="ClienteFormulario.aspx" />
+>>>>>>> main
     <Content Include="Global.asax" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
@@ -177,6 +186,27 @@
     <Content Include="Inicio.aspx" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Acceso.aspx.cs">
+      <DependentUpon>Acceso.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Acceso.aspx.designer.cs">
+      <DependentUpon>Acceso.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ArticuloFormulario.aspx.cs">
+      <DependentUpon>ArticuloFormulario.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ArticuloFormulario.aspx.designer.cs">
+      <DependentUpon>ArticuloFormulario.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ClienteFormulario.aspx.cs">
+      <DependentUpon>ClienteFormulario.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ClienteFormulario.aspx.designer.cs">
+      <DependentUpon>ClienteFormulario.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -223,10 +253,21 @@
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <TypeScriptCompile Include="Scripts\index.d.ts" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
+=======
+    <ProjectReference Include="..\AppGestionNegocio.Dominio\AppGestionNegocio.Dominio.csproj">
+      <Project>{62e5c7bc-cb4f-4c08-8386-cc5450011754}</Project>
+      <Name>AppGestionNegocio.Dominio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AppGestionNegocio.Negocio\AppGestionNegocio.Negocio.csproj">
+      <Project>{6b9f3c11-e912-4865-b7da-a492b936836c}</Project>
+      <Name>AppGestionNegocio.Negocio</Name>
+    </ProjectReference>
+>>>>>>> main
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -262,7 +303,7 @@
   </ProjectExtensions>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+      <ErrorText>Este proyecto hace referencia a los paquetes NuGet que faltan en este equipo. Use la restauración de paquetes NuGet para descargarlos. Para obtener más información, consulte http://go.microsoft.com/fwlink/?LinkID=322105. El archivo que falta es {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
   </Target>
