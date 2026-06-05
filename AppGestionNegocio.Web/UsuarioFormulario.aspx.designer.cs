@@ -11,7 +11,7 @@ namespace AppGestionNegocio.Web
 {
 
 
-    public partial class Inicio
+    public partial class UsuarioFormulario
     {
     }
 }
