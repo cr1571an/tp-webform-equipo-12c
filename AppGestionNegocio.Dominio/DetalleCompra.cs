@@ -9,7 +9,6 @@ namespace AppGestionNegocio.Dominio
     public class DetalleCompra
     {
         public int IdDetalleCompra { get; set; }
-        public Compra Compra { get; set; }
         public Articulo Articulo { get; set; }
         public int Cantidad { get; set; }
         public decimal PrecioUnitario { get; set; }
