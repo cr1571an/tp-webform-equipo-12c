@@ -21,6 +21,7 @@ namespace AppGestionNegocio.Dominio
         public List<Proveedor> Proveedores { get; set; }
         public List<DetalleCompra> DetallesCompra { get; set; }
         public List<DetalleVenta> DetallesVenta { get; set; }
+        public bool Activo { get; set; }
         public override string ToString()
         {
             return Nombre;
