@@ -7,20 +7,12 @@
             font-weight: 700;
             margin-bottom: 16px;
         }
-
         .form-label-custom {
             font-weight: 600;
             font-size: 14px;
             color: #374151;
             margin-bottom: 6px;
         }
-
-        .helper-text {
-            color: #6b7280;
-            font-size: 13px;
-            margin-top: 4px;
-        }
-
         .form-actions {
             display: flex;
             justify-content: flex-end;
@@ -29,24 +21,18 @@
             padding-top: 18px;
             margin-top: 10px;
         }
-
-        .detail-box {
-            background-color: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 16px;
-            margin-top: 8px;
-        }
-
         .preview-box {
             background-color: #f9fafb;
             border: 1px solid #e5e7eb;
             border-radius: 12px;
             padding: 16px;
             text-align: center;
-            height: 100%;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
-
         .preview-img {
             max-width: 100%;
             max-height: 150px;
@@ -55,60 +41,30 @@
             background-color: white;
             padding: 8px;
         }
-
-        .preview-placeholder {
-            width: 160px;
-            height: 120px;
-            max-width: 100%;
-            margin: 0 auto;
-            border: 1px dashed #c4b5fd;
-            border-radius: 10px;
-            background-color: #ede9fe;
-            color: #6f42c1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            font-weight: 600;
+        select.form-control {
+            height: 38px;
+            padding: 6px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
         }
-
-        .preview-placeholder i {
-            font-size: 28px;
-            margin-bottom: 6px;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: #6b7280;
-            font-weight: 500;
-            padding: 22px;
-            background-color: #ffffff;
-        }
-
-        .table td,
-        .table th {
-            vertical-align: middle;
-            white-space: nowrap;
-        }
+        .dashboard-card {
+        background: #ffffff;
+        padding: 24px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+    }
     </style>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h1 class="page-title">Registrar artículo</h1>
-        </div>
-
-        <a href="Articulos.aspx" class="btn btn-outline-secondary">
-            Volver al listado
-        </a>
+    <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title">Registrar artículo</h1>
+        <asp:Button ID="btnVolver" runat="server" Text="Volver al listado" CssClass="btn btn-outline-secondary" OnClick="btnVolver_Click"/>
     </div>
 
     <div class="dashboard-card">
-
         <h5 class="form-section-title">Datos principales</h5>
-
         <div class="row">
             <div class="col-md-4 mb-3">
                 <asp:Label ID="lblCategoria" runat="server" CssClass="form-label-custom d-block" Text="Categoría"></asp:Label>
@@ -141,74 +97,48 @@
         <div class="row">
             <div class="col-md-6 mb-3">
                 <asp:Label ID="lblPrecio" runat="server" CssClass="form-label-custom d-block" Text="Precio de venta"></asp:Label>
-                <asp:TextBox ID="txtPrecio" runat="server" CssClass="form-control" TextMode="Number" placeholder="0.00"></asp:TextBox>
+                <asp:TextBox ID="txtPrecio" runat="server" CssClass="form-control" placeholder="0.00"></asp:TextBox>
             </div>
 
             <div class="col-md-6 mb-3">
                 <asp:Label ID="lblStock" runat="server" CssClass="form-label-custom d-block" Text="Stock inicial"></asp:Label>
-                <asp:TextBox ID="txtStock" runat="server" CssClass="form-control" TextMode="Number" placeholder="0"></asp:TextBox>
+                <asp:TextBox ID="txtStock" runat="server" Text="0" CssClass="form-control" TextMode="Number" placeholder="0"></asp:TextBox>
             </div>
         </div>
 
         <h5 class="form-section-title mt-4">Imagen del artículo</h5>
-
-        <div class="row">
-            <div class="col-md-8 mb-3">
-                <asp:Label ID="lblUrlImagen" runat="server" CssClass="form-label-custom d-block" Text="URL de imagen"></asp:Label>
-                <asp:TextBox ID="txtUrlImagen" runat="server" CssClass="form-control" placeholder="https://ejemplo.com/imagen.png"></asp:TextBox>
-            </div>
-
-            <div class="col-md-4 mb-3">
-                <div class="preview-box">
-                    <asp:Label ID="lblImagenTitulo" runat="server" CssClass="form-label-custom d-block mb-2" Text="Vista previa"></asp:Label>
-
-                    <div class="preview-placeholder">
-                        <i class="fas fa-image"></i>
-                        Sin imagen
+        <asp:UpdatePanel ID="upImagen" runat="server">
+            <ContentTemplate>
+                <div class="row align-items-start">
+                    <div class="col-md-8 mb-3">
+                        <asp:Label ID="lblUrlImagen" runat="server" CssClass="form-label-custom d-block" Text="URL de imagen"></asp:Label>
+                        <asp:TextBox ID="txtImagenUrl" runat="server" CssClass="form-control" placeholder="https://ejemplo.com" AutoPostBack="true" OnTextChanged="txtImagenUrl_TextChanged"></asp:TextBox>
                     </div>
 
-                    <asp:Image ID="imgPreview" runat="server" CssClass="preview-img" Style="display:none;" />
+                    <div class="col-md-4 mb-3">
+                        <div class="preview-box">
+                            <asp:Label ID="lblImagenTitulo" runat="server" CssClass="form-label-custom d-block mb-2" Text="Vista previa"></asp:Label>
+                            <asp:Image ID="imgPreview" runat="server" CssClass="preview-img" ImageUrl="https://grupoact.com.ar/wp-content/uploads/2020/04/placeholder.png" />
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </ContentTemplate>
+        </asp:UpdatePanel>
 
-        <h5 class="form-section-title mt-4">Proveedores asociados</h5>
-
-        <div class="detail-box">
-            <div class="row">
-                <div class="col-md-8 mb-3">
-                    <label class="form-label-custom d-block">Proveedor</label>
-                    <select class="form-control">
-                        <option>Seleccione un proveedor</option>
-                    </select>
+        <asp:UpdatePanel ID="upBotones" runat="server">
+            <ContentTemplate>
+                <div class="mt-3">
+                    <asp:Label ID="lblMensajeError" runat="server" CssClass="alert alert-danger d-block" Visible="false" />
                 </div>
 
-                <div class="col-md-4 mb-3 d-flex align-items-end">
-                    <button type="button" class="btn btn-outline-primary w-100">
-                        Asociar proveedor
-                    </button>
+                <div class="form-actions">
+                    <asp:Button ID="btnEliminar" runat="server" CssClass="btn btn-danger" Text="Eliminar" Visible="false" CausesValidation="false" OnClick="btnEliminar_Click" OnClientClick="return confirm('¿Estás seguro de que deseas eliminar este artículo?');" />
+                    <asp:Button ID="btnCancelar" runat="server" CssClass="btn btn-outline-secondary" Text="Cancelar" OnClick="btnCancelar_Click"/>
+                    <asp:Button ID="btnGuardar" runat="server" CssClass="btn btn-primary" Text="Guardar artículo" OnClick="btnGuardar_Click"/>
                 </div>
-            </div>
 
-            <div class="table-responsive mt-2">
-                <table class="table table-sm table-striped table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>Proveedor</th>
-                            <th>Teléfono</th>
-                            <th>Email</th>
-                            <th class="text-center">Acción</th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
-        </div>
-
-        <div class="form-actions">
-            <asp:Button ID="btnCancelar" runat="server" CssClass="btn btn-outline-secondary" Text="Cancelar" CausesValidation="false" />
-            <asp:Button ID="btnGuardar" runat="server" CssClass="btn btn-primary" Text="Guardar artículo" />
-        </div>
-
+            </ContentTemplate>
+        </asp:UpdatePanel>
     </div>
 
 </asp:Content>
