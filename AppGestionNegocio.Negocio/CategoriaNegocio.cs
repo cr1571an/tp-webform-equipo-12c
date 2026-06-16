@@ -1,29 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Data.SqlClient;
 using AppGestionNegocio.Dominio;
 
 namespace AppGestionNegocio.Negocio
 {
-    public class MarcaNegocio
+    public class CategoriaNegocio
     {
-        public List<Marca> listar()
+        public List<Categoria> listar()
         {
-            List<Marca> lista = new List<Marca>();
+            List<Categoria> lista = new List<Categoria>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("SELECT IdMarca, Nombre, Activo FROM Marcas WHERE Activo = 1 ORDER BY Nombre");
+                datos.setearConsulta("SELECT IdCategoria, Nombre, Activo FROM Categorias WHERE Activo = 1 ORDER BY Nombre");
                 datos.ejecutarLectura();
 
                 SqlDataReader lector = datos.Lector;
 
                 while (lector.Read())
                 {
-                    Marca aux = new Marca();
+                    Categoria aux = new Categoria();
 
-                    aux.IdMarca = (int)lector["IdMarca"];
+                    aux.IdCategoria = (int)lector["IdCategoria"];
                     aux.Nombre = (string)lector["Nombre"];
                     aux.Activo = bool.Parse(lector["Activo"].ToString());
 
@@ -41,13 +44,13 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
-        public void agregar(Marca nueva)
+        public void agregar(Categoria nueva)
         {
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("INSERT INTO Marcas (Nombre, Activo) VALUES (@Nombre, 1)");
+                datos.setearConsulta("INSERT INTO Categorias (Nombre, Activo) VALUES (@Nombre, 1)");
                 datos.setearParametro("@Nombre", nueva.Nombre);
                 datos.ejecutarAccion();
             }
@@ -60,16 +63,16 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
-        public void modificar(Marca marca)
+        public void modificar(Categoria categoria)
         {
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("UPDATE Marcas SET Nombre = @Nombre, Activo = @Activo WHERE IdMarca = @IdMarca");
-                datos.setearParametro("@Nombre", marca.Nombre);
-                datos.setearParametro("@Activo", marca.Activo);
-                datos.setearParametro("@IdMarca", marca.IdMarca);
+                datos.setearConsulta("UPDATE Categorias SET Nombre = @Nombre, Activo = @Activo WHERE IdCategoria = @IdCategoria");
+                datos.setearParametro("@Nombre", categoria.Nombre);
+                datos.setearParametro("@Activo", categoria.Activo);
+                datos.setearParametro("@IdCategoria", categoria.IdCategoria);
                 datos.ejecutarAccion();
             }
             catch (Exception ex)
@@ -81,14 +84,14 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
-        public void eliminar(int idMarca)
+        public void eliminar(int idCategoria)
         {
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("UPDATE Marcas SET Activo = 0 WHERE IdMarca = @IdMarca");
-                datos.setearParametro("@IdMarca", idMarca);
+                datos.setearConsulta("UPDATE Categorias SET Activo = 0 WHERE IdCategoria = @IdCategoria");
+                datos.setearParametro("@IdCategoria", idCategoria);
                 datos.ejecutarAccion();
             }
             catch (Exception ex)
@@ -100,14 +103,14 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Marca> filtrar(string filtro)
+        public List<Categoria> filtrar(string filtro)
         {
-            List<Marca> lista = new List<Marca>();
+            List<Categoria> lista = new List<Categoria>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                string consulta = "SELECT IdMarca, Nombre, Activo FROM Marcas WHERE Activo = 1";
+                string consulta = "SELECT IdCategoria, Nombre, Activo FROM Categorias WHERE Activo = 1";
 
                 if (!string.IsNullOrWhiteSpace(filtro))
                 {
@@ -129,9 +132,9 @@ namespace AppGestionNegocio.Negocio
 
                 while (lector.Read())
                 {
-                    Marca aux = new Marca();
+                    Categoria aux = new Categoria();
 
-                    aux.IdMarca = (int)lector["IdMarca"];
+                    aux.IdCategoria = (int)lector["IdCategoria"];
                     aux.Nombre = (string)lector["Nombre"];
                     aux.Activo = bool.Parse(lector["Activo"].ToString());
 

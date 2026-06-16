@@ -1,30 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Data.SqlClient;
 using AppGestionNegocio.Dominio;
 
 namespace AppGestionNegocio.Negocio
 {
-    public class MarcaNegocio
+    public class MedioPagoNegocio
     {
-        public List<Marca> listar()
+        public List<MedioPago> listar()
         {
-            List<Marca> lista = new List<Marca>();
+            List<MedioPago> lista = new List<MedioPago>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("SELECT IdMarca, Nombre, Activo FROM Marcas WHERE Activo = 1 ORDER BY Nombre");
+                datos.setearConsulta("SELECT IdMedioPago, Nombre, Descripcion, Activo FROM MediosPago WHERE Activo = 1 ORDER BY Nombre");
                 datos.ejecutarLectura();
 
                 SqlDataReader lector = datos.Lector;
 
                 while (lector.Read())
                 {
-                    Marca aux = new Marca();
+                    MedioPago aux = new MedioPago();
 
-                    aux.IdMarca = (int)lector["IdMarca"];
+                    aux.IdMedioPago = (int)lector["IdMedioPago"];
                     aux.Nombre = (string)lector["Nombre"];
+                    aux.Descripcion = lector["Descripcion"] != DBNull.Value ? (string)lector["Descripcion"] : "";
                     aux.Activo = bool.Parse(lector["Activo"].ToString());
 
                     lista.Add(aux);
@@ -41,14 +45,15 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
-        public void agregar(Marca nueva)
+        public void agregar(MedioPago nuevo)
         {
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("INSERT INTO Marcas (Nombre, Activo) VALUES (@Nombre, 1)");
-                datos.setearParametro("@Nombre", nueva.Nombre);
+                datos.setearConsulta("INSERT INTO MediosPago (Nombre, Descripcion, Activo) VALUES (@Nombre, @Descripcion, 1)");
+                datos.setearParametro("@Nombre", nuevo.Nombre);
+                datos.setearParametro("@Descripcion", nuevo.Descripcion);
                 datos.ejecutarAccion();
             }
             catch (Exception ex)
@@ -60,16 +65,17 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
-        public void modificar(Marca marca)
+        public void modificar(MedioPago medioPago)
         {
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("UPDATE Marcas SET Nombre = @Nombre, Activo = @Activo WHERE IdMarca = @IdMarca");
-                datos.setearParametro("@Nombre", marca.Nombre);
-                datos.setearParametro("@Activo", marca.Activo);
-                datos.setearParametro("@IdMarca", marca.IdMarca);
+                datos.setearConsulta("UPDATE MediosPago SET Nombre = @Nombre, Descripcion = @Descripcion, Activo = @Activo WHERE IdMedioPago = @IdMedioPago");
+                datos.setearParametro("@Nombre", medioPago.Nombre);
+                datos.setearParametro("@Descripcion", medioPago.Descripcion);
+                datos.setearParametro("@Activo", medioPago.Activo);
+                datos.setearParametro("@IdMedioPago", medioPago.IdMedioPago);
                 datos.ejecutarAccion();
             }
             catch (Exception ex)
@@ -81,14 +87,14 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
-        public void eliminar(int idMarca)
+        public void eliminar(int idMedioPago)
         {
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("UPDATE Marcas SET Activo = 0 WHERE IdMarca = @IdMarca");
-                datos.setearParametro("@IdMarca", idMarca);
+                datos.setearConsulta("UPDATE MediosPago SET Activo = 0 WHERE IdMedioPago = @IdMedioPago");
+                datos.setearParametro("@IdMedioPago", idMedioPago);
                 datos.ejecutarAccion();
             }
             catch (Exception ex)
@@ -100,14 +106,14 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Marca> filtrar(string filtro)
+        public List<MedioPago> filtrar(string filtro)
         {
-            List<Marca> lista = new List<Marca>();
+            List<MedioPago> lista = new List<MedioPago>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                string consulta = "SELECT IdMarca, Nombre, Activo FROM Marcas WHERE Activo = 1";
+                string consulta = "SELECT IdMedioPago, Nombre, Descripcion, Activo FROM MediosPago WHERE Activo = 1";
 
                 if (!string.IsNullOrWhiteSpace(filtro))
                 {
@@ -129,10 +135,11 @@ namespace AppGestionNegocio.Negocio
 
                 while (lector.Read())
                 {
-                    Marca aux = new Marca();
+                    MedioPago aux = new MedioPago();
 
-                    aux.IdMarca = (int)lector["IdMarca"];
+                    aux.IdMedioPago = (int)lector["IdMedioPago"];
                     aux.Nombre = (string)lector["Nombre"];
+                    aux.Descripcion = lector["Descripcion"] != DBNull.Value ? (string)lector["Descripcion"] : "";
                     aux.Activo = bool.Parse(lector["Activo"].ToString());
 
                     lista.Add(aux);

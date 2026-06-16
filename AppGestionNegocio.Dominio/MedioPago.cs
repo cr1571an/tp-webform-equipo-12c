@@ -11,6 +11,7 @@ namespace AppGestionNegocio.Dominio
         public int IdMedioPago { get; set; }
         public string Nombre { get; set; }
         public string Descripcion { get; set; }
+        public bool Activo { get; set; }
         public List<Compra> Compras { get; set; }
         public List<Venta> Ventas { get; set; }
         public override string ToString()

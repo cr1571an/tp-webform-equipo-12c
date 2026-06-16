@@ -42,9 +42,11 @@
         }
 
         .message {
+            display: block;
             font-size: 14px;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-top: 6px;
+            margin-bottom: 0;
         }
 
         .col-name {
@@ -89,20 +91,25 @@
         </div>
     </div>
 
-    <asp:Label ID="lblMensaje" runat="server" CssClass="message text-danger"></asp:Label>
-
     <div class="dashboard-card mb-3">
         <h5 class="form-section-title">Nueva marca</h5>
 
         <div class="row">
             <div class="col-md-10 mb-3">
                 <label>Nombre</label>
+
                 <asp:TextBox
                     ID="txtNombre"
                     runat="server"
                     CssClass="form-control"
                     placeholder="Ej: Royal Canin">
                 </asp:TextBox>
+
+                <asp:Label
+                    ID="lblMensaje"
+                    runat="server"
+                    CssClass="message text-danger">
+                </asp:Label>
             </div>
 
             <div class="col-md-2 mb-3 d-flex align-items-end">

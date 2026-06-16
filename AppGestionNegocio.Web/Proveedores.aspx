@@ -5,12 +5,18 @@
         .page-actions {
             display: flex;
             gap: 8px;
+            align-items: center;
+        }
+
+        .filtro-input {
+            width: 220px;
         }
 
         .table-actions {
             display: flex;
             gap: 6px;
             flex-wrap: nowrap;
+            justify-content: center;
         }
 
         .table td,
@@ -31,63 +37,20 @@
             color: #374151;
         }
 
-        .supplier-name {
+        .provider-name {
             font-weight: 600;
         }
 
-        .supplier-email {
-            color: #6b7280;
-            font-size: 13px;
-        }
-
-        .badge-count {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
+        .message {
+            display: block;
+            font-size: 14px;
             font-weight: 600;
-            background-color: #ede9fe;
-            color: #6f42c1;
-        }
-
-        .badge-buy {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            background-color: #dcfce7;
-            color: #166534;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: #6b7280;
-            font-weight: 500;
-            padding: 28px;
-            background-color: #ffffff;
-        }
-
-        .col-name {
-            width: 25%;
-        }
-
-        .col-phone {
-            width: 15%;
-        }
-
-        .col-email {
-            width: 25%;
-        }
-
-        .col-articles {
-            width: 12%;
-        }
-
-        .col-purchases {
-            width: 12%;
+            margin-top: 6px;
+            margin-bottom: 0;
         }
 
         .col-actions {
-            width: 11%;
+            text-align: center;
         }
     </style>
 </asp:Content>
@@ -100,9 +63,26 @@
         </div>
 
         <div class="page-actions">
-            <button type="button" class="btn btn-outline-secondary">
-                Filtrar
-            </button>
+            <asp:TextBox
+                ID="txtFiltroNombre"
+                runat="server"
+                CssClass="form-control filtro-input"
+                placeholder="Buscar proveedor">
+            </asp:TextBox>
+
+            <asp:Button
+                ID="btnFiltrar"
+                runat="server"
+                Text="Filtrar"
+                CssClass="btn btn-outline-secondary"
+                OnClick="btnFiltrar_Click" />
+
+            <asp:Button
+                ID="btnLimpiarFiltro"
+                runat="server"
+                Text="Limpiar"
+                CssClass="btn btn-outline-secondary"
+                OnClick="btnLimpiarFiltro_Click" />
         </div>
     </div>
 
@@ -112,55 +92,170 @@
         <div class="row">
             <div class="col-md-4 mb-3">
                 <label>Nombre</label>
-                <input type="text" class="form-control" placeholder="Ej: Prove Pet" />
+                <asp:TextBox
+                    ID="txtNombre"
+                    runat="server"
+                    CssClass="form-control"
+                    MaxLength="60"
+                    placeholder="Ej: Distribuidora Patitas">
+                </asp:TextBox>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-4 mb-3">
                 <label>Teléfono</label>
-                <input type="text" class="form-control" placeholder="Ej: 11 1234-5678" />
+                <asp:TextBox
+                    ID="txtTelefono"
+                    runat="server"
+                    CssClass="form-control"
+                    MaxLength="11"
+                    placeholder="Ej: 1134567890">
+                </asp:TextBox>
             </div>
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-4 mb-3">
                 <label>Email</label>
-                <input type="email" class="form-control" placeholder="Ej: ventas@provepet.com" />
+                <asp:TextBox
+                    ID="txtEmail"
+                    runat="server"
+                    CssClass="form-control"
+                    MaxLength="100"
+                    placeholder="Ej: proveedor@mail.com">
+                </asp:TextBox>
             </div>
 
-            <div class="col-md-2 mb-3 d-flex align-items-end">
-                <button type="button" class="btn btn-primary w-100">
-                    Guardar
-                </button>
+            <div class="col-md-12">
+                <asp:Label
+                    ID="lblMensaje"
+                    runat="server"
+                    CssClass="message text-danger">
+                </asp:Label>
+            </div>
+
+            <div class="col-md-12 mt-3">
+                <asp:Button
+                    ID="btnAgregar"
+                    runat="server"
+                    Text="Agregar"
+                    CssClass="btn btn-primary"
+                    OnClick="btnAgregar_Click" />
             </div>
         </div>
     </div>
 
     <div class="dashboard-card">
-
         <h5 class="form-section-title">Proveedores registrados</h5>
 
         <div class="table-responsive">
-            <table class="table table-striped table-hover mb-0">
-                <colgroup>
-                    <col class="col-name" />
-                    <col class="col-phone" />
-                    <col class="col-email" />
-                    <col class="col-articles" />
-                    <col class="col-purchases" />
-                    <col class="col-actions" />
-                </colgroup>
+            <asp:GridView
+                ID="dgvProveedores"
+                runat="server"
+                CssClass="table table-striped table-hover mb-0"
+                AutoGenerateColumns="false"
+                GridLines="None"
+                DataKeyNames="IdProveedor"
+                EmptyDataText="No hay proveedores activos registrados."
+                OnRowEditing="dgvProveedores_RowEditing"
+                OnRowCancelingEdit="dgvProveedores_RowCancelingEdit"
+                OnRowUpdating="dgvProveedores_RowUpdating"
+                OnRowCommand="dgvProveedores_RowCommand">
 
-                <thead>
-                    <tr>
-                        <th>Proveedor</th>
-                        <th>Teléfono</th>
-                        <th>Email</th>
-                        <th>Artículos asociados</th>
-                        <th>Compras registradas</th>
-                        <th class="text-center">Acciones</th>
-                    </tr>
-                </thead>
-            </table>
+                <Columns>
+
+                    <asp:TemplateField HeaderText="Nombre">
+                        <ItemTemplate>
+                            <span class="provider-name"><%# Eval("Nombre") %></span>
+                        </ItemTemplate>
+
+                        <EditItemTemplate>
+                            <asp:TextBox
+                                ID="txtNombreEdit"
+                                runat="server"
+                                CssClass="form-control"
+                                MaxLength="60"
+                                Text='<%# Bind("Nombre") %>'>
+                            </asp:TextBox>
+                        </EditItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Teléfono">
+                        <ItemTemplate>
+                            <%# Eval("Telefono") %>
+                        </ItemTemplate>
+
+                        <EditItemTemplate>
+                            <asp:TextBox
+                                ID="txtTelefonoEdit"
+                                runat="server"
+                                CssClass="form-control"
+                                MaxLength="11"
+                                Text='<%# Bind("Telefono") %>'>
+                            </asp:TextBox>
+                        </EditItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Email">
+                        <ItemTemplate>
+                            <%# Eval("Email") %>
+                        </ItemTemplate>
+
+                        <EditItemTemplate>
+                            <asp:TextBox
+                                ID="txtEmailEdit"
+                                runat="server"
+                                CssClass="form-control"
+                                MaxLength="100"
+                                Text='<%# Bind("Email") %>'>
+                            </asp:TextBox>
+                        </EditItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Acciones">
+                        <ItemTemplate>
+                            <div class="table-actions">
+                                <asp:Button
+                                    ID="btnEditar"
+                                    runat="server"
+                                    Text="Modificar"
+                                    CssClass="btn btn-sm btn-outline-primary"
+                                    CommandName="Edit" />
+
+                                <asp:Button
+                                    ID="btnEliminar"
+                                    runat="server"
+                                    Text="Eliminar"
+                                    CssClass="btn btn-sm btn-outline-danger"
+                                    CommandName="EliminarProveedor"
+                                    CommandArgument='<%# Eval("IdProveedor") %>'
+                                    OnClientClick="return confirm('¿Seguro que querés eliminar este proveedor?');" />
+                            </div>
+                        </ItemTemplate>
+
+                        <EditItemTemplate>
+                            <div class="table-actions">
+                                <asp:Button
+                                    ID="btnGuardarEdit"
+                                    runat="server"
+                                    Text="Guardar"
+                                    CssClass="btn btn-sm btn-success"
+                                    CommandName="Update" />
+
+                                <asp:Button
+                                    ID="btnCancelarEdit"
+                                    runat="server"
+                                    Text="Cancelar"
+                                    CssClass="btn btn-sm btn-secondary"
+                                    CommandName="Cancel" />
+                            </div>
+                        </EditItemTemplate>
+
+                        <ItemStyle CssClass="col-actions" />
+                        <HeaderStyle CssClass="col-actions" />
+                    </asp:TemplateField>
+
+                </Columns>
+
+            </asp:GridView>
         </div>
-
     </div>
 
 </asp:Content>
