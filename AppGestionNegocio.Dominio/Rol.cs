@@ -11,6 +11,7 @@ namespace AppGestionNegocio.Dominio
         public int IdRol { get; set; }
         public string Nombre { get; set; }
         public string Descripcion { get; set; }
+        public bool Activo { get; set; }
         public List<Usuario> Usuarios { get; set; }
         public override string ToString()
         {
