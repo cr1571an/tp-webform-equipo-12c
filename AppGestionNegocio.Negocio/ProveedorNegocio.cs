@@ -1,30 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Data.SqlClient;
 using AppGestionNegocio.Dominio;
 
 namespace AppGestionNegocio.Negocio
 {
-    public class MarcaNegocio
+    public class ProveedorNegocio
     {
-        public List<Marca> listar()
+        public List<Proveedor> listar()
         {
-            List<Marca> lista = new List<Marca>();
+            List<Proveedor> lista = new List<Proveedor>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("SELECT IdMarca, Nombre, Activo FROM Marcas WHERE Activo = 1 ORDER BY Nombre");
+                datos.setearConsulta("SELECT IdProveedor, Nombre, Telefono, Email, Activo FROM Proveedores WHERE Activo = 1 ORDER BY Nombre");
                 datos.ejecutarLectura();
 
                 SqlDataReader lector = datos.Lector;
 
                 while (lector.Read())
                 {
-                    Marca aux = new Marca();
+                    Proveedor aux = new Proveedor();
 
-                    aux.IdMarca = (int)lector["IdMarca"];
+                    aux.IdProveedor = (int)lector["IdProveedor"];
                     aux.Nombre = (string)lector["Nombre"];
+                    aux.Telefono = (string)lector["Telefono"];
+                    aux.Email = (string)lector["Email"];
                     aux.Activo = bool.Parse(lector["Activo"].ToString());
 
                     lista.Add(aux);
@@ -41,14 +46,16 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
-        public void agregar(Marca nueva)
+        public void agregar(Proveedor nuevo)
         {
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("INSERT INTO Marcas (Nombre, Activo) VALUES (@Nombre, 1)");
-                datos.setearParametro("@Nombre", nueva.Nombre);
+                datos.setearConsulta("INSERT INTO Proveedores (Nombre, Telefono, Email, Activo) VALUES (@Nombre, @Telefono, @Email, 1)");
+                datos.setearParametro("@Nombre", nuevo.Nombre);
+                datos.setearParametro("@Telefono", nuevo.Telefono);
+                datos.setearParametro("@Email", nuevo.Email);
                 datos.ejecutarAccion();
             }
             catch (Exception ex)
@@ -60,16 +67,18 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
-        public void modificar(Marca marca)
+        public void modificar(Proveedor proveedor)
         {
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("UPDATE Marcas SET Nombre = @Nombre, Activo = @Activo WHERE IdMarca = @IdMarca");
-                datos.setearParametro("@Nombre", marca.Nombre);
-                datos.setearParametro("@Activo", marca.Activo);
-                datos.setearParametro("@IdMarca", marca.IdMarca);
+                datos.setearConsulta("UPDATE Proveedores SET Nombre = @Nombre, Telefono = @Telefono, Email = @Email, Activo = @Activo WHERE IdProveedor = @IdProveedor");
+                datos.setearParametro("@Nombre", proveedor.Nombre);
+                datos.setearParametro("@Telefono", proveedor.Telefono);
+                datos.setearParametro("@Email", proveedor.Email);
+                datos.setearParametro("@Activo", proveedor.Activo);
+                datos.setearParametro("@IdProveedor", proveedor.IdProveedor);
                 datos.ejecutarAccion();
             }
             catch (Exception ex)
@@ -81,14 +90,14 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
-        public void eliminar(int idMarca)
+        public void eliminar(int idProveedor)
         {
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("UPDATE Marcas SET Activo = 0 WHERE IdMarca = @IdMarca");
-                datos.setearParametro("@IdMarca", idMarca);
+                datos.setearConsulta("UPDATE Proveedores SET Activo = 0 WHERE IdProveedor = @IdProveedor");
+                datos.setearParametro("@IdProveedor", idProveedor);
                 datos.ejecutarAccion();
             }
             catch (Exception ex)
@@ -100,14 +109,14 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Marca> filtrar(string filtro)
+        public List<Proveedor> filtrar(string filtro)
         {
-            List<Marca> lista = new List<Marca>();
+            List<Proveedor> lista = new List<Proveedor>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                string consulta = "SELECT IdMarca, Nombre, Activo FROM Marcas WHERE Activo = 1";
+                string consulta = "SELECT IdProveedor, Nombre, Telefono, Email, Activo FROM Proveedores WHERE Activo = 1";
 
                 if (!string.IsNullOrWhiteSpace(filtro))
                 {
@@ -129,10 +138,12 @@ namespace AppGestionNegocio.Negocio
 
                 while (lector.Read())
                 {
-                    Marca aux = new Marca();
+                    Proveedor aux = new Proveedor();
 
-                    aux.IdMarca = (int)lector["IdMarca"];
+                    aux.IdProveedor = (int)lector["IdProveedor"];
                     aux.Nombre = (string)lector["Nombre"];
+                    aux.Telefono = (string)lector["Telefono"];
+                    aux.Email = (string)lector["Email"];
                     aux.Activo = bool.Parse(lector["Activo"].ToString());
 
                     lista.Add(aux);

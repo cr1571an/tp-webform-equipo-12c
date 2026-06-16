@@ -12,6 +12,7 @@ namespace AppGestionNegocio.Dominio
         public string Nombre { get; set; }
         public string Telefono { get; set; }
         public string Email { get; set; }
+        public bool Activo { get; set; }
         public List<Articulo> Articulos { get; set; }
         public List<Compra> Compras { get; set; }
         public override string ToString()
