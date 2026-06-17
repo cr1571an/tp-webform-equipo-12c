@@ -10,15 +10,22 @@ namespace AppGestionNegocio.Negocio
 {
     public class UsuarioNegocio
     {
-        public List<Usuario> listar()
+        public List<Usuario> listar(int? id = null)
         {
             List<Usuario> lista = new List<Usuario>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("SELECT u.IdUsuario, u.IdEmpleado, u.IdRol, u.NombreUsuario, u.Activo AS UsuarioActivo, u.PasswordHash, e.IdEmpleado AS EmpIdEmpleado, e.Nombre, e.Apellido, e.Telefono, e.Email, e.Dni, e.FechaIngreso, e.Activo AS EmpleadoActivo, r.IdRol AS RolIdRol, r.NombreRol, r.Descripcion, r.Activo AS RolActivo FROM COMERCIO_DB.dbo.Usuarios u INNER JOIN COMERCIO_DB.dbo.Empleados e ON u.IdEmpleado = e.IdEmpleado INNER JOIN COMERCIO_DB.dbo.Roles r ON u.IdRol = r.IdRol");
+                string consulta = "SELECT u.IdUsuario, u.IdEmpleado, u.IdRol, u.NombreUsuario, u.Activo AS UsuarioActivo, u.PasswordHash, e.IdEmpleado AS EmpIdEmpleado, e.Nombre, e.Apellido, e.Telefono, e.Email, e.Dni, e.FechaIngreso, e.Activo AS EmpleadoActivo, r.IdRol AS RolIdRol, r.NombreRol, r.Descripcion, r.Activo AS RolActivo FROM COMERCIO_DB.dbo.Usuarios u INNER JOIN COMERCIO_DB.dbo.Empleados e ON u.IdEmpleado = e.IdEmpleado INNER JOIN COMERCIO_DB.dbo.Roles r ON u.IdRol = r.IdRol";
+                
+                if (id.HasValue)
+                {
+                    consulta += " AND u.IdUsuario = @id ";
+                    datos.setearParametro("@Id", id.Value);
+                }
 
+                datos.setearConsulta(consulta);
                 datos.ejecutarLectura();
 
                 SqlDataReader lector = datos.Lector;
