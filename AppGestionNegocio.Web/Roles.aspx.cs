@@ -40,48 +40,34 @@ namespace AppGestionNegocio.Web
 
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
-            //try
-            //{
-            //    lblMensaje.Text = "";
+            try
+            {
+                lblMensaje.Text = "";
 
-            //    if (string.IsNullOrWhiteSpace(txtNombre.Text))
-            //    {
-            //        mostrarMensaje("Debe ingresar el nombre del proveedor.");
-            //        return;
-            //    }
+                if (string.IsNullOrWhiteSpace(txtNombre.Text) || string.IsNullOrWhiteSpace(txtDescripcion.Text))
+                {
+                    mostrarMensaje(lblMensaje,"Debe ingresar el nombre del rol y descripción.");
+                    return;
+                }
 
-            //    if (string.IsNullOrWhiteSpace(txtTelefono.Text))
-            //    {
-            //        mostrarMensaje("Debe ingresar el teléfono del proveedor.");
-            //        return;
-            //    }
+                Rol rol = new Rol();
+                rol.Nombre = txtNombre.Text.Trim();
+                rol.Descripcion = txtDescripcion.Text.Trim();
+                rol.Activo = true;
 
-            //    if (string.IsNullOrWhiteSpace(txtEmail.Text))
-            //    {
-            //        mostrarMensaje("Debe ingresar el email del proveedor.");
-            //        return;
-            //    }
+                RolNegocio negocio = new RolNegocio();
+                negocio.agregar(rol);
 
-            //    Proveedor proveedor = new Proveedor();
-            //    proveedor.Nombre = txtNombre.Text.Trim();
-            //    proveedor.Telefono = txtTelefono.Text.Trim();
-            //    proveedor.Email = txtEmail.Text.Trim();
-            //    proveedor.Activo = true;
+                txtNombre.Text = "";
+                txtDescripcion.Text = "";
+                txtFiltroNombre.Text = "";
 
-            //    RolNegocio negocio = new RolNegocio();
-            //    negocio.agregar(proveedor);
-
-            //    txtNombre.Text = "";
-            //    txtTelefono.Text = "";
-            //    txtEmail.Text = "";
-            //    txtFiltroNombre.Text = "";
-
-            //    cargarRoles();
-            //}
-            //catch (Exception ex)
-            //{
-            //    mostrarMensaje("Error al agregar el proveedor: " + ex.Message);
-            //}
+                cargarRoles();
+            }
+            catch (Exception ex)
+            {
+                mostrarMensaje(lblMensaje,"Error al agregar el rol: " + ex.Message);
+            }
         }
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {

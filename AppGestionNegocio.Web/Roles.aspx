@@ -81,6 +81,10 @@
         .col-actions {
             width: 18%;
         }
+
+        .btn-primary {
+            height: 26px;
+        }
     </style>
 </asp:Content>
 
@@ -120,13 +124,23 @@
 
         <div class="row">
             <div class="col-md-3 mb-3">
-                <label>Nombre</label>
-                <input type="text" class="form-control" placeholder="Ej: Vendedor" />
+                <label>Nombre</label>&nbsp;
+                <asp:TextBox
+                    ID="txtNombre"
+                    runat="server"
+                    CssClass="form-control"
+                    MaxLength="60"
+                    placeholder="Ej: Vendedor"></asp:TextBox>
             </div>
 
-            <div class="col-md-7 mb-3">
-                <label>Descripción</label>
-                <input type="text" class="form-control" placeholder="Ej: Puede registrar ventas y consultar artículos" />
+            <div class="col-md-9 mb-3">
+                <label>Descripción</label>&nbsp;
+                <asp:TextBox
+                    ID="txtDescripcion"
+                    runat="server"
+                    CssClass="form-control"
+                    MaxLength="255"
+                    placeholder="Ej: Registra ventas en el sistema"></asp:TextBox>
             </div>
 
             <div class="col-md-12">
@@ -137,10 +151,14 @@
                 </asp:Label>
             </div>
 
-            <div class="col-md-2 mb-3 d-flex align-items-end">
-                <button type="button" class="btn btn-primary w-100">
-                    Guardar
-                </button>
+            <div class="col-md-12 mt-3">
+                <asp:Button
+                    ID="btnAgregar"
+                    runat="server"
+                    Text="Agregar"
+                    CssClass="btn btn-primary"
+                    Style="height: 38px;"
+                    OnClick="btnAgregar_Click" />
             </div>
         </div>
     </div>
