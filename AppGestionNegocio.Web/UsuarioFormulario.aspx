@@ -41,7 +41,7 @@
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-
+    <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h1 class="page-title">Registrar usuario</h1>
@@ -68,18 +68,16 @@
 
             <div class="col-md-4 mb-3">
                 <label class="form-label-custom d-block">Estado</label>
-                <select class="form-control">
-                    <option>Activo</option>
-                    <option>Inactivo</option>
-                </select>
+                <asp:DropDownList ID="ddlEstado" runat="server" CssClass="form-control">
+                </asp:DropDownList>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label class="form-label-custom d-block">Nombre de usuario</label>
-                <input type="text" class="form-control" placeholder="Ej: vendedor1" />
-            </div>
+                <asp:TextBox ID="txtNombre" runat="server" CssClass="form-control" placeholder="Ej: Pro Plan adulto carne x20kg"></asp:TextBox>
+        &nbsp;</div>
         </div>
 
         <div class="security-box">
@@ -98,14 +96,22 @@
             </div>
         </div>
 
-        <div class="form-actions">
-            <a href="Usuarios.aspx" class="btn btn-outline-secondary">Cancelar
-            </a>
 
-            <button type="button" class="btn btn-primary">
-                Guardar usuario
-            </button>
-        </div>
+
+        <asp:UpdatePanel ID="upBotones" runat="server">
+            <ContentTemplate>
+                <div class="mt-3">
+                    <asp:Label ID="lblMensajeError" runat="server" CssClass="alert alert-danger d-block" Visible="false" />
+                </div>
+
+                <div class="form-actions">
+                    <asp:Button ID="btnEliminar" runat="server" CssClass="btn btn-danger" Text="Eliminar" Visible="false" CausesValidation="false" OnClick="btnEliminar_Click" OnClientClick="return confirm('¿Estás seguro de que deseas eliminar este artículo?');" />
+                    <asp:Button ID="btnCancelar" runat="server" CssClass="btn btn-outline-secondary" Text="Cancelar" OnClick="btnCancelar_Click" />
+                    <asp:Button ID="btnGuardar" runat="server" CssClass="btn btn-primary" Text="Guardar artículo" OnClick="btnGuardar_Click" />
+                </div>
+
+            </ContentTemplate>
+        </asp:UpdatePanel>
 
     </div>
 

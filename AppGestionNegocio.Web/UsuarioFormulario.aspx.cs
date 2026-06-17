@@ -19,6 +19,24 @@ namespace AppGestionNegocio.Web
                 {
                     CargarDesplegables();
                 }
+
+                int? id = int.TryParse(Request.QueryString["id"], out int aux) ? aux : (int?)null;
+                if (id.HasValue && !IsPostBack) {
+                    btnEliminar.Visible = true;
+                    UsuarioNegocio negocio = new UsuarioNegocio();
+                    Usuario seleccionado = (negocio.listar(id))[0];
+
+                    Session.Add("usuarioSeleccionado", seleccionado);
+
+                    ddlEstado.Items.Add(new ListItem("Activo", "true"));
+                    ddlEstado.Items.Add(new ListItem("Inactivo", "false"));
+
+                    txtNombre.Text = seleccionado.Nombre;
+
+                    ddlEmpleado.SelectedValue = seleccionado.Empleado.IdEmpleado.ToString();
+                    ddlRol.SelectedValue = seleccionado.Rol.IdRol.ToString();
+                    ddlEstado.SelectedValue = seleccionado.Activo.ToString().ToLower();
+                }
             }
             catch (Exception ex)
             {
@@ -45,6 +63,21 @@ namespace AppGestionNegocio.Web
             ddlRol.Items.Insert(0, new ListItem("-- Seleccione una Rol --", "0"));
 
             
+        }
+
+        protected void btnCancelar_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("Usuarios.aspx");
+        }
+
+        protected void btnEliminar_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected void btnGuardar_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
