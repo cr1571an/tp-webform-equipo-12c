@@ -21,15 +21,13 @@ namespace AppGestionNegocio.Web
                 }
 
                 int? id = int.TryParse(Request.QueryString["id"], out int aux) ? aux : (int?)null;
-                if (id.HasValue && !IsPostBack) {
+                if (id.HasValue && !IsPostBack)
+                {
                     btnEliminar.Visible = true;
                     UsuarioNegocio negocio = new UsuarioNegocio();
                     Usuario seleccionado = (negocio.listar(id))[0];
 
                     Session.Add("usuarioSeleccionado", seleccionado);
-
-                    ddlEstado.Items.Add(new ListItem("Activo", "true"));
-                    ddlEstado.Items.Add(new ListItem("Inactivo", "false"));
 
                     txtNombre.Text = seleccionado.Nombre;
 
@@ -62,7 +60,53 @@ namespace AppGestionNegocio.Web
 
             ddlRol.Items.Insert(0, new ListItem("-- Seleccione una Rol --", "0"));
 
-            
+            ddlEstado.Items.Clear();
+            ddlEstado.Items.Add(new ListItem("Activo", "true"));
+            ddlEstado.Items.Add(new ListItem("Inactivo", "false"));
+        }
+
+        private bool ValidarCampo()
+        {
+            lblMensajeError.Visible = false;
+
+            if (ddlEmpleado.SelectedValue == "0")
+            {
+                lblMensajeError.Text = "Error: Por favor, seleccione un Empleado.";
+                lblMensajeError.Visible = true;
+                return false;
+            }
+
+            if (ddlRol.SelectedValue == "0")
+            {
+                lblMensajeError.Text = "Error: Por favor, seleccione un Rol.";
+                lblMensajeError.Visible = true;
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtPassword.Text))
+            {
+                lblMensajeError.Text = "Error: La contraseña es obligatoria.";
+                lblMensajeError.Visible = true;
+                return false;
+            }
+
+            if (txtPassword.Text.Length < 6)
+            {
+                lblMensajeError.Text = "Error: La contraseña debe tener al menos 6 caracteres.";
+                lblMensajeError.Visible = true;
+                return false;
+            }
+
+            if (txtPassword.Text != txtConfirmPassword.Text)
+            {
+                lblMensajeError.Text = "Error: Las contraseñas no coinciden.";
+                lblMensajeError.Visible = true;
+                return false;
+            }
+
+
+
+            return true;
         }
 
         protected void btnCancelar_Click(object sender, EventArgs e)
@@ -77,7 +121,53 @@ namespace AppGestionNegocio.Web
 
         protected void btnGuardar_Click(object sender, EventArgs e)
         {
+            try
+            {
+                if (ValidarCampo() == false) return;
 
+                UsuarioNegocio negocio = new UsuarioNegocio();
+                int? id = int.TryParse(Request.QueryString["id"], out int aux) ? aux : (int?)null;
+                if (!id.HasValue)
+
+                {
+                    List<Usuario> listaUsuarios = negocio.listar();
+                    foreach (Usuario usr in listaUsuarios)
+                    {
+                        if (usr.Nombre.Trim().ToUpper() == txtNombre.Text.Trim().ToUpper())
+                        {
+                            lblMensajeError.Text = "Error: Ya existe un ususario registrado con ese nombre.";
+                            lblMensajeError.Visible = true;
+                            return;
+                        }
+                    }
+                }
+
+                Usuario nuevo = new Usuario();
+
+                nuevo.Nombre = txtNombre.Text.Trim();
+                nuevo.Empleado = new Empleado();
+                nuevo.Empleado.IdEmpleado = int.Parse(ddlEmpleado.SelectedValue);
+                nuevo.Rol = new Rol();
+                nuevo.Rol.IdRol = int.Parse(ddlRol.SelectedValue);
+                nuevo.Activo = bool.Parse(ddlEstado.SelectedValue);
+                nuevo.PasswordHash = txtConfirmPassword.Text.ToString();
+
+
+                if (id.HasValue)
+                {
+                    nuevo.IdUsuario = id.Value;
+                    negocio.modificar(nuevo);
+                }
+                else
+                {
+                    negocio.agregar(nuevo);
+                }
+                Response.Redirect("Usuarios.aspx", false);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }
