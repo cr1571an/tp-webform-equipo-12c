@@ -81,7 +81,7 @@ namespace AppGestionNegocio.Web
         protected void dgvRoles_RowCommand(object sender, GridViewCommandEventArgs e)
         {
             RolNegocio negocio = new RolNegocio();
-            string id = (e.CommandArgument).ToString();
+            int id = int.Parse(e.CommandArgument.ToString());
 
             lblMensajeModal.Text = "";
             if (e.CommandName == "EditarModal")
@@ -109,9 +109,8 @@ namespace AppGestionNegocio.Web
             else if (e.CommandName == "EliminarRol")
             {
                 try
-                {
-                    int idRol = int.Parse(id);
-                    negocio.eliminar(idRol);
+                {                    
+                    negocio.eliminar(id);
                     cargarRoles();
                 }
                 catch (Exception ex)

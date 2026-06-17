@@ -47,8 +47,7 @@
             <h1 class="page-title">Registrar usuario</h1>
         </div>
 
-        <a href="Usuarios.aspx" class="btn btn-outline-secondary">
-            Volver al listado
+        <a href="Usuarios.aspx" class="btn btn-outline-secondary">Volver al listado
         </a>
     </div>
 
@@ -65,10 +64,8 @@
             </div>
 
             <div class="col-md-4 mb-3">
-                <label class="form-label-custom d-block">Rol</label>
-                <select class="form-control">
-                    <option>Seleccione un rol</option>
-                </select>
+                <asp:Label ID="lblRol" runat="server" CssClass="form-label-custom d-block" Text="Rol"></asp:Label>
+                <asp:DropDownList ID="ddlRol" runat="server" CssClass="form-control"></asp:DropDownList>
             </div>
 
             <div class="col-md-4 mb-3">
@@ -84,11 +81,6 @@
             <div class="col-md-6 mb-3">
                 <label class="form-label-custom d-block">Nombre de usuario</label>
                 <input type="text" class="form-control" placeholder="Ej: vendedor1" />
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label class="form-label-custom d-block">Observación interna</label>
-                <input type="text" class="form-control" placeholder="Ej: Usuario para el sector de ventas" />
             </div>
         </div>
 
@@ -109,8 +101,7 @@
         </div>
 
         <div class="form-actions">
-            <a href="Usuarios.aspx" class="btn btn-outline-secondary">
-                Cancelar
+            <a href="Usuarios.aspx" class="btn btn-outline-secondary">Cancelar
             </a>
 
             <button type="button" class="btn btn-primary">
