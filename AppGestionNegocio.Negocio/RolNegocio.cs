@@ -10,7 +10,7 @@ namespace AppGestionNegocio.Negocio
 {
     public class RolNegocio
     {
-        public List<Rol> listar(string id = "")
+        public List<Rol> listar(int? id = null)
         {
             List<Rol> lista = new List<Rol>();
             AccesoDatos datos = new AccesoDatos();
@@ -19,9 +19,10 @@ namespace AppGestionNegocio.Negocio
             {
                 string consulta = "SELECT IdRol, NombreRol, Descripcion, Activo FROM Roles WHERE Activo = 1 ";
 
-                if (id != null)
+                if (id.HasValue)
                 {
-                    consulta += "and IdRol =" + id + " ";
+                    consulta += " AND IdRol = @IdRol ";
+                    datos.setearParametro("@IdRol", id.Value);
                 }
 
                 consulta += "ORDER BY NombreRol";
