@@ -142,5 +142,90 @@ namespace AppGestionNegocio.Negocio
             return aux;
         }
 
+        public List<Articulo> filtrar(string filtro)
+        {
+            List<Articulo> lista = new List<Articulo>();
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                string consulta = CONSULTA;
+
+                if (!string.IsNullOrWhiteSpace(filtro))
+                {
+                    consulta += " AND A.Nombre LIKE @filtro";
+                }
+
+                consulta += " ORDER BY A.Nombre";
+
+                datos.setearConsulta(consulta);
+
+                if (!string.IsNullOrWhiteSpace(filtro))
+                {
+                    datos.setearParametro("@filtro", "%" + filtro.Trim() + "%");
+                }
+
+                datos.ejecutarLectura();
+                SqlDataReader lector = datos.Lector;
+
+                while (lector.Read())
+                {
+                    lista.Add(MapearArticulo(lector));
+                }
+
+                return lista;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        public List<Articulo> listarOrdenado(string criterio)
+        {
+            List<Articulo> lista = new List<Articulo>();
+            AccesoDatos accesoDatos = new AccesoDatos();
+            try
+            {
+                string consulta = CONSULTA;
+                switch (criterio)
+                {
+                    case "StockMayorMenor":
+                        consulta +=" ORDER BY A.Stock DESC";
+                        break;
+                    case "StockMenorMayor":
+                        consulta += " ORDER BY A.Stock ASC";
+                        break;
+                    case "PrecioMayorMenor":
+                        consulta += " ORDER BY A.PrecioUnitario DESC";
+                        break;
+                    case "PrecioMenorMayor":
+                        consulta += " ORDER BY A.PrecioUnitario ASC";
+                        break;
+                }
+
+                accesoDatos.setearConsulta(consulta);
+                accesoDatos.ejecutarLectura();
+                SqlDataReader lector = accesoDatos.Lector;
+
+                while (lector.Read())
+                {
+                    lista.Add(MapearArticulo(lector));
+                }
+                return lista;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                accesoDatos.cerrarConexion();
+            }
+        }
+
     }
 }

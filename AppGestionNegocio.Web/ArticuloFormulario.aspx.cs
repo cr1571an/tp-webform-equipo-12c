@@ -47,31 +47,25 @@ namespace AppGestionNegocio.Web
 
         private void CargarDesplegables()
         {
-            /*
             CategoriaNegocio catNegocio = new CategoriaNegocio();
             ddlCategoria.DataSource = catNegocio.listar();
             ddlCategoria.DataValueField = "IdCategoria";
             ddlCategoria.DataTextField = "Nombre";
             ddlCategoria.DataBind();
-            */
             ddlCategoria.Items.Insert(0, new ListItem("-- Seleccione una Categoría --", "0"));
-
-            /*
+            
             MarcaNegocio marNegocio = new MarcaNegocio();
             ddlMarca.DataSource = marNegocio.listar();
             ddlMarca.DataValueField = "IdMarca";
             ddlMarca.DataTextField = "Nombre";
             ddlMarca.DataBind();
-            */
             ddlMarca.Items.Insert(0, new ListItem("-- Seleccione una Marca --", "0"));
 
-            /*
             AlicuotaIvaNegocio ivaNegocio = new AlicuotaIvaNegocio();
             ddlIva.DataSource = ivaNegocio.listar();
             ddlIva.DataValueField = "IdAlicuotaIva";
             ddlIva.DataTextField = "Alicuota";
             ddlIva.DataBind();
-            */
             ddlIva.Items.Insert(0, new ListItem("-- Seleccione Alícuota IVA --", "0"));
         }
 
@@ -107,14 +101,14 @@ namespace AppGestionNegocio.Web
                 return false;
             }
 
-            if (!decimal.TryParse(txtPrecio.Text, out decimal precio) || precio <= 0)
+            if ((string.IsNullOrEmpty(txtPrecio.Text.Trim())) || !decimal.TryParse(txtPrecio.Text, out decimal precio) || precio <= 0)
             {
                 lblMensajeError.Text = "Error: Por favor, ingrese un precio válido y mayor a cero.";
                 lblMensajeError.Visible = true;
                 return false;
             }
 
-            if (!int.TryParse(txtStock.Text, out int stock) || stock < 0)
+            if ((string.IsNullOrEmpty(txtStock.Text.Trim())) || !int.TryParse(txtStock.Text, out int stock) || stock < 0)
             {
                 lblMensajeError.Text = "Error: Por favor, ingrese un stock válido. No puede ser negativo.";
                 lblMensajeError.Visible = true;
@@ -174,7 +168,7 @@ namespace AppGestionNegocio.Web
                     {
                         if (art.Nombre.Trim().ToUpper() == txtNombre.Text.Trim().ToUpper())
                         {
-                            lblMensajeError.Text = "Error: No se puede agregar este artículo porque ya está en el sistema.";
+                            lblMensajeError.Text = "Error: Ya existe un artículo registrado con ese nombre.";
                             lblMensajeError.Visible = true;
                             return; 
                         }
