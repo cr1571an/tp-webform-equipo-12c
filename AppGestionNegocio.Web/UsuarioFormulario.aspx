@@ -76,7 +76,7 @@
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label class="form-label-custom d-block">Nombre de usuario</label>
-                <asp:TextBox ID="txtNombre" runat="server" CssClass="form-control" placeholder="Ej: Pro Plan adulto carne x20kg"></asp:TextBox>
+                <asp:TextBox ID="txtNombre" runat="server" CssClass="form-control" placeholder="Ej: juanp"></asp:TextBox>
         &nbsp;</div>
         </div>
 
@@ -86,12 +86,12 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label-custom d-block">Contraseña</label>
-                    <input type="password" class="form-control" placeholder="Contraseña" />
+                    <asp:TextBox ID="txtPassword" runat="server" CssClass="form-control" TextMode="Password" />
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label class="form-label-custom d-block">Confirmar contraseña</label>
-                    <input type="password" class="form-control" placeholder="Repetir contraseña" />
+                    <asp:TextBox ID="txtConfirmPassword" runat="server" CssClass="form-control" TextMode="Password" />
                 </div>
             </div>
         </div>
