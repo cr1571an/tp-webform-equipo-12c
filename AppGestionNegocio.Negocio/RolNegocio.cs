@@ -10,14 +10,22 @@ namespace AppGestionNegocio.Negocio
 {
     public class RolNegocio
     {
-        public List<Rol> listar()
+        public List<Rol> listar(string id = "")
         {
             List<Rol> lista = new List<Rol>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("SELECT IdRol, NombreRol, Descripcion, Activo FROM Roles WHERE Activo = 1 ORDER BY Nombre");
+                string consulta = "SELECT IdRol, NombreRol, Descripcion, Activo FROM Roles WHERE Activo = 1 ";
+
+                if (id != null)
+                {
+                    consulta += "and IdRol =" + id + " ";
+                }
+
+                consulta += "ORDER BY NombreRol";
+                datos.setearConsulta(consulta);
                 datos.ejecutarLectura();
 
                 SqlDataReader lector = datos.Lector;
@@ -72,7 +80,7 @@ namespace AppGestionNegocio.Negocio
             try
             {
                 datos.setearConsulta("UPDATE Roles SET NombreRol = @Nombre,Descripcion = @Descripcion, Activo = @Activo WHERE IdRol = @IdRol");
-                datos.setearParametro("@NombreRol", rol.Nombre);
+                datos.setearParametro("@Nombre", rol.Nombre);
                 datos.setearParametro("@Descripcion", rol.Descripcion);                
                 datos.setearParametro("@Activo", rol.Activo);
                 datos.setearParametro("@IdRol", rol.IdRol);
