@@ -78,16 +78,16 @@ namespace AppGestionNegocio.Web
             txtFiltroNombre.Text = "";
             cargarRoles();
         }
-        protected void dgvRoles_RowEditing(object sender, GridViewEditEventArgs e)
-        {
-            dgvRoles.EditIndex = e.NewEditIndex;
-            cargarRoles();
-        }
-        protected void dgvRoles_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
-        {
-            dgvRoles.EditIndex = -1;
-            cargarRoles();
-        }
+        //protected void dgvRoles_RowEditing(object sender, GridViewEditEventArgs e)
+        //{
+        //    dgvRoles.EditIndex = e.NewEditIndex;
+        //    cargarRoles();
+        //}
+        //protected void dgvRoles_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
+        //{
+        //    dgvRoles.EditIndex = -1;
+        //    cargarRoles();
+        //}
         protected void dgvRoles_RowUpdating(object sender, GridViewUpdateEventArgs e)
         {
             //try
@@ -141,10 +141,11 @@ namespace AppGestionNegocio.Web
         protected void dgvRoles_RowCommand(object sender, GridViewCommandEventArgs e)
         {
             RolNegocio negocio = new RolNegocio();
+            string id = (e.CommandArgument).ToString();
 
             if (e.CommandName == "EditarModal")
             {
-                string id = (e.CommandArgument).ToString();
+                
                 Rol rol = (negocio.listar(id))[0];
 
                 hfIdRol.Value = rol.IdRol.ToString();
@@ -157,6 +158,14 @@ namespace AppGestionNegocio.Web
                     "$('#modalEditar').modal('show');",
                     true);
             }
+            else if (e.CommandName == "EliminarRol") {
+                int idRol = int.Parse(id);
+                negocio.eliminar(idRol);
+
+                //dgvRoles.EditIndex = -1;
+                cargarRoles();
+
+            }
 
 
             //try
@@ -165,13 +174,7 @@ namespace AppGestionNegocio.Web
 
             //    if (e.CommandName == "EliminarProveedor")
             //    {
-            //        int idProveedor = int.Parse(e.CommandArgument.ToString());
-
-            //        RolNegocio negocio = new RolNegocio();
-            //        negocio.eliminar(idProveedor);
-
-            //        dgvRoles.EditIndex = -1;
-            //        cargarRoles();
+            //        
             //    }
             //}
             //catch (Exception ex)

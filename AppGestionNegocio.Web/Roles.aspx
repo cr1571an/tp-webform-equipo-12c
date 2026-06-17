@@ -176,9 +176,6 @@
                 GridLines="None"
                 DataKeyNames="IdRol"
                 EmptyDataText="No hay roles activos registrados."
-                OnRowEditing="dgvRoles_RowEditing"
-                OnRowCancelingEdit="dgvRoles_RowCancelingEdit"
-                OnRowUpdating="dgvRoles_RowUpdating"
                 OnRowCommand="dgvRoles_RowCommand">
 
                 <Columns>
