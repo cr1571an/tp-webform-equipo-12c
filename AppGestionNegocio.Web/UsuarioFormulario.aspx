@@ -57,10 +57,8 @@
 
         <div class="row">
             <div class="col-md-4 mb-3">
-                <label class="form-label-custom d-block">Empleado</label>
-                <select class="form-control">
-                    <option>Seleccione un empleado</option>
-                </select>
+                <asp:Label ID="lblEmpleado" runat="server" CssClass="form-label-custom d-block" Text="Empleado"></asp:Label>
+                <asp:DropDownList ID="ddlEmpleado" runat="server" CssClass="form-control"></asp:DropDownList>
             </div>
 
             <div class="col-md-4 mb-3">

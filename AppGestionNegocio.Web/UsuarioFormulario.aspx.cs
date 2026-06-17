@@ -29,7 +29,13 @@ namespace AppGestionNegocio.Web
         private void CargarDesplegables()
         {
 
-            
+            EmpleadoNegocio empleadoNegocio = new EmpleadoNegocio();
+            ddlEmpleado.DataSource = empleadoNegocio.listar();
+            ddlEmpleado.DataValueField = "IdEmpleado";
+            ddlEmpleado.DataTextField = "NombreCompleto";
+            ddlEmpleado.DataBind();
+            ddlEmpleado.Items.Insert(0, new ListItem("-- Seleccione una Empleado --", "0"));
+
             RolNegocio rolNegocio = new RolNegocio();
             ddlRol.DataSource = rolNegocio.listar();
             ddlRol.DataValueField = "IdRol";
