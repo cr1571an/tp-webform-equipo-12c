@@ -116,7 +116,21 @@ namespace AppGestionNegocio.Web
 
         protected void btnEliminar_Click(object sender, EventArgs e)
         {
+            try
+            {
+                UsuarioNegocio negocio = new UsuarioNegocio();
+                Usuario seleccionado = (Usuario)Session["usuarioSeleccionado"];
 
+                if (seleccionado != null)
+                {
+                    negocio.eliminar(seleccionado.IdUsuario);
+                    Response.Redirect("Usuarios.aspx", false);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         protected void btnGuardar_Click(object sender, EventArgs e)
