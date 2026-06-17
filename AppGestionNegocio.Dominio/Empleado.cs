@@ -19,5 +19,7 @@ namespace AppGestionNegocio.Dominio
         {
             return Nombre + " " + Apellido;
         }
+
+        public string NombreCompleto => Nombre + " " + Apellido;
     }
 }
