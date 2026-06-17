@@ -266,6 +266,13 @@
                         Rows="4"
                         Style="resize: vertical;" />
 
+                    <asp:Label
+                        ID="lblMensajeModal"
+                        runat="server"
+                        CssClass="text-danger">
+                    </asp:Label>
+
+
                 </div>
 
                 <div class="modal-footer">
@@ -276,7 +283,7 @@
                         CssClass="btn btn-success"
                         OnClick="btnGuardarModal_Click" />
 
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
                         Cancelar
                     </button>
                 </div>

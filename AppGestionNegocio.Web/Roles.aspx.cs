@@ -29,11 +29,11 @@ namespace AppGestionNegocio.Web
             dgvRoles.DataBind();
         }
 
-        private void mostrarMensaje(string mensaje)
+        private void mostrarMensaje(Label lbl, string mensaje)
         {
-            lblMensaje.Text = mensaje;
+            lbl.Text = mensaje;
 
-            string script = "setTimeout(function() { " + "var mensaje = document.getElementById('" + lblMensaje.ClientID + "'); " + "if (mensaje) { mensaje.innerHTML = ''; } " + "}, 4000);";
+            string script = "setTimeout(function() { " + "var mensaje = document.getElementById('" + lbl.ClientID + "'); " + "if (mensaje) { mensaje.innerHTML = ''; } " + "}, 4000);";
 
             ClientScript.RegisterStartupScript(this.GetType(), "ocultarMensaje", script, true);
         }
@@ -198,17 +198,16 @@ namespace AppGestionNegocio.Web
         {
             try
             {
-                //lblMensajeModal.Text = "";
-
-                if (string.IsNullOrWhiteSpace(txtNombreModal.Text))
+                lblMensajeModal.Text = "";
+                if (string.IsNullOrWhiteSpace(txtNombreModal.Text) ||
+                    string.IsNullOrWhiteSpace(txtDescripcionModal.Text))
                 {
-                    mostrarMensaje("Debe ingresar el nombre del rol.");
-                    return;
-                }
+                    mostrarMensaje(lblMensajeModal, "Nombre y descripción son obligatorios");
 
-                if (string.IsNullOrWhiteSpace(txtDescripcionModal.Text))
-                {
-                    mostrarMensaje("Debe ingresar la descripción del rol.");
+                    ScriptManager.RegisterStartupScript(this, this.GetType(),
+                        "abrirModal",
+                        "$('#modalEditar').modal('show');",
+                        true);
                     return;
                 }
 
@@ -229,7 +228,7 @@ namespace AppGestionNegocio.Web
             }
             catch (Exception ex)
             {
-                mostrarMensaje("Error al agregar el proveedor: " + ex.Message);
+                mostrarMensaje(lblMensajeModal,"Error al agregar el proveedor: " + ex.Message);
             }
 
         }
