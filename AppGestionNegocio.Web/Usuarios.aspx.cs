@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AppGestionNegocio.Negocio;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -11,7 +12,32 @@ namespace AppGestionNegocio.Web
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (!IsPostBack)
+            {
+                CargarGridV();
+            }
+        }
+        private void CargarGridV()
+        {
+            try
+            {
+                UsuarioNegocio negocio = new UsuarioNegocio();
+                Session["listaUsuarios"] = negocio.listar();
 
+                dgvUsuarios.DataSource = Session["listaUsuarios"];
+                dgvUsuarios.DataBind();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        protected void dgvUsuarios_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            dgvUsuarios.DataSource = Session["listaUsuarios"];
+            dgvUsuarios.PageIndex = e.NewPageIndex;
+            dgvUsuarios.DataBind();
         }
     }
 }
