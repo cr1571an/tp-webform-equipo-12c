@@ -107,8 +107,7 @@
                 Filtrar
             </button>
 
-            <a href="UsuarioFormulario.aspx" class="btn btn-primary">
-                Nuevo usuario
+            <a href="UsuarioFormulario.aspx" class="btn btn-primary">Nuevo usuario
             </a>
         </div>
     </div>
@@ -117,28 +116,36 @@
 
         <h5 class="form-section-title">Usuarios registrados</h5>
 
-        <div class="table-responsive">
-            <table class="table table-striped table-hover mb-0">
-                <colgroup>
-                    <col class="col-user" />
-                    <col class="col-employee" />
-                    <col class="col-role" />
-                    <col class="col-status" />
-                    <col class="col-security" />
-                    <col class="col-actions" />
-                </colgroup>
+    </div>
+    <div class="dashboard-card">
 
-                <thead>
-                    <tr>
-                        <th>Usuario</th>
-                        <th>Empleado</th>
-                        <th>Rol</th>
-                        <th>Estado</th>
-                        <th>Seguridad</th>
-                        <th class="text-center">Acciones</th>
-                    </tr>
-                </thead>
-            </table>
+        <div class="table-responsive">
+            <asp:GridView ID="dgvUsuarios" runat="server" CssClass="table table-striped table-hover mb-0" AutoGenerateColumns="false" GridLines="None" AllowPaging="True" PageSize="10" PagerStyle-CssClass="grid-pager" OnPageIndexChanging="dgvUsuarios_PageIndexChanging">
+                <Columns>
+                    <asp:TemplateField HeaderText="Usuario">
+                        <ItemTemplate>
+                            <div class="article-cell">
+                                <span class="article-name"><%# Eval("Nombre") %></span>
+                            </div>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Empleado">
+                        <ItemTemplate>
+                            <span class="badge-category"><%# Eval("Empleado.Nombre") + " " + Eval("Empleado.Apellido") %></span>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Rol">
+                        <ItemTemplate>
+                            <%# Eval("Rol.Nombre") %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Acciones">
+                        <ItemTemplate>
+                            <a href='UsuarioFormulario.aspx?id=<%# Eval("IdUsuario") %>' class="btn btn-sm btn-outline-primary grid-action-btn">Editar</a>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+            </asp:GridView>
         </div>
 
     </div>
