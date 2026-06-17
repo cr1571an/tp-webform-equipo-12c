@@ -29,6 +29,15 @@ namespace AppGestionNegocio.Web
             dgvRoles.DataBind();
         }
 
+        private void mostrarMensaje(string mensaje)
+        {
+            lblMensaje.Text = mensaje;
+
+            string script = "setTimeout(function() { " + "var mensaje = document.getElementById('" + lblMensaje.ClientID + "'); " + "if (mensaje) { mensaje.innerHTML = ''; } " + "}, 4000);";
+
+            ClientScript.RegisterStartupScript(this.GetType(), "ocultarMensaje", script, true);
+        }
+
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
             //try
@@ -145,6 +154,25 @@ namespace AppGestionNegocio.Web
         }
         protected void dgvRoles_RowCommand(object sender, GridViewCommandEventArgs e)
         {
+            RolNegocio negocio = new RolNegocio();
+
+            if (e.CommandName == "EditarModal")
+            {
+                string id = (e.CommandArgument).ToString();
+                Rol rol = (negocio.listar(id))[0];
+
+                hfIdRol.Value = rol.IdRol.ToString();
+                txtNombreModal.Text = rol.Nombre;
+                txtDescripcionModal.Text = rol.Descripcion;
+
+
+                ScriptManager.RegisterStartupScript(this, this.GetType(),
+                    "abrirModal",
+                    "$('#modalEditar').modal('show');",
+                    true);
+            }
+
+
             //try
             //{
             //    lblMensaje.Text = "";
@@ -164,6 +192,46 @@ namespace AppGestionNegocio.Web
             //{
             //    mostrarMensaje("Error al eliminar el proveedor: " + ex.Message);
             //}
+        }
+
+        protected void btnGuardarModal_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                //lblMensajeModal.Text = "";
+
+                if (string.IsNullOrWhiteSpace(txtNombreModal.Text))
+                {
+                    mostrarMensaje("Debe ingresar el nombre del rol.");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(txtDescripcionModal.Text))
+                {
+                    mostrarMensaje("Debe ingresar la descripción del rol.");
+                    return;
+                }
+
+                Rol rol = new Rol();
+                rol.IdRol = int.Parse(hfIdRol.Value);
+                rol.Nombre = txtNombreModal.Text.Trim();
+                rol.Descripcion = txtDescripcionModal.Text;
+                rol.Activo = true;
+
+                RolNegocio negocio = new RolNegocio();
+                negocio.modificar(rol);
+
+                txtNombreModal.Text = "";
+                txtDescripcionModal.Text = "";
+                txtFiltroNombre.Text = "";
+
+                cargarRoles();
+            }
+            catch (Exception ex)
+            {
+                mostrarMensaje("Error al agregar el proveedor: " + ex.Message);
+            }
+
         }
     }
 }

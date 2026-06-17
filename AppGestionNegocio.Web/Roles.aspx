@@ -181,6 +181,16 @@
                         </EditItemTemplate>
                     </asp:TemplateField>
 
+                    <asp:TemplateField HeaderText="Descripción">
+                        <ItemTemplate>
+                            <span title='<%# Eval("Descripcion") %>'>
+                                <%# Eval("Descripcion") != null && Eval("Descripcion").ToString().Length > 40
+                ? Eval("Descripcion").ToString().Substring(0, 40) + "..."
+                : Eval("Descripcion") %>
+                            </span>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+
                     <asp:TemplateField HeaderText="Acciones">
                         <ItemTemplate>
                             <div class="table-actions">
@@ -189,7 +199,8 @@
                                     runat="server"
                                     Text="Modificar"
                                     CssClass="btn btn-sm btn-outline-primary"
-                                    CommandName="Edit" />
+                                    CommandName="EditarModal"
+                                    CommandArgument='<%# Eval("IdRol") %>' />
 
                                 <asp:Button
                                     ID="btnEliminar"
@@ -230,5 +241,49 @@
         </div>
 
     </div>
+
+    <div class="modal fade" id="modalEditar" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Rol</h5>
+                </div>
+
+                <div class="modal-body">
+
+                    <asp:HiddenField ID="hfIdRol" runat="server" />
+
+                    <label>Nombre</label>
+                    <asp:TextBox ID="txtNombreModal" runat="server" CssClass="form-control" />
+
+                    <label class="mt-2">Descripción</label>
+                    <asp:TextBox
+                        ID="txtDescripcionModal"
+                        runat="server"
+                        CssClass="form-control"
+                        TextMode="MultiLine"
+                        Rows="4"
+                        Style="resize: vertical;" />
+
+                </div>
+
+                <div class="modal-footer">
+                    <asp:Button
+                        ID="btnGuardarModal"
+                        runat="server"
+                        Text="Guardar"
+                        CssClass="btn btn-success"
+                        OnClick="btnGuardarModal_Click" />
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 
 </asp:Content>
