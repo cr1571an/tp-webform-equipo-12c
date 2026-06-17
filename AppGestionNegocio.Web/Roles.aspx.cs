@@ -46,7 +46,7 @@ namespace AppGestionNegocio.Web
 
                 if (string.IsNullOrWhiteSpace(txtNombre.Text) || string.IsNullOrWhiteSpace(txtDescripcion.Text))
                 {
-                    mostrarMensaje(lblMensaje,"Debe ingresar el nombre del rol y descripción.");
+                    mostrarMensaje(lblMensaje, "Debe ingresar el nombre del rol y descripción.");
                     return;
                 }
 
@@ -66,7 +66,7 @@ namespace AppGestionNegocio.Web
             }
             catch (Exception ex)
             {
-                mostrarMensaje(lblMensaje,"Error al agregar el rol: " + ex.Message);
+                mostrarMensaje(lblMensaje, "Error al agregar el rol: " + ex.Message);
             }
         }
         protected void btnFiltrar_Click(object sender, EventArgs e)
@@ -78,109 +78,48 @@ namespace AppGestionNegocio.Web
             txtFiltroNombre.Text = "";
             cargarRoles();
         }
-        //protected void dgvRoles_RowEditing(object sender, GridViewEditEventArgs e)
-        //{
-        //    dgvRoles.EditIndex = e.NewEditIndex;
-        //    cargarRoles();
-        //}
-        //protected void dgvRoles_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
-        //{
-        //    dgvRoles.EditIndex = -1;
-        //    cargarRoles();
-        //}
-        protected void dgvRoles_RowUpdating(object sender, GridViewUpdateEventArgs e)
-        {
-            //try
-            //{
-            //    lblMensaje.Text = "";
-
-            //    int idProveedor = (int)dgvRoles.DataKeys[e.RowIndex].Value;
-
-            //    GridViewRow fila = dgvRoles.Rows[e.RowIndex];
-
-            //    TextBox txtNombreEdit = (TextBox)fila.FindControl("txtNombreEdit");
-            //    TextBox txtTelefonoEdit = (TextBox)fila.FindControl("txtTelefonoEdit");
-            //    TextBox txtEmailEdit = (TextBox)fila.FindControl("txtEmailEdit");
-
-            //    if (string.IsNullOrWhiteSpace(txtNombreEdit.Text))
-            //    {
-            //        mostrarMensaje("Debe ingresar el nombre del proveedor.");
-            //        return;
-            //    }
-
-            //    if (string.IsNullOrWhiteSpace(txtTelefonoEdit.Text))
-            //    {
-            //        mostrarMensaje("Debe ingresar el teléfono del proveedor.");
-            //        return;
-            //    }
-
-            //    if (string.IsNullOrWhiteSpace(txtEmailEdit.Text))
-            //    {
-            //        mostrarMensaje("Debe ingresar el email del proveedor.");
-            //        return;
-            //    }
-
-            //    Proveedor proveedor = new Proveedor();
-            //    proveedor.IdProveedor = idProveedor;
-            //    proveedor.Nombre = txtNombreEdit.Text.Trim();
-            //    proveedor.Telefono = txtTelefonoEdit.Text.Trim();
-            //    proveedor.Email = txtEmailEdit.Text.Trim();
-            //    proveedor.Activo = true;
-
-            //    RolNegocio negocio = new RolNegocio();
-            //    negocio.modificar(proveedor);
-
-            //    dgvRoles.EditIndex = -1;
-            //    cargarRoles();
-            //}
-            //catch (Exception ex)
-            //{
-            //    mostrarMensaje("Error al modificar el proveedor: " + ex.Message);
-            //}
-        }
         protected void dgvRoles_RowCommand(object sender, GridViewCommandEventArgs e)
         {
             RolNegocio negocio = new RolNegocio();
             string id = (e.CommandArgument).ToString();
 
+            lblMensajeModal.Text = "";
             if (e.CommandName == "EditarModal")
             {
-                
-                Rol rol = (negocio.listar(id))[0];
+                try
+                {
 
-                hfIdRol.Value = rol.IdRol.ToString();
-                txtNombreModal.Text = rol.Nombre;
-                txtDescripcionModal.Text = rol.Descripcion;
+                    Rol rol = (negocio.listar(id))[0];
+
+                    hfIdRol.Value = rol.IdRol.ToString();
+                    txtNombreModal.Text = rol.Nombre;
+                    txtDescripcionModal.Text = rol.Descripcion;
 
 
-                ScriptManager.RegisterStartupScript(this, this.GetType(),
-                    "abrirModal",
-                    "$('#modalEditar').modal('show');",
-                    true);
+                    ScriptManager.RegisterStartupScript(this, this.GetType(),
+                        "abrirModal",
+                        "$('#modalEditar').modal('show');",
+                        true);
+                }
+                catch (Exception ex)
+                {
+                    mostrarMensaje(lblMensajeModal, "Error al eliminar el rol: " + ex.Message);
+                }
             }
-            else if (e.CommandName == "EliminarRol") {
-                int idRol = int.Parse(id);
-                negocio.eliminar(idRol);
-
-                //dgvRoles.EditIndex = -1;
-                cargarRoles();
-
+            else if (e.CommandName == "EliminarRol")
+            {
+                try
+                {
+                    int idRol = int.Parse(id);
+                    negocio.eliminar(idRol);
+                    cargarRoles();
+                }
+                catch (Exception ex)
+                {
+                    mostrarMensaje(lblMensajeModal, "Error al actulizar el rol: " + ex.Message);
+                }
             }
 
-
-            //try
-            //{
-            //    lblMensaje.Text = "";
-
-            //    if (e.CommandName == "EliminarProveedor")
-            //    {
-            //        
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    mostrarMensaje("Error al eliminar el proveedor: " + ex.Message);
-            //}
         }
 
         protected void btnGuardarModal_Click(object sender, EventArgs e)
@@ -217,7 +156,7 @@ namespace AppGestionNegocio.Web
             }
             catch (Exception ex)
             {
-                mostrarMensaje(lblMensajeModal,"Error al agregar el proveedor: " + ex.Message);
+                mostrarMensaje(lblMensajeModal, "Error al agregar el proveedor: " + ex.Message);
             }
 
         }
