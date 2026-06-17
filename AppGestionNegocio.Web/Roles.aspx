@@ -92,9 +92,26 @@
         </div>
 
         <div class="page-actions">
-            <button type="button" class="btn btn-outline-secondary">
-                Filtrar
-            </button>
+            <asp:TextBox
+                ID="txtFiltroNombre"
+                runat="server"
+                CssClass="form-control filtro-input"
+                placeholder="Buscar Rol">
+            </asp:TextBox>
+
+            <asp:Button
+                ID="btnFiltrar"
+                runat="server"
+                Text="Filtrar"
+                CssClass="btn btn-outline-secondary"
+                OnClick="btnFiltrar_Click" />
+
+            <asp:Button
+                ID="btnLimpiarFiltro"
+                runat="server"
+                Text="Limpiar"
+                CssClass="btn btn-outline-secondary"
+                OnClick="btnLimpiarFiltro_Click" />
         </div>
     </div>
 
@@ -112,6 +129,14 @@
                 <input type="text" class="form-control" placeholder="Ej: Puede registrar ventas y consultar artículos" />
             </div>
 
+            <div class="col-md-12">
+                <asp:Label
+                    ID="lblMensaje"
+                    runat="server"
+                    CssClass="message text-danger">
+                </asp:Label>
+            </div>
+
             <div class="col-md-2 mb-3 d-flex align-items-end">
                 <button type="button" class="btn btn-primary w-100">
                     Guardar
@@ -125,23 +150,83 @@
         <h5 class="form-section-title">Roles registrados</h5>
 
         <div class="table-responsive">
-            <table class="table table-striped table-hover mb-0">
-                <colgroup>
-                    <col class="col-name" />
-                    <col class="col-description" />
-                    <col class="col-users" />
-                    <col class="col-actions" />
-                </colgroup>
+            <asp:GridView
+                ID="dgvRoles"
+                runat="server"
+                CssClass="table table-striped table-hover mb-0"
+                AutoGenerateColumns="false"
+                GridLines="None"
+                DataKeyNames="IdRol"
+                EmptyDataText="No hay roles activos registrados."
+                OnRowEditing="dgvRoles_RowEditing"
+                OnRowCancelingEdit="dgvRoles_RowCancelingEdit"
+                OnRowUpdating="dgvRoles_RowUpdating"
+                OnRowCommand="dgvRoles_RowCommand">
 
-                <thead>
-                    <tr>
-                        <th>Rol</th>
-                        <th>Descripción</th>
-                        <th>Usuarios asociados</th>
-                        <th class="text-center">Acciones</th>
-                    </tr>
-                </thead>
-            </table>
+                <Columns>
+
+                    <asp:TemplateField HeaderText="Nombre">
+                        <ItemTemplate>
+                            <span class="provider-name"><%# Eval("Nombre") %></span>
+                        </ItemTemplate>
+
+                        <EditItemTemplate>
+                            <asp:TextBox
+                                ID="txtNombreEdit"
+                                runat="server"
+                                CssClass="form-control"
+                                MaxLength="60"
+                                Text='<%# Bind("Nombre") %>'>
+                            </asp:TextBox>
+                        </EditItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Acciones">
+                        <ItemTemplate>
+                            <div class="table-actions">
+                                <asp:Button
+                                    ID="btnEditar"
+                                    runat="server"
+                                    Text="Modificar"
+                                    CssClass="btn btn-sm btn-outline-primary"
+                                    CommandName="Edit" />
+
+                                <asp:Button
+                                    ID="btnEliminar"
+                                    runat="server"
+                                    Text="Eliminar"
+                                    CssClass="btn btn-sm btn-outline-danger"
+                                    CommandName="EliminarRol"
+                                    CommandArgument='<%# Eval("IdRol") %>'
+                                    OnClientClick="return confirm('¿Seguro que querés eliminar este rol?');" />
+                            </div>
+                        </ItemTemplate>
+
+                        <EditItemTemplate>
+                            <div class="table-actions">
+                                <asp:Button
+                                    ID="btnGuardarEdit"
+                                    runat="server"
+                                    Text="Guardar"
+                                    CssClass="btn btn-sm btn-success"
+                                    CommandName="Update" />
+
+                                <asp:Button
+                                    ID="btnCancelarEdit"
+                                    runat="server"
+                                    Text="Cancelar"
+                                    CssClass="btn btn-sm btn-secondary"
+                                    CommandName="Cancel" />
+                            </div>
+                        </EditItemTemplate>
+
+                        <ItemStyle CssClass="col-actions" />
+                        <HeaderStyle CssClass="col-actions" />
+                    </asp:TemplateField>
+
+                </Columns>
+
+            </asp:GridView>
         </div>
 
     </div>
