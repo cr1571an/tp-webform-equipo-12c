@@ -75,23 +75,23 @@
             font-weight: 500;
         }
 
-        .sidebar-link i {
-            width: 24px;
-            margin-right: 12px;
-            font-size: 16px;
-            color: #c4b5fd;
-        }
+            .sidebar-link i {
+                width: 24px;
+                margin-right: 12px;
+                font-size: 16px;
+                color: #c4b5fd;
+            }
 
-        .sidebar-link:hover {
-            background-color: #6f42c1;
-            color: white;
-            text-decoration: none;
-            transform: translateX(3px);
-        }
+            .sidebar-link:hover {
+                background-color: #6f42c1;
+                color: white;
+                text-decoration: none;
+                transform: translateX(3px);
+            }
 
-        .sidebar-link:hover i {
-            color: white;
-        }
+                .sidebar-link:hover i {
+                    color: white;
+                }
 
         .sidebar-footer {
             margin-top: 40px;
@@ -183,9 +183,9 @@
             padding: 22px;
         }
 
-        .dashboard-card:hover {
-            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.10);
-        }
+            .dashboard-card:hover {
+                box-shadow: 0 8px 22px rgba(15, 23, 42, 0.10);
+            }
 
         .module-card {
             background-color: white;
@@ -224,11 +224,11 @@
             background-color: white;
         }
 
-        .table th {
-            background-color: #f3f4f6;
-            color: #374151;
-            font-weight: 700;
-        }
+            .table th {
+                background-color: #f3f4f6;
+                color: #374151;
+                font-weight: 700;
+            }
 
         @media (max-width: 768px) {
             .app-wrapper {
@@ -349,8 +349,8 @@
             </div>
         </div>
 
-        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-        <script src="/js/bootstrap.min.js"></script>
+        <script src="<%= ResolveUrl("~/Scripts/jquery-3.5.0.min.js") %>"></script>
+        <script src="<%= ResolveUrl("~/Scripts/bootstrap.bundle.js") %>"></script>
     </form>
 </body>
 </html>
