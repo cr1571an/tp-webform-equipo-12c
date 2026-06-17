@@ -10,6 +10,7 @@ namespace AppGestionNegocio.Dominio
     {
         public int IdAlicuotaIva { get; set; }
         public decimal Alicuota { get; set; }
+        public bool Activo { get; set; }
         public List<Articulo> Articulos { get; set; }
         public override string ToString()
         {

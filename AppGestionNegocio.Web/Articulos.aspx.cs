@@ -1,4 +1,5 @@
-﻿using AppGestionNegocio.Negocio;
+﻿using AppGestionNegocio.Dominio;
+using AppGestionNegocio.Negocio;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,11 +35,6 @@ namespace AppGestionNegocio.Web
             }
         }
 
-        protected void btnFiltrar_Click(object sender, EventArgs e)
-        {
-            // Falta hacer la lógica del filtrado todavía
-        }
-
         protected void btnNuevoArticulo_Click(object sender, EventArgs e)
         {
             Response.Redirect("ArticuloFormulario.aspx");
@@ -50,5 +46,16 @@ namespace AppGestionNegocio.Web
             dgvArticulos.PageIndex = e.NewPageIndex;
             dgvArticulos.DataBind();
         }
+
+        protected void ddlFiltro_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ArticuloNegocio negocio = new ArticuloNegocio();
+
+            string filtroSeleccionado = ddlFiltro.SelectedValue;
+            List<Articulo> listaOrdenada = negocio.listarOrdenado(filtroSeleccionado);
+            dgvArticulos.DataSource = listaOrdenada;
+            dgvArticulos.DataBind();
+        }
+
     }
 }

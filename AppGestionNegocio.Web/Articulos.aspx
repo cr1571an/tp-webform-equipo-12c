@@ -87,7 +87,12 @@
         </div>
     
         <div class="page-actions">
-            <asp:Button ID="btnFiltrar" runat="server" Text="Filtrar" CssClass="btn btn-outline-secondary" OnClick="btnFiltrar_Click"/>
+          <asp:DropDownList ID="ddlFiltro" runat="server" CssClass="form-control" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltro_SelectedIndexChanged">
+                <asp:ListItem Text="Mayor a menor Stock" Value="StockMayorMenor"></asp:ListItem>
+                <asp:ListItem Text="Menor a mayor Stock" Value="StockMenorMayor"></asp:ListItem>
+                <asp:ListItem Text="Mayor a menor Precio" Value="PrecioMayorMenor"></asp:ListItem>
+                <asp:ListItem Text="Menor a mayor Precio" Value="PrecioMenorMayor"></asp:ListItem>
+            </asp:DropDownList>
             <asp:Button ID="btnNuevoArticulo" runat="server" Text="Nuevo artículo" CssClass="btn btn-primary" OnClick="btnNuevoArticulo_Click"/>
         </div>
     </div>
