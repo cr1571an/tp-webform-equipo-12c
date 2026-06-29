@@ -19,7 +19,7 @@ namespace AppGestionNegocio.Negocio
 
         public AccesoDatos()
         {
-            conexion = new SqlConnection("server=.\\SQLEXPRESS; database=COMERCIO_DB; integrated security=true");
+            conexion = new SqlConnection("server=.\\SQLEXPRESS; database=COMERCIO_BBDD; integrated security=true");
             comando = new SqlCommand();
         }
 

@@ -17,7 +17,7 @@ namespace AppGestionNegocio.Negocio
 
             try
             {
-                string consulta = "SELECT u.IdUsuario, u.IdEmpleado, u.IdRol, u.NombreUsuario, u.Activo AS UsuarioActivo, u.PasswordHash, e.IdEmpleado AS EmpIdEmpleado, e.Nombre, e.Apellido, e.Telefono, e.Email, e.Dni, e.FechaIngreso, e.Activo AS EmpleadoActivo, r.IdRol AS RolIdRol, r.NombreRol, r.Descripcion, r.Activo AS RolActivo FROM COMERCIO_DB.dbo.Usuarios u INNER JOIN COMERCIO_DB.dbo.Empleados e ON u.IdEmpleado = e.IdEmpleado INNER JOIN COMERCIO_DB.dbo.Roles r ON u.IdRol = r.IdRol WHERE u.Activo =1";
+                string consulta = "SELECT u.IdUsuario, u.IdEmpleado, u.IdRol, u.NombreUsuario, u.Activo AS UsuarioActivo, u.PasswordHash, e.IdEmpleado AS EmpIdEmpleado, e.Nombre, e.Apellido, e.Telefono, e.Email, e.Dni, e.FechaIngreso, e.Activo AS EmpleadoActivo, r.IdRol AS RolIdRol, r.NombreRol, r.Descripcion, r.Activo AS RolActivo FROM Usuarios u INNER JOIN Empleados e ON u.IdEmpleado = e.IdEmpleado INNER JOIN Roles r ON u.IdRol = r.IdRol WHERE u.Activo =1";
                 
                 if (id.HasValue)
                 {

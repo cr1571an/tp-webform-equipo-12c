@@ -184,6 +184,56 @@ namespace AppGestionNegocio.Negocio
             }
         }
 
+        public List<ArticuloProveedorDto> listarPorProveedor(int idProveedor)
+        {
+            List<ArticuloProveedorDto> lista = new List<ArticuloProveedorDto>();
+            AccesoDatos accesoDatos = new AccesoDatos();
+
+            try
+            {
+                string consulta = @"
+            SELECT
+                a.IdArticulo,
+                a.IdAlicuotaIva,
+                a.Nombre,
+                a.PrecioUnitario,
+                a.Stock
+            FROM ArticulosProveedor ap
+            INNER JOIN Articulos a ON a.IdArticulo = ap.IdArticulo
+            WHERE ap.IdProveedor = @IdProveedor
+              AND ap.Activo = 1";
+
+                accesoDatos.setearConsulta(consulta);
+                accesoDatos.setearParametro("@IdProveedor", idProveedor);
+                accesoDatos.ejecutarLectura();
+
+                SqlDataReader lector = accesoDatos.Lector;
+
+                while (lector.Read())
+                {
+                    ArticuloProveedorDto dto = new ArticuloProveedorDto();
+
+                    dto.IdArticulo = (int)lector["IdArticulo"];
+                    dto.IdAlicuotaIva = (int)lector["IdAlicuotaIva"];
+                    dto.Nombre = lector["Nombre"].ToString();
+                    dto.PrecioUnitario = (decimal)lector["PrecioUnitario"];
+                    dto.Stock = Convert.ToInt32(lector["Stock"]);
+
+                    lista.Add(dto);
+                }
+
+                return lista;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                accesoDatos.cerrarConexion();
+            }
+        }
+
         public List<Articulo> listarOrdenado(string criterio)
         {
             List<Articulo> lista = new List<Articulo>();
@@ -194,7 +244,7 @@ namespace AppGestionNegocio.Negocio
                 switch (criterio)
                 {
                     case "StockMayorMenor":
-                        consulta +=" ORDER BY A.Stock DESC";
+                        consulta += " ORDER BY A.Stock DESC";
                         break;
                     case "StockMenorMayor":
                         consulta += " ORDER BY A.Stock ASC";
