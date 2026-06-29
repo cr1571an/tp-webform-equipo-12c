@@ -71,8 +71,7 @@
             <h1 class="page-title">Registrar compra</h1>
         </div>
 
-        <a href="Compras.aspx" class="btn btn-outline-secondary">
-            Volver al listado
+        <a href="Compras.aspx" class="btn btn-outline-secondary">Volver al listado
         </a>
     </div>
 
@@ -80,18 +79,23 @@
         <h5 class="form-section-title">Datos de la compra</h5>
 
         <div class="row">
+
             <div class="col-md-3 mb-3">
                 <label>Proveedor</label>
-                <select class="form-control">
-                    <option>Seleccione un proveedor</option>
-                </select>
+                <asp:DropDownList
+                    ID="ddlProveedor"
+                    runat="server"
+                    CssClass="form-control" OnSelectedIndexChanged="ddlProveedor_SelectedIndexChanged" AutoPostBack="True">
+                </asp:DropDownList>
             </div>
 
             <div class="col-md-3 mb-3">
-                <label>Medio de pago</label>
-                <select class="form-control">
-                    <option>Seleccione un medio de pago</option>
-                </select>
+                <label>Medio de Pago</label>
+                <asp:DropDownList
+                    ID="ddlMedio"
+                    runat="server"
+                    CssClass="form-control">
+                </asp:DropDownList>
             </div>
 
             <div class="col-md-3 mb-3">
@@ -109,47 +113,70 @@
             <h6 class="subsection-title">Detalle de compra</h6>
 
             <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label>Artículo</label>
-                    <select class="form-control">
-                        <option>Seleccione un artículo</option>
-                    </select>
+                <div class="col-md-2 mb-3">
+                    <asp:DropDownList
+                        ID="ddlArticulo"
+                        runat="server"
+                        CssClass="form-control"
+                        AutoPostBack="true"
+                        OnSelectedIndexChanged="ddlArticulo_SelectedIndexChanged">
+                    </asp:DropDownList>
+
                 </div>
 
-                <div class="col-md-2 mb-3">
-                    <label>Cantidad</label>
-                    <input type="number" class="form-control" placeholder="0" />
-                </div>
+                <asp:TextBox
+                    ID="txtCantidad"
+                    runat="server"
+                    TextMode="Number"
+                    CssClass="form-control"
+                    onkeyup="calcularSubtotal()">
+                </asp:TextBox>
 
-                <div class="col-md-2 mb-3">
-                    <label>Precio unitario</label>
-                    <input type="text" class="form-control" placeholder="$ 0,00" />
-                </div>
+                <asp:TextBox
+                    ID="txtPrecioUnitario"
+                    runat="server"
+                    CssClass="form-control"
+                    ReadOnly="true">
+                </asp:TextBox>
 
-                <div class="col-md-2 mb-3">
-                    <label>Subtotal</label>
-                    <input type="text" class="form-control" placeholder="$ 0,00" />
-                </div>
+                <asp:TextBox
+                    ID="txtSubtotal"
+                    runat="server"
+                    CssClass="form-control"
+                    ReadOnly="true">
+                </asp:TextBox>
+
+                <asp:Label
+                    ID="lblMensaje"
+                    runat="server"
+                    Visible="false">
+                </asp:Label>
 
                 <div class="col-md-2 mb-3 d-flex align-items-end">
-                    <button type="button" class="btn btn-outline-primary w-100">
-                        Agregar
-                    </button>
+                    <asp:Button
+                        ID="btnAgregar"
+                        runat="server"
+                        Text="Agregar"
+                        CssClass="btn btn-outline-primary w-100"
+                        OnClick="btnAgregar_Click" />
                 </div>
             </div>
 
             <div class="table-responsive mt-2">
-                <table class="table table-sm table-striped table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>Artículo</th>
-                            <th>Cantidad</th>
-                            <th>Precio unitario</th>
-                            <th>Subtotal</th>
-                            <th class="text-center">Acción</th>
-                        </tr>
-                    </thead>
-                </table>
+                <asp:GridView
+                    ID="gvDetalle"
+                    runat="server"
+                    AutoGenerateColumns="false"
+                    CssClass="table table-sm table-striped table-hover mb-0">
+
+                    <Columns>
+                        <asp:BoundField DataField="NombreArticulo" HeaderText="Artículo" />
+                        <asp:BoundField DataField="Cantidad" HeaderText="Cantidad" />
+                        <asp:BoundField DataField="PrecioUnitario" HeaderText="Precio unitario" />
+                        <asp:BoundField DataField="Subtotal" HeaderText="Subtotal" />
+                    </Columns>
+
+                </asp:GridView>
             </div>
         </div>
 
@@ -168,8 +195,7 @@
         </div>
 
         <div class="form-actions">
-            <a href="Compras.aspx" class="btn btn-outline-secondary">
-                Cancelar
+            <a href="Compras.aspx" class="btn btn-outline-secondary">Cancelar
             </a>
 
             <button type="button" class="btn btn-primary">
@@ -177,5 +203,23 @@
             </button>
         </div>
     </div>
+
+
+    <script>
+        function calcularSubtotal() {
+
+            let cantidad =
+                parseFloat(document.getElementById('<%= txtCantidad.ClientID %>').value) || 0;
+
+            let precio =
+                parseFloat(document.getElementById('<%= txtPrecioUnitario.ClientID %>').value) || 0;
+
+            let subtotal = cantidad * precio;
+
+            document.getElementById('<%= txtSubtotal.ClientID %>').value =
+                subtotal.toFixed(2);
+        }
+    </script>
+
 
 </asp:Content>
