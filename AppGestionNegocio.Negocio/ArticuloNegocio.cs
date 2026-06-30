@@ -2,50 +2,62 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 
 namespace AppGestionNegocio.Negocio
 {
     public class ArticuloNegocio
     {
         private const string CONSULTA = "SELECT A.IdArticulo, A.IdCategoria, A.IdMarca, A.IdAlicuotaIva, Ali.AlicuotaIva, A.Nombre AS NombreArticulo, C.Nombre AS Categoria, M.Nombre AS Marca, A.Descripcion, A.PrecioUnitario, A.Stock, A.UrlImagen, A.Activo FROM Articulos A JOIN Categorias C ON A.IdCategoria = C.IdCategoria JOIN AlicuotaIva Ali ON A.IdAlicuotaIva = Ali.IdAlicuotaIva JOIN Marcas M ON A.IdMarca = M.IdMarca WHERE A.Activo = 1";
+
         public List<Articulo> listar(string id = "")
         {
             List<Articulo> lista = new List<Articulo>();
             AccesoDatos accesoDatos = new AccesoDatos();
+
             try
             {
                 string consulta = CONSULTA;
-                if (id != "") consulta += " AND A.IdArticulo = " + id;
+
+                if (id != "")
+                {
+                    consulta += " AND A.IdArticulo = @IdArticulo";
+                }
 
                 accesoDatos.setearConsulta(consulta);
+
+                if (id != "")
+                {
+                    accesoDatos.setearParametro("@IdArticulo", int.Parse(id));
+                }
+
                 accesoDatos.ejecutarLectura();
+
                 SqlDataReader lector = accesoDatos.Lector;
 
                 while (lector.Read())
                 {
                     lista.Add(MapearArticulo(lector));
                 }
+
                 return lista;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
             finally
             {
                 accesoDatos.cerrarConexion();
             }
         }
-        public void agregar(Articulo nuevo)
+
+        public int agregar(Articulo nuevo)
         {
             AccesoDatos datos = new AccesoDatos();
+
             try
             {
-                datos.setearConsulta("INSERT INTO Articulos (IdCategoria, IdMarca, IdAlicuotaIva, Nombre, Descripcion, PrecioUnitario, Stock, UrlImagen, Activo) VALUES (@IdCategoria, @IdMarca, @IdAlicuotaIva, @Nombre, @Descripcion, @PrecioUnitario, @Stock, @UrlImagen, 1)");
+                datos.setearConsulta("INSERT INTO Articulos (IdCategoria, IdMarca, IdAlicuotaIva, Nombre, Descripcion, PrecioUnitario, Stock, UrlImagen, Activo) VALUES (@IdCategoria, @IdMarca, @IdAlicuotaIva, @Nombre, @Descripcion, @PrecioUnitario, @Stock, @UrlImagen, 1); SELECT CAST(SCOPE_IDENTITY() AS INT) AS IdArticulo;");
 
                 datos.setearParametro("@IdCategoria", nuevo.Categoria.IdCategoria);
                 datos.setearParametro("@IdMarca", nuevo.Marca.IdMarca);
@@ -55,20 +67,30 @@ namespace AppGestionNegocio.Negocio
                 datos.setearParametro("@PrecioUnitario", nuevo.Precio);
                 datos.setearParametro("@Stock", nuevo.Stock);
                 datos.setearParametro("@UrlImagen", (object)nuevo.UrlImagen ?? DBNull.Value);
-                datos.ejecutarAccion();
+
+                datos.ejecutarLectura();
+
+                if (datos.Lector.Read())
+                {
+                    return (int)datos.Lector["IdArticulo"];
+                }
+
+                return 0;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
             finally
             {
                 datos.cerrarConexion();
             }
         }
+
         public void modificar(Articulo modificado)
         {
             AccesoDatos datos = new AccesoDatos();
+
             try
             {
                 datos.setearConsulta("UPDATE Articulos SET IdCategoria = @IdCategoria, IdMarca = @IdMarca, IdAlicuotaIva = @IdAlicuotaIva, Nombre = @Nombre, Descripcion = @Descripcion, PrecioUnitario = @PrecioUnitario, Stock = @Stock, UrlImagen = @UrlImagen WHERE IdArticulo = @IdArticulo");
@@ -82,36 +104,39 @@ namespace AppGestionNegocio.Negocio
                 datos.setearParametro("@Stock", modificado.Stock);
                 datos.setearParametro("@UrlImagen", (object)modificado.UrlImagen ?? DBNull.Value);
                 datos.setearParametro("@IdArticulo", modificado.IdArticulo);
+
                 datos.ejecutarAccion();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
             finally
             {
                 datos.cerrarConexion();
             }
         }
+
         public void eliminarLogico(int IdArticulo)
         {
             AccesoDatos datos = new AccesoDatos();
+
             try
             {
                 datos.setearConsulta("UPDATE Articulos SET Activo = 0 WHERE IdArticulo = @IdArticulo");
                 datos.setearParametro("@IdArticulo", IdArticulo);
-
                 datos.ejecutarAccion();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
             finally
             {
                 datos.cerrarConexion();
             }
         }
+
         private Articulo MapearArticulo(SqlDataReader lector)
         {
             Articulo aux = new Articulo();
@@ -119,12 +144,18 @@ namespace AppGestionNegocio.Negocio
             aux.IdArticulo = (int)lector["IdArticulo"];
             aux.Nombre = lector["NombreArticulo"].ToString();
 
-            if (!(lector["Descripcion"] is DBNull)) aux.Descripcion = (string)lector["Descripcion"];
+            if (!(lector["Descripcion"] is DBNull))
+            {
+                aux.Descripcion = (string)lector["Descripcion"];
+            }
 
             aux.Precio = (decimal)lector["PrecioUnitario"];
             aux.Stock = Convert.ToInt32(lector["Stock"]);
 
-            if (!(lector["UrlImagen"] is DBNull)) aux.UrlImagen = (string)lector["UrlImagen"];
+            if (!(lector["UrlImagen"] is DBNull))
+            {
+                aux.UrlImagen = (string)lector["UrlImagen"];
+            }
 
             aux.Activo = (bool)lector["Activo"];
 
@@ -139,6 +170,9 @@ namespace AppGestionNegocio.Negocio
             aux.AlicuotaIva = new AlicuotaIva();
             aux.AlicuotaIva.IdAlicuotaIva = (int)lector["IdAlicuotaIva"];
             aux.AlicuotaIva.Alicuota = (decimal)lector["AlicuotaIva"];
+
+            aux.Proveedores = new List<Proveedor>();
+
             return aux;
         }
 
@@ -146,6 +180,7 @@ namespace AppGestionNegocio.Negocio
         {
             List<Articulo> lista = new List<Articulo>();
             AccesoDatos datos = new AccesoDatos();
+
             try
             {
                 string consulta = CONSULTA;
@@ -165,6 +200,7 @@ namespace AppGestionNegocio.Negocio
                 }
 
                 datos.ejecutarLectura();
+
                 SqlDataReader lector = datos.Lector;
 
                 while (lector.Read())
@@ -174,9 +210,9 @@ namespace AppGestionNegocio.Negocio
 
                 return lista;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -191,17 +227,7 @@ namespace AppGestionNegocio.Negocio
 
             try
             {
-                string consulta = @"
-            SELECT
-                a.IdArticulo,
-                a.IdAlicuotaIva,
-                a.Nombre,
-                a.PrecioUnitario,
-                a.Stock
-            FROM ArticulosProveedor ap
-            INNER JOIN Articulos a ON a.IdArticulo = ap.IdArticulo
-            WHERE ap.IdProveedor = @IdProveedor
-              AND ap.Activo = 1";
+                string consulta = "SELECT a.IdArticulo, a.IdAlicuotaIva, a.Nombre, a.PrecioUnitario, a.Stock FROM ArticulosProveedor ap INNER JOIN Articulos a ON a.IdArticulo = ap.IdArticulo WHERE ap.IdProveedor = @IdProveedor AND ap.Activo = 1";
 
                 accesoDatos.setearConsulta(consulta);
                 accesoDatos.setearParametro("@IdProveedor", idProveedor);
@@ -224,9 +250,9 @@ namespace AppGestionNegocio.Negocio
 
                 return lista;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -238,38 +264,49 @@ namespace AppGestionNegocio.Negocio
         {
             List<Articulo> lista = new List<Articulo>();
             AccesoDatos accesoDatos = new AccesoDatos();
+
             try
             {
                 string consulta = CONSULTA;
+
                 switch (criterio)
                 {
                     case "StockMayorMenor":
                         consulta += " ORDER BY A.Stock DESC";
                         break;
+
                     case "StockMenorMayor":
                         consulta += " ORDER BY A.Stock ASC";
                         break;
+
                     case "PrecioMayorMenor":
                         consulta += " ORDER BY A.PrecioUnitario DESC";
                         break;
+
                     case "PrecioMenorMayor":
                         consulta += " ORDER BY A.PrecioUnitario ASC";
+                        break;
+
+                    default:
+                        consulta += " ORDER BY A.Nombre ASC";
                         break;
                 }
 
                 accesoDatos.setearConsulta(consulta);
                 accesoDatos.ejecutarLectura();
+
                 SqlDataReader lector = accesoDatos.Lector;
 
                 while (lector.Read())
                 {
                     lista.Add(MapearArticulo(lector));
                 }
+
                 return lista;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -277,5 +314,94 @@ namespace AppGestionNegocio.Negocio
             }
         }
 
+        public List<int> listarIdsProveedoresPorArticulo(int idArticulo)
+        {
+            List<int> lista = new List<int>();
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                datos.setearConsulta("SELECT IdProveedor FROM ArticulosProveedor WHERE IdArticulo = @IdArticulo AND Activo = 1");
+
+                datos.setearParametro("@IdArticulo", idArticulo);
+                datos.ejecutarLectura();
+
+                SqlDataReader lector = datos.Lector;
+
+                while (lector.Read())
+                {
+                    lista.Add((int)lector["IdProveedor"]);
+                }
+
+                return lista;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        public void guardarProveedoresArticulo(int idArticulo, List<Proveedor> proveedores)
+        {
+            desactivarProveedoresArticulo(idArticulo);
+
+            if (proveedores == null)
+            {
+                return;
+            }
+
+            foreach (Proveedor proveedor in proveedores)
+            {
+                guardarRelacionProveedorArticulo(idArticulo, proveedor.IdProveedor);
+            }
+        }
+
+        private void desactivarProveedoresArticulo(int idArticulo)
+        {
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                datos.setearConsulta("UPDATE ArticulosProveedor SET Activo = 0 WHERE IdArticulo = @IdArticulo");
+
+                datos.setearParametro("@IdArticulo", idArticulo);
+                datos.ejecutarAccion();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        private void guardarRelacionProveedorArticulo(int idArticulo, int idProveedor)
+        {
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                datos.setearConsulta("IF EXISTS (SELECT 1 FROM ArticulosProveedor WHERE IdArticulo = @IdArticulo AND IdProveedor = @IdProveedor) BEGIN UPDATE ArticulosProveedor SET Activo = 1 WHERE IdArticulo = @IdArticulo AND IdProveedor = @IdProveedor END ELSE BEGIN INSERT INTO ArticulosProveedor (IdArticulo, IdProveedor, Activo) VALUES (@IdArticulo, @IdProveedor, 1) END");
+
+                datos.setearParametro("@IdArticulo", idArticulo);
+                datos.setearParametro("@IdProveedor", idProveedor);
+
+                datos.ejecutarAccion();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
     }
 }

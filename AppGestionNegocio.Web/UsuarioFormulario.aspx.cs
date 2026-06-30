@@ -21,9 +21,9 @@ namespace AppGestionNegocio.Web
                 }
 
                 int? id = int.TryParse(Request.QueryString["id"], out int aux) ? aux : (int?)null;
+
                 if (id.HasValue && !IsPostBack)
                 {
-                    btnEliminar.Visible = true;
                     UsuarioNegocio negocio = new UsuarioNegocio();
                     Usuario seleccionado = (negocio.listar(id))[0];
 
@@ -44,7 +44,6 @@ namespace AppGestionNegocio.Web
 
         private void CargarDesplegables()
         {
-
             EmpleadoNegocio empleadoNegocio = new EmpleadoNegocio();
             ddlEmpleado.DataSource = empleadoNegocio.listar();
             ddlEmpleado.DataValueField = "IdEmpleado";
@@ -104,8 +103,6 @@ namespace AppGestionNegocio.Web
                 return false;
             }
 
-
-
             return true;
         }
 
@@ -114,42 +111,27 @@ namespace AppGestionNegocio.Web
             Response.Redirect("Usuarios.aspx");
         }
 
-        protected void btnEliminar_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                UsuarioNegocio negocio = new UsuarioNegocio();
-                Usuario seleccionado = (Usuario)Session["usuarioSeleccionado"];
-
-                if (seleccionado != null)
-                {
-                    negocio.eliminar(seleccionado.IdUsuario);
-                    Response.Redirect("Usuarios.aspx", false);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
         protected void btnGuardar_Click(object sender, EventArgs e)
         {
             try
             {
-                if (ValidarCampo() == false) return;
+                if (ValidarCampo() == false)
+                {
+                    return;
+                }
 
                 UsuarioNegocio negocio = new UsuarioNegocio();
                 int? id = int.TryParse(Request.QueryString["id"], out int aux) ? aux : (int?)null;
-                if (!id.HasValue)
 
+                if (!id.HasValue)
                 {
                     List<Usuario> listaUsuarios = negocio.listar();
+
                     foreach (Usuario usr in listaUsuarios)
                     {
                         if (usr.Nombre.Trim().ToUpper() == txtNombre.Text.Trim().ToUpper())
                         {
-                            lblMensajeError.Text = "Error: Ya existe un ususario registrado con ese nombre.";
+                            lblMensajeError.Text = "Error: Ya existe un usuario registrado con ese nombre.";
                             lblMensajeError.Visible = true;
                             return;
                         }
@@ -159,13 +141,15 @@ namespace AppGestionNegocio.Web
                 Usuario nuevo = new Usuario();
 
                 nuevo.Nombre = txtNombre.Text.Trim();
+
                 nuevo.Empleado = new Empleado();
                 nuevo.Empleado.IdEmpleado = int.Parse(ddlEmpleado.SelectedValue);
+
                 nuevo.Rol = new Rol();
                 nuevo.Rol.IdRol = int.Parse(ddlRol.SelectedValue);
+
                 nuevo.Activo = bool.Parse(ddlEstado.SelectedValue);
                 nuevo.PasswordHash = txtConfirmPassword.Text.ToString();
-
 
                 if (id.HasValue)
                 {
@@ -176,6 +160,7 @@ namespace AppGestionNegocio.Web
                 {
                     negocio.agregar(nuevo);
                 }
+
                 Response.Redirect("Usuarios.aspx", false);
             }
             catch (Exception ex)

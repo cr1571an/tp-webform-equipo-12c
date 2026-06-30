@@ -76,6 +76,16 @@
             padding: 28px;
             background-color: #ffffff;
         }
+
+        .grid-action-btn {
+            padding: 4px 10px;
+            font-size: 13px;
+            border-radius: 6px;
+        }
+
+        .modal-top .modal-dialog {
+            margin-top: 40px;
+        }
     </style>
 </asp:Content>
 
@@ -87,12 +97,13 @@
         </div>
     
         <div class="page-actions">
-          <asp:DropDownList ID="ddlFiltro" runat="server" CssClass="form-control" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltro_SelectedIndexChanged">
+            <asp:DropDownList ID="ddlFiltro" runat="server" CssClass="form-control" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltro_SelectedIndexChanged">
                 <asp:ListItem Text="Mayor a menor Stock" Value="StockMayorMenor"></asp:ListItem>
                 <asp:ListItem Text="Menor a mayor Stock" Value="StockMenorMayor"></asp:ListItem>
                 <asp:ListItem Text="Mayor a menor Precio" Value="PrecioMayorMenor"></asp:ListItem>
                 <asp:ListItem Text="Menor a mayor Precio" Value="PrecioMenorMayor"></asp:ListItem>
             </asp:DropDownList>
+
             <asp:Button ID="btnNuevoArticulo" runat="server" Text="Nuevo artículo" CssClass="btn btn-primary" OnClick="btnNuevoArticulo_Click"/>
         </div>
     </div>
@@ -100,7 +111,7 @@
     <div class="dashboard-card">
     
         <div class="table-responsive">
-            <asp:GridView ID="dgvArticulos" runat="server" CssClass="table table-striped table-hover mb-0" AutoGenerateColumns="false" GridLines="None" AllowPaging="True" PageSize="10" PagerStyle-CssClass="grid-pager" OnPageIndexChanging="dgvArticulos_PageIndexChanging">
+            <asp:GridView ID="dgvArticulos" runat="server" CssClass="table table-striped table-hover mb-0" AutoGenerateColumns="false" GridLines="None" AllowPaging="True" PageSize="10" PagerStyle-CssClass="grid-pager" OnPageIndexChanging="dgvArticulos_PageIndexChanging" OnRowCommand="dgvArticulos_RowCommand">
                 <Columns>
                     <asp:TemplateField HeaderText="Artículo">
                         <ItemTemplate>
@@ -109,21 +120,25 @@
                             </div>
                         </ItemTemplate>
                     </asp:TemplateField>
+
                     <asp:TemplateField HeaderText="Categoría">
                         <ItemTemplate>
                             <span class="badge-category"><%# Eval("Categoria.Nombre") %></span>
                         </ItemTemplate>
                     </asp:TemplateField>
+
                     <asp:TemplateField HeaderText="Marca">
                         <ItemTemplate>
                             <%# Eval("Marca.Nombre") %>
                         </ItemTemplate>
                     </asp:TemplateField>
+
                     <asp:TemplateField HeaderText="Precio">
                         <ItemTemplate>
                             <span class="price-text"><%# Eval("Precio", "{0:C}") %></span>
                         </ItemTemplate>
                     </asp:TemplateField>
+
                     <asp:TemplateField HeaderText="Stock">
                         <ItemTemplate>
                             <span class='badge-stock <%# Convert.ToInt32(Eval("Stock")) <= 5 ? "stock-low" : "stock-ok" %>'>
@@ -131,15 +146,61 @@
                             </span>
                         </ItemTemplate>
                     </asp:TemplateField>
+
                     <asp:TemplateField HeaderText="Acciones">
                         <ItemTemplate>
-                            <a href='ArticuloFormulario.aspx?id=<%# Eval("IdArticulo") %>' class="btn btn-sm btn-outline-primary grid-action-btn">Editar</a>
+                            <div class="table-actions">
+                                <a href='ArticuloFormulario.aspx?id=<%# Eval("IdArticulo") %>' class="btn btn-sm btn-outline-primary grid-action-btn">Modificar</a>
+
+                                <asp:Button
+                                    ID="btnEliminar"
+                                    runat="server"
+                                    Text="Eliminar"
+                                    CssClass="btn btn-sm btn-outline-danger grid-action-btn"
+                                    CommandName="AbrirModalEliminar"
+                                    CommandArgument='<%# Eval("IdArticulo") %>' />
+                            </div>
                         </ItemTemplate>
                     </asp:TemplateField>
                 </Columns>
             </asp:GridView>
         </div>
 
+    </div>
+
+    <div class="modal fade modal-top" id="modalEliminarArticulo" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header justify-content-center">
+                    <h5 class="modal-title">Eliminar artículo</h5>
+                </div>
+
+                <div class="modal-body text-center">
+                    <asp:HiddenField ID="hfIdArticuloEliminar" runat="server" />
+
+                    <p class="mb-2">
+                        ¿Seguro que querés eliminar este artículo?
+                    </p>
+                </div>
+
+                <div class="modal-footer justify-content-center">
+
+                    <asp:Button
+                        ID="btnConfirmarEliminar"
+                        runat="server"
+                        Text="Eliminar"
+                        CssClass="btn btn-danger"
+                        OnClick="btnConfirmarEliminar_Click" />
+
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
     </div>
 
 </asp:Content>

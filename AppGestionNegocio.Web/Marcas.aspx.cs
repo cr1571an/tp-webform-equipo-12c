@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Web.UI;
 using System.Web.UI.WebControls;
 using AppGestionNegocio.Dominio;
 using AppGestionNegocio.Negocio;
@@ -14,6 +15,7 @@ namespace AppGestionNegocio.Web
                 cargarMarcas();
             }
         }
+
         private void cargarMarcas()
         {
             MarcaNegocio negocio = new MarcaNegocio();
@@ -23,6 +25,7 @@ namespace AppGestionNegocio.Web
             dgvMarcas.DataSource = negocio.filtrar(nombre);
             dgvMarcas.DataBind();
         }
+
         private void mostrarMensaje(string mensaje)
         {
             lblMensaje.Text = mensaje;
@@ -31,6 +34,7 @@ namespace AppGestionNegocio.Web
 
             ClientScript.RegisterStartupScript(this.GetType(), "ocultarMensaje", script, true);
         }
+
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
             try
@@ -60,25 +64,30 @@ namespace AppGestionNegocio.Web
                 mostrarMensaje("Error al agregar la marca: " + ex.Message);
             }
         }
+
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             cargarMarcas();
         }
+
         protected void btnLimpiarFiltro_Click(object sender, EventArgs e)
         {
             txtFiltroNombre.Text = "";
             cargarMarcas();
         }
+
         protected void dgvMarcas_RowEditing(object sender, GridViewEditEventArgs e)
         {
             dgvMarcas.EditIndex = e.NewEditIndex;
             cargarMarcas();
         }
+
         protected void dgvMarcas_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
         {
             dgvMarcas.EditIndex = -1;
             cargarMarcas();
         }
+
         protected void dgvMarcas_RowUpdating(object sender, GridViewUpdateEventArgs e)
         {
             try
@@ -113,22 +122,57 @@ namespace AppGestionNegocio.Web
                 mostrarMensaje("Error al modificar la marca: " + ex.Message);
             }
         }
+
         protected void dgvMarcas_RowCommand(object sender, GridViewCommandEventArgs e)
         {
             try
             {
                 lblMensaje.Text = "";
 
-                if (e.CommandName == "EliminarMarca")
+                if (e.CommandName == "AbrirModalEliminar")
                 {
                     int idMarca = int.Parse(e.CommandArgument.ToString());
 
-                    MarcaNegocio negocio = new MarcaNegocio();
-                    negocio.eliminar(idMarca);
+                    hfIdMarcaEliminar.Value = idMarca.ToString();
 
-                    dgvMarcas.EditIndex = -1;
-                    cargarMarcas();
+                    ScriptManager.RegisterStartupScript(
+                        this,
+                        this.GetType(),
+                        "abrirModalEliminarMarca",
+                        "$('#modalEliminarMarca').modal('show');",
+                        true
+                    );
                 }
+            }
+            catch (Exception ex)
+            {
+                mostrarMensaje("Error al seleccionar la marca: " + ex.Message);
+            }
+        }
+
+        protected void btnConfirmarEliminar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                lblMensaje.Text = "";
+
+                int idMarca;
+
+                if (!int.TryParse(hfIdMarcaEliminar.Value, out idMarca))
+                {
+                    mostrarMensaje("No se pudo identificar la marca a eliminar.");
+                    return;
+                }
+
+                MarcaNegocio negocio = new MarcaNegocio();
+                negocio.eliminar(idMarca);
+
+                hfIdMarcaEliminar.Value = "";
+
+                dgvMarcas.EditIndex = -1;
+                cargarMarcas();
+
+                mostrarMensaje("Marca eliminada correctamente.");
             }
             catch (Exception ex)
             {

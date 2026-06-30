@@ -52,6 +52,10 @@
         .col-actions {
             text-align: center;
         }
+
+        .modal-top .modal-dialog {
+            margin-top: 40px;
+        }
     </style>
 </asp:Content>
 
@@ -90,7 +94,7 @@
         <h5 class="form-section-title">Nuevo medio de pago</h5>
 
         <div class="row">
-            <div class="col-md-5 mb-3">
+            <div class="col-md-4 mb-3">
                 <label>Nombre</label>
 
                 <asp:TextBox
@@ -108,7 +112,7 @@
                 </asp:Label>
             </div>
 
-            <div class="col-md-7 mb-3">
+            <div class="col-md-6 mb-3">
                 <label>Descripción</label>
 
                 <asp:TextBox
@@ -120,12 +124,12 @@
                 </asp:TextBox>
             </div>
 
-            <div class="col-md-12">
+            <div class="col-md-2 mb-3 d-flex align-items-end">
                 <asp:Button
                     ID="btnAgregar"
                     runat="server"
                     Text="Agregar"
-                    CssClass="btn btn-primary"
+                    CssClass="btn btn-primary w-100"
                     OnClick="btnAgregar_Click" />
             </div>
         </div>
@@ -197,9 +201,8 @@
                                     runat="server"
                                     Text="Eliminar"
                                     CssClass="btn btn-sm btn-outline-danger"
-                                    CommandName="EliminarMedioPago"
-                                    CommandArgument='<%# Eval("IdMedioPago") %>'
-                                    OnClientClick="return confirm('¿Seguro que querés eliminar este medio de pago?');" />
+                                    CommandName="AbrirModalEliminar"
+                                    CommandArgument='<%# Eval("IdMedioPago") %>' />
                             </div>
                         </ItemTemplate>
 
@@ -228,6 +231,41 @@
                 </Columns>
 
             </asp:GridView>
+        </div>
+    </div>
+
+    <div class="modal fade modal-top" id="modalEliminarMedioPago" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header justify-content-center">
+                    <h5 class="modal-title">Eliminar medio de pago</h5>
+                </div>
+
+                <div class="modal-body text-center">
+                    <asp:HiddenField ID="hfIdMedioPagoEliminar" runat="server" />
+
+                    <p class="mb-2">
+                        ¿Seguro que querés eliminar este medio de pago?
+                    </p>
+                </div>
+
+                <div class="modal-footer justify-content-center">
+
+                    <asp:Button
+                        ID="btnConfirmarEliminar"
+                        runat="server"
+                        Text="Eliminar"
+                        CssClass="btn btn-danger"
+                        OnClick="btnConfirmarEliminar_Click" />
+
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                </div>
+
+            </div>
         </div>
     </div>
 

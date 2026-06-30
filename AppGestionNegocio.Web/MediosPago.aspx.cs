@@ -18,6 +18,7 @@ namespace AppGestionNegocio.Web
                 cargarMediosPago();
             }
         }
+
         private void cargarMediosPago()
         {
             MedioPagoNegocio negocio = new MedioPagoNegocio();
@@ -27,6 +28,7 @@ namespace AppGestionNegocio.Web
             dgvMediosPago.DataSource = negocio.filtrar(nombre);
             dgvMediosPago.DataBind();
         }
+
         private void mostrarMensaje(string mensaje)
         {
             lblMensaje.Text = mensaje;
@@ -35,6 +37,7 @@ namespace AppGestionNegocio.Web
 
             ClientScript.RegisterStartupScript(this.GetType(), "ocultarMensaje", script, true);
         }
+
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
             try
@@ -66,25 +69,30 @@ namespace AppGestionNegocio.Web
                 mostrarMensaje("Error al agregar el medio de pago: " + ex.Message);
             }
         }
+
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             cargarMediosPago();
         }
+
         protected void btnLimpiarFiltro_Click(object sender, EventArgs e)
         {
             txtFiltroNombre.Text = "";
             cargarMediosPago();
         }
+
         protected void dgvMediosPago_RowEditing(object sender, GridViewEditEventArgs e)
         {
             dgvMediosPago.EditIndex = e.NewEditIndex;
             cargarMediosPago();
         }
+
         protected void dgvMediosPago_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
         {
             dgvMediosPago.EditIndex = -1;
             cargarMediosPago();
         }
+
         protected void dgvMediosPago_RowUpdating(object sender, GridViewUpdateEventArgs e)
         {
             try
@@ -121,22 +129,57 @@ namespace AppGestionNegocio.Web
                 mostrarMensaje("Error al modificar el medio de pago: " + ex.Message);
             }
         }
+
         protected void dgvMediosPago_RowCommand(object sender, GridViewCommandEventArgs e)
         {
             try
             {
                 lblMensaje.Text = "";
 
-                if (e.CommandName == "EliminarMedioPago")
+                if (e.CommandName == "AbrirModalEliminar")
                 {
                     int idMedioPago = int.Parse(e.CommandArgument.ToString());
 
-                    MedioPagoNegocio negocio = new MedioPagoNegocio();
-                    negocio.eliminar(idMedioPago);
+                    hfIdMedioPagoEliminar.Value = idMedioPago.ToString();
 
-                    dgvMediosPago.EditIndex = -1;
-                    cargarMediosPago();
+                    ScriptManager.RegisterStartupScript(
+                        this,
+                        this.GetType(),
+                        "abrirModalEliminarMedioPago",
+                        "$('#modalEliminarMedioPago').modal('show');",
+                        true
+                    );
                 }
+            }
+            catch (Exception ex)
+            {
+                mostrarMensaje("Error al seleccionar el medio de pago: " + ex.Message);
+            }
+        }
+
+        protected void btnConfirmarEliminar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                lblMensaje.Text = "";
+
+                int idMedioPago;
+
+                if (!int.TryParse(hfIdMedioPagoEliminar.Value, out idMedioPago))
+                {
+                    mostrarMensaje("No se pudo identificar el medio de pago a eliminar.");
+                    return;
+                }
+
+                MedioPagoNegocio negocio = new MedioPagoNegocio();
+                negocio.eliminar(idMedioPago);
+
+                hfIdMedioPagoEliminar.Value = "";
+
+                dgvMediosPago.EditIndex = -1;
+                cargarMediosPago();
+
+                mostrarMensaje("Medio de pago eliminado correctamente.");
             }
             catch (Exception ex)
             {

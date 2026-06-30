@@ -57,6 +57,10 @@
             width: 30%;
             text-align: center;
         }
+
+        .modal-top .modal-dialog {
+            margin-top: 40px;
+        }
     </style>
 </asp:Content>
 
@@ -175,9 +179,8 @@
                                     runat="server"
                                     Text="Eliminar"
                                     CssClass="btn btn-sm btn-outline-danger"
-                                    CommandName="EliminarCategoria"
-                                    CommandArgument='<%# Eval("IdCategoria") %>'
-                                    OnClientClick="return confirm('¿Seguro que querés eliminar esta categoría?');" />
+                                    CommandName="AbrirModalEliminar"
+                                    CommandArgument='<%# Eval("IdCategoria") %>' />
                             </div>
                         </ItemTemplate>
 
@@ -206,6 +209,41 @@
                 </Columns>
 
             </asp:GridView>
+        </div>
+    </div>
+
+    <div class="modal fade modal-top" id="modalEliminarCategoria" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header justify-content-center">
+                    <h5 class="modal-title">Eliminar categoría</h5>
+                </div>
+
+                <div class="modal-body text-center">
+                    <asp:HiddenField ID="hfIdCategoriaEliminar" runat="server" />
+
+                    <p class="mb-2">
+                        ¿Seguro que querés eliminar esta categoría?
+                    </p>
+                </div>
+
+                <div class="modal-footer justify-content-center">
+
+                    <asp:Button
+                        ID="btnConfirmarEliminar"
+                        runat="server"
+                        Text="Eliminar"
+                        CssClass="btn btn-danger"
+                        OnClick="btnConfirmarEliminar_Click" />
+
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                </div>
+
+            </div>
         </div>
     </div>
 

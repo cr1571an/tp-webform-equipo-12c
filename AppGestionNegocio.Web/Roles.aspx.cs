@@ -1,9 +1,6 @@
 ﻿using AppGestionNegocio.Dominio;
 using AppGestionNegocio.Negocio;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -69,95 +66,122 @@ namespace AppGestionNegocio.Web
                 mostrarMensaje(lblMensaje, "Error al agregar el rol: " + ex.Message);
             }
         }
+
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             cargarRoles();
         }
+
         protected void btnLimpiarFiltro_Click(object sender, EventArgs e)
         {
             txtFiltroNombre.Text = "";
             cargarRoles();
         }
-        protected void dgvRoles_RowCommand(object sender, GridViewCommandEventArgs e)
+
+        protected void dgvRoles_RowEditing(object sender, GridViewEditEventArgs e)
         {
-            RolNegocio negocio = new RolNegocio();
-            int id = int.Parse(e.CommandArgument.ToString());
-
-            lblMensajeModal.Text = "";
-            if (e.CommandName == "EditarModal")
-            {
-                try
-                {
-
-                    Rol rol = (negocio.listar(id))[0];
-
-                    hfIdRol.Value = rol.IdRol.ToString();
-                    txtNombreModal.Text = rol.Nombre;
-                    txtDescripcionModal.Text = rol.Descripcion;
-
-
-                    ScriptManager.RegisterStartupScript(this, this.GetType(),
-                        "abrirModal",
-                        "$('#modalEditar').modal('show');",
-                        true);
-                }
-                catch (Exception ex)
-                {
-                    mostrarMensaje(lblMensajeModal, "Error al eliminar el rol: " + ex.Message);
-                }
-            }
-            else if (e.CommandName == "EliminarRol")
-            {
-                try
-                {                    
-                    negocio.eliminar(id);
-                    cargarRoles();
-                }
-                catch (Exception ex)
-                {
-                    mostrarMensaje(lblMensajeModal, "Error al actulizar el rol: " + ex.Message);
-                }
-            }
-
+            dgvRoles.EditIndex = e.NewEditIndex;
+            cargarRoles();
         }
 
-        protected void btnGuardarModal_Click(object sender, EventArgs e)
+        protected void dgvRoles_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
+        {
+            dgvRoles.EditIndex = -1;
+            cargarRoles();
+        }
+
+        protected void dgvRoles_RowUpdating(object sender, GridViewUpdateEventArgs e)
         {
             try
             {
-                lblMensajeModal.Text = "";
-                if (string.IsNullOrWhiteSpace(txtNombreModal.Text) ||
-                    string.IsNullOrWhiteSpace(txtDescripcionModal.Text))
-                {
-                    mostrarMensaje(lblMensajeModal, "Nombre y descripción son obligatorios");
+                lblMensaje.Text = "";
 
-                    ScriptManager.RegisterStartupScript(this, this.GetType(),
-                        "abrirModal",
-                        "$('#modalEditar').modal('show');",
-                        true);
+                int idRol = (int)dgvRoles.DataKeys[e.RowIndex].Value;
+
+                GridViewRow fila = dgvRoles.Rows[e.RowIndex];
+
+                TextBox txtNombreEdit = (TextBox)fila.FindControl("txtNombreEdit");
+                TextBox txtDescripcionEdit = (TextBox)fila.FindControl("txtDescripcionEdit");
+
+                if (string.IsNullOrWhiteSpace(txtNombreEdit.Text) || string.IsNullOrWhiteSpace(txtDescripcionEdit.Text))
+                {
+                    mostrarMensaje(lblMensaje, "Debe ingresar el nombre del rol y descripción.");
                     return;
                 }
 
                 Rol rol = new Rol();
-                rol.IdRol = int.Parse(hfIdRol.Value);
-                rol.Nombre = txtNombreModal.Text.Trim();
-                rol.Descripcion = txtDescripcionModal.Text;
+                rol.IdRol = idRol;
+                rol.Nombre = txtNombreEdit.Text.Trim();
+                rol.Descripcion = txtDescripcionEdit.Text.Trim();
                 rol.Activo = true;
 
                 RolNegocio negocio = new RolNegocio();
                 negocio.modificar(rol);
 
-                txtNombreModal.Text = "";
-                txtDescripcionModal.Text = "";
-                txtFiltroNombre.Text = "";
-
+                dgvRoles.EditIndex = -1;
                 cargarRoles();
             }
             catch (Exception ex)
             {
-                mostrarMensaje(lblMensajeModal, "Error al agregar el proveedor: " + ex.Message);
+                mostrarMensaje(lblMensaje, "Error al modificar el rol: " + ex.Message);
             }
+        }
 
+        protected void dgvRoles_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            try
+            {
+                lblMensaje.Text = "";
+
+                if (e.CommandName == "AbrirModalEliminar")
+                {
+                    int idRol = int.Parse(e.CommandArgument.ToString());
+
+                    hfIdRolEliminar.Value = idRol.ToString();
+
+                    ScriptManager.RegisterStartupScript(
+                        this,
+                        this.GetType(),
+                        "abrirModalEliminarRol",
+                        "$('#modalEliminarRol').modal('show');",
+                        true
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                mostrarMensaje(lblMensaje, "Error al seleccionar el rol: " + ex.Message);
+            }
+        }
+
+        protected void btnConfirmarEliminar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                lblMensaje.Text = "";
+
+                int idRol;
+
+                if (!int.TryParse(hfIdRolEliminar.Value, out idRol))
+                {
+                    mostrarMensaje(lblMensaje, "No se pudo identificar el rol a eliminar.");
+                    return;
+                }
+
+                RolNegocio negocio = new RolNegocio();
+                negocio.eliminar(idRol);
+
+                hfIdRolEliminar.Value = "";
+
+                dgvRoles.EditIndex = -1;
+                cargarRoles();
+
+                mostrarMensaje(lblMensaje, "Rol eliminado correctamente.");
+            }
+            catch (Exception ex)
+            {
+                mostrarMensaje(lblMensaje, "Error al eliminar el rol: " + ex.Message);
+            }
         }
     }
 }

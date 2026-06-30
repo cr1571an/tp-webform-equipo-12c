@@ -7,12 +7,14 @@
             font-weight: 700;
             margin-bottom: 16px;
         }
+
         .form-label-custom {
             font-weight: 600;
             font-size: 14px;
             color: #374151;
             margin-bottom: 6px;
         }
+
         .form-actions {
             display: flex;
             justify-content: flex-end;
@@ -21,6 +23,7 @@
             padding-top: 18px;
             margin-top: 10px;
         }
+
         .preview-box {
             background-color: #f9fafb;
             border: 1px solid #e5e7eb;
@@ -33,6 +36,7 @@
             justify-content: center;
             align-items: center;
         }
+
         .preview-img {
             max-width: 100%;
             max-height: 150px;
@@ -41,30 +45,78 @@
             background-color: white;
             padding: 8px;
         }
+
         select.form-control {
             height: 38px;
             padding: 6px 12px;
             border: 1px solid #ced4da;
             border-radius: 6px;
         }
+
         .dashboard-card {
-        background: #ffffff;
-        padding: 24px;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-    }
+            background: #ffffff;
+            padding: 24px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+        }
+
+        .provider-box {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 14px;
+        }
+
+        .provider-badge {
+            display: inline-block;
+            background-color: #ede9fe;
+            color: #6d28d9;
+            font-weight: 600;
+            font-size: 13px;
+            padding: 4px 8px;
+            border-radius: 999px;
+        }
+
+        .form-message {
+            display: block;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 18px;
+            padding: 10px 18px;
+            border-radius: 8px;
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .table td,
+        .table th {
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .col-action {
+            text-align: center;
+            width: 120px;
+        }
     </style>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+
     <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
+
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="page-title">Registrar artículo</h1>
-        <asp:Button ID="btnVolver" runat="server" Text="Volver al listado" CssClass="btn btn-outline-secondary" OnClick="btnVolver_Click"/>
+        <h1 class="page-title">
+            <asp:Label ID="lblTitulo" runat="server" Text="Registrar artículo"></asp:Label>
+        </h1>
     </div>
 
     <div class="dashboard-card">
+
         <h5 class="form-section-title">Datos principales</h5>
+
         <div class="row">
             <div class="col-md-4 mb-3">
                 <asp:Label ID="lblCategoria" runat="server" CssClass="form-label-custom d-block" Text="Categoría"></asp:Label>
@@ -107,6 +159,7 @@
         </div>
 
         <h5 class="form-section-title mt-4">Imagen del artículo</h5>
+
         <asp:UpdatePanel ID="upImagen" runat="server">
             <ContentTemplate>
                 <div class="row align-items-start">
@@ -125,20 +178,105 @@
             </ContentTemplate>
         </asp:UpdatePanel>
 
-        <asp:UpdatePanel ID="upBotones" runat="server">
+        <asp:UpdatePanel ID="upFormulario" runat="server">
             <ContentTemplate>
+
+                <h5 class="form-section-title mt-4">Proveedores asociados</h5>
+
+                <div class="provider-box mb-3">
+
+                    <div class="row align-items-end mb-3">
+                        <div class="col-md-8">
+                            <asp:Label ID="lblProveedor" runat="server" CssClass="form-label-custom d-block" Text="Proveedor"></asp:Label>
+
+                            <asp:DropDownList
+                                ID="ddlProveedor"
+                                runat="server"
+                                CssClass="form-control">
+                            </asp:DropDownList>
+                        </div>
+
+                        <div class="col-md-4">
+                            <asp:Button
+                                ID="btnAsociarProveedor"
+                                runat="server"
+                                Text="Asociar proveedor"
+                                CssClass="btn btn-outline-primary w-100"
+                                CausesValidation="false"
+                                OnClick="btnAsociarProveedor_Click" />
+                        </div>
+                    </div>
+
+                    <asp:GridView
+                        ID="dgvProveedoresAsociados"
+                        runat="server"
+                        CssClass="table table-striped table-hover mb-0"
+                        AutoGenerateColumns="false"
+                        GridLines="None"
+                        EmptyDataText="No hay proveedores asociados."
+                        OnRowCommand="dgvProveedoresAsociados_RowCommand">
+
+                        <Columns>
+                            <asp:TemplateField HeaderText="Proveedor">
+                                <ItemTemplate>
+                                    <span class="provider-badge"><%# Eval("Nombre") %></span>
+                                </ItemTemplate>
+                            </asp:TemplateField>
+
+                            <asp:BoundField HeaderText="Teléfono" DataField="Telefono" />
+                            <asp:BoundField HeaderText="Email" DataField="Email" />
+
+                            <asp:TemplateField HeaderText="Acción">
+                                <ItemTemplate>
+                                    <asp:Button
+                                        ID="btnQuitarProveedor"
+                                        runat="server"
+                                        Text="Quitar"
+                                        CssClass="btn btn-sm btn-outline-danger"
+                                        CommandName="QuitarProveedor"
+                                        CommandArgument='<%# Eval("IdProveedor") %>'
+                                        CausesValidation="false" />
+                                </ItemTemplate>
+
+                                <ItemStyle CssClass="col-action" />
+                                <HeaderStyle CssClass="col-action" />
+                            </asp:TemplateField>
+                        </Columns>
+
+                    </asp:GridView>
+
+                </div>
+
                 <div class="mt-3">
-                    <asp:Label ID="lblMensajeError" runat="server" CssClass="alert alert-danger d-block" Visible="false" />
+                    <asp:Label
+                        ID="lblMensajeError"
+                        runat="server"
+                        CssClass="form-message"
+                        Visible="false">
+                    </asp:Label>
                 </div>
 
                 <div class="form-actions">
-                    <asp:Button ID="btnEliminar" runat="server" CssClass="btn btn-danger" Text="Eliminar" Visible="false" CausesValidation="false" OnClick="btnEliminar_Click" OnClientClick="return confirm('¿Estás seguro de que deseas eliminar este artículo?');" />
-                    <asp:Button ID="btnCancelar" runat="server" CssClass="btn btn-outline-secondary" Text="Cancelar" OnClick="btnCancelar_Click"/>
-                    <asp:Button ID="btnGuardar" runat="server" CssClass="btn btn-primary" Text="Guardar artículo" OnClick="btnGuardar_Click"/>
+
+                    <asp:Button
+                        ID="btnCancelar"
+                        runat="server"
+                        CssClass="btn btn-outline-secondary"
+                        Text="Cancelar"
+                        CausesValidation="false"
+                        OnClick="btnCancelar_Click" />
+
+                    <asp:Button
+                        ID="btnGuardar"
+                        runat="server"
+                        CssClass="btn btn-primary"
+                        Text="Guardar artículo"
+                        OnClick="btnGuardar_Click" />
                 </div>
 
             </ContentTemplate>
         </asp:UpdatePanel>
+
     </div>
 
 </asp:Content>
