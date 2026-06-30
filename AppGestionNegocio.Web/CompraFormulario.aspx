@@ -183,13 +183,23 @@
         <div class="row mt-3">
             <div class="col-md-8 mb-3">
                 <label>Observaciones</label>
-                <input type="text" class="form-control" placeholder="Observaciones generales de la compra" />
+                <asp:TextBox
+                    ID="txtObservaciones"
+                    runat="server"
+                    CssClass="form-control"
+                    placeholder="Observaciones generales de la compra">
+                </asp:TextBox>
             </div>
 
             <div class="col-md-4 mb-3">
                 <label>Total</label>
                 <div class="purchase-total-box">
-                    Total estimado: $ 0,00
+                    Total estimado:
+            <asp:Label
+                ID="lblTotal"
+                runat="server"
+                Text="$ 0,00">
+            </asp:Label>
                 </div>
             </div>
         </div>

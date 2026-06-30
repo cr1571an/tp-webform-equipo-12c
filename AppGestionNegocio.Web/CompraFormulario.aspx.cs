@@ -104,22 +104,30 @@ namespace AppGestionNegocio.Web
             else
                 detalles = (List<DetalleCompraDto>)Session["DetallesCompra"];
 
-            ArticuloProveedorDto articulo =
-                (ArticuloProveedorDto)Session["ArticuloSeleccionado"];
+            ArticuloProveedorDto articulo = (ArticuloProveedorDto)Session["ArticuloSeleccionado"];
 
-            detalles.Add(new DetalleCompraDto
+            var existente = detalles.FirstOrDefault(x => x.IdArticulo == articulo.IdArticulo);
+
+            if (existente != null)
             {
-                IdArticulo = articulo.IdArticulo,
-                NombreArticulo = articulo.Nombre,
-                Cantidad = cantidad,
-                PrecioUnitario = articulo.PrecioUnitario,
-                Subtotal = cantidad * articulo.PrecioUnitario
-            });
+                existente.Cantidad += cantidad;
+                existente.Subtotal = existente.Cantidad * existente.PrecioUnitario;
+            }
+            else
+            {
+                detalles.Add(new DetalleCompraDto
+                {
+                    IdArticulo = articulo.IdArticulo,
+                    NombreArticulo = articulo.Nombre,
+                    Cantidad = cantidad,
+                    PrecioUnitario = articulo.PrecioUnitario,
+                    Subtotal = cantidad * articulo.PrecioUnitario
+                });
+            }
 
             Session["DetallesCompra"] = detalles;
-            gvDetalle.DataSource = detalles;
-            gvDetalle.DataBind();
 
+            ActualizarGrilla();
 
             ddlArticulo.SelectedIndex = 0;
             txtCantidad.Text = string.Empty;
@@ -127,6 +135,18 @@ namespace AppGestionNegocio.Web
             txtSubtotal.Text = string.Empty;
 
             Session.Remove("ArticuloSeleccionado");
+        }
+
+        private void ActualizarGrilla()
+        {
+            var detalles = (List<DetalleCompraDto>)Session["DetallesCompra"];
+
+            gvDetalle.DataSource = detalles;
+            gvDetalle.DataBind();
+
+            decimal total = detalles.Sum(x => x.Subtotal);
+
+            lblTotal.Text = "$ " + total.ToString("N2");
         }
     }
 }
