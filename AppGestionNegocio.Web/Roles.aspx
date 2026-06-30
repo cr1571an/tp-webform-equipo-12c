@@ -5,12 +5,18 @@
         .page-actions {
             display: flex;
             gap: 8px;
+            align-items: center;
+        }
+
+        .filtro-input {
+            width: 220px;
         }
 
         .table-actions {
             display: flex;
             gap: 6px;
             flex-wrap: nowrap;
+            justify-content: center;
         }
 
         .table td,
@@ -40,30 +46,12 @@
             font-size: 13px;
         }
 
-        .badge-users {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
+        .message {
+            display: block;
+            font-size: 14px;
             font-weight: 600;
-            background-color: #ede9fe;
-            color: #6f42c1;
-        }
-
-        .badge-active {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            background-color: #dcfce7;
-            color: #166534;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: #6b7280;
-            font-weight: 500;
-            padding: 28px;
-            background-color: #ffffff;
+            margin-top: 6px;
+            margin-bottom: 0;
         }
 
         .col-name {
@@ -71,19 +59,16 @@
         }
 
         .col-description {
-            width: 42%;
-        }
-
-        .col-users {
-            width: 16%;
+            width: 52%;
         }
 
         .col-actions {
-            width: 18%;
+            width: 24%;
+            text-align: center;
         }
 
-        .btn-primary {
-            height: 26px;
+        .modal-top .modal-dialog {
+            margin-top: 40px;
         }
     </style>
 </asp:Content>
@@ -100,7 +85,7 @@
                 ID="txtFiltroNombre"
                 runat="server"
                 CssClass="form-control filtro-input"
-                placeholder="Buscar Rol">
+                placeholder="Buscar rol">
             </asp:TextBox>
 
             <asp:Button
@@ -124,23 +109,36 @@
 
         <div class="row">
             <div class="col-md-3 mb-3">
-                <label>Nombre</label>&nbsp;
+                <label>Nombre</label>
+
                 <asp:TextBox
                     ID="txtNombre"
                     runat="server"
                     CssClass="form-control"
                     MaxLength="60"
-                    placeholder="Ej: Vendedor"></asp:TextBox>
+                    placeholder="Ej: Vendedor">
+                </asp:TextBox>
             </div>
 
-            <div class="col-md-9 mb-3">
-                <label>Descripción</label>&nbsp;
+            <div class="col-md-7 mb-3">
+                <label>Descripción</label>
+
                 <asp:TextBox
                     ID="txtDescripcion"
                     runat="server"
                     CssClass="form-control"
                     MaxLength="255"
-                    placeholder="Ej: Registra ventas en el sistema"></asp:TextBox>
+                    placeholder="Ej: Registra ventas en el sistema">
+                </asp:TextBox>
+            </div>
+
+            <div class="col-md-2 mb-3 d-flex align-items-end">
+                <asp:Button
+                    ID="btnAgregar"
+                    runat="server"
+                    Text="Agregar"
+                    CssClass="btn btn-primary w-100"
+                    OnClick="btnAgregar_Click" />
             </div>
 
             <div class="col-md-12">
@@ -149,16 +147,6 @@
                     runat="server"
                     CssClass="message text-danger">
                 </asp:Label>
-            </div>
-
-            <div class="col-md-12 mt-3">
-                <asp:Button
-                    ID="btnAgregar"
-                    runat="server"
-                    Text="Agregar"
-                    CssClass="btn btn-primary"
-                    Style="height: 38px;"
-                    OnClick="btnAgregar_Click" />
             </div>
         </div>
     </div>
@@ -176,13 +164,16 @@
                 GridLines="None"
                 DataKeyNames="IdRol"
                 EmptyDataText="No hay roles activos registrados."
+                OnRowEditing="dgvRoles_RowEditing"
+                OnRowCancelingEdit="dgvRoles_RowCancelingEdit"
+                OnRowUpdating="dgvRoles_RowUpdating"
                 OnRowCommand="dgvRoles_RowCommand">
 
                 <Columns>
 
                     <asp:TemplateField HeaderText="Nombre">
                         <ItemTemplate>
-                            <span class="provider-name"><%# Eval("Nombre") %></span>
+                            <span class="role-name"><%# Eval("Nombre") %></span>
                         </ItemTemplate>
 
                         <EditItemTemplate>
@@ -194,16 +185,30 @@
                                 Text='<%# Bind("Nombre") %>'>
                             </asp:TextBox>
                         </EditItemTemplate>
+
+                        <ItemStyle CssClass="col-name" />
+                        <HeaderStyle CssClass="col-name" />
                     </asp:TemplateField>
 
                     <asp:TemplateField HeaderText="Descripción">
                         <ItemTemplate>
-                            <span title='<%# Eval("Descripcion") %>'>
-                                <%# Eval("Descripcion") != null && Eval("Descripcion").ToString().Length > 40
-                ? Eval("Descripcion").ToString().Substring(0, 40) + "..."
-                : Eval("Descripcion") %>
+                            <span class="role-description" title='<%# Eval("Descripcion") %>'>
+                                <%# Eval("Descripcion") != null && Eval("Descripcion").ToString().Length > 40 ? Eval("Descripcion").ToString().Substring(0, 40) + "..." : Eval("Descripcion") %>
                             </span>
                         </ItemTemplate>
+
+                        <EditItemTemplate>
+                            <asp:TextBox
+                                ID="txtDescripcionEdit"
+                                runat="server"
+                                CssClass="form-control"
+                                MaxLength="255"
+                                Text='<%# Bind("Descripcion") %>'>
+                            </asp:TextBox>
+                        </EditItemTemplate>
+
+                        <ItemStyle CssClass="col-description" />
+                        <HeaderStyle CssClass="col-description" />
                     </asp:TemplateField>
 
                     <asp:TemplateField HeaderText="Acciones">
@@ -214,17 +219,15 @@
                                     runat="server"
                                     Text="Modificar"
                                     CssClass="btn btn-sm btn-outline-primary"
-                                    CommandName="EditarModal"
-                                    CommandArgument='<%# Eval("IdRol") %>' />
+                                    CommandName="Edit" />
 
                                 <asp:Button
                                     ID="btnEliminar"
                                     runat="server"
                                     Text="Eliminar"
                                     CssClass="btn btn-sm btn-outline-danger"
-                                    CommandName="EliminarRol"
-                                    CommandArgument='<%# Eval("IdRol") %>'
-                                    OnClientClick="return confirm('¿Seguro que querés eliminar este rol?');" />
+                                    CommandName="AbrirModalEliminar"
+                                    CommandArgument='<%# Eval("IdRol") %>' />
                             </div>
                         </ItemTemplate>
 
@@ -257,55 +260,39 @@
 
     </div>
 
-    <div class="modal fade" id="modalEditar" tabindex="-1">
+    <div class="modal fade modal-top" id="modalEliminarRol" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
 
-                <div class="modal-header">
-                    <h5 class="modal-title">Editar Rol</h5>
+                <div class="modal-header justify-content-center">
+                    <h5 class="modal-title">Eliminar rol</h5>
                 </div>
 
-                <div class="modal-body">
+                <div class="modal-body text-center">
+                    <asp:HiddenField ID="hfIdRolEliminar" runat="server" />
 
-                    <asp:HiddenField ID="hfIdRol" runat="server" />
-
-                    <label>Nombre</label>
-                    <asp:TextBox ID="txtNombreModal" runat="server" CssClass="form-control" />
-
-                    <label class="mt-2">Descripción</label>
-                    <asp:TextBox
-                        ID="txtDescripcionModal"
-                        runat="server"
-                        CssClass="form-control"
-                        TextMode="MultiLine"
-                        Rows="4"
-                        Style="resize: vertical;" />
-
-                    <asp:Label
-                        ID="lblMensajeModal"
-                        runat="server"
-                        CssClass="text-danger">
-                    </asp:Label>
-
-
+                    <p class="mb-2">
+                        ¿Seguro que querés eliminar este rol?
+                    </p>
                 </div>
 
-                <div class="modal-footer">
+                <div class="modal-footer justify-content-center">
+
                     <asp:Button
-                        ID="btnGuardarModal"
+                        ID="btnConfirmarEliminar"
                         runat="server"
-                        Text="Guardar"
-                        CssClass="btn btn-success"
-                        OnClick="btnGuardarModal_Click" />
+                        Text="Eliminar"
+                        CssClass="btn btn-danger"
+                        OnClick="btnConfirmarEliminar_Click" />
 
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">
                         Cancelar
                     </button>
+
                 </div>
 
             </div>
         </div>
     </div>
-
 
 </asp:Content>

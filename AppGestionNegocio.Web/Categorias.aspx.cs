@@ -18,6 +18,7 @@ namespace AppGestionNegocio.Web
                 cargarCategorias();
             }
         }
+
         private void cargarCategorias()
         {
             CategoriaNegocio negocio = new CategoriaNegocio();
@@ -27,6 +28,7 @@ namespace AppGestionNegocio.Web
             dgvCategorias.DataSource = negocio.filtrar(nombre);
             dgvCategorias.DataBind();
         }
+
         private void mostrarMensaje(string mensaje)
         {
             lblMensaje.Text = mensaje;
@@ -35,6 +37,7 @@ namespace AppGestionNegocio.Web
 
             ClientScript.RegisterStartupScript(this.GetType(), "ocultarMensaje", script, true);
         }
+
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
             try
@@ -64,25 +67,30 @@ namespace AppGestionNegocio.Web
                 mostrarMensaje("Error al agregar la categoría: " + ex.Message);
             }
         }
+
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             cargarCategorias();
         }
+
         protected void btnLimpiarFiltro_Click(object sender, EventArgs e)
         {
             txtFiltroNombre.Text = "";
             cargarCategorias();
         }
+
         protected void dgvCategorias_RowEditing(object sender, GridViewEditEventArgs e)
         {
             dgvCategorias.EditIndex = e.NewEditIndex;
             cargarCategorias();
         }
+
         protected void dgvCategorias_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
         {
             dgvCategorias.EditIndex = -1;
             cargarCategorias();
         }
+
         protected void dgvCategorias_RowUpdating(object sender, GridViewUpdateEventArgs e)
         {
             try
@@ -117,22 +125,57 @@ namespace AppGestionNegocio.Web
                 mostrarMensaje("Error al modificar la categoría: " + ex.Message);
             }
         }
+
         protected void dgvCategorias_RowCommand(object sender, GridViewCommandEventArgs e)
         {
             try
             {
                 lblMensaje.Text = "";
 
-                if (e.CommandName == "EliminarCategoria")
+                if (e.CommandName == "AbrirModalEliminar")
                 {
                     int idCategoria = int.Parse(e.CommandArgument.ToString());
 
-                    CategoriaNegocio negocio = new CategoriaNegocio();
-                    negocio.eliminar(idCategoria);
+                    hfIdCategoriaEliminar.Value = idCategoria.ToString();
 
-                    dgvCategorias.EditIndex = -1;
-                    cargarCategorias();
+                    ScriptManager.RegisterStartupScript(
+                        this,
+                        this.GetType(),
+                        "abrirModalEliminarCategoria",
+                        "$('#modalEliminarCategoria').modal('show');",
+                        true
+                    );
                 }
+            }
+            catch (Exception ex)
+            {
+                mostrarMensaje("Error al seleccionar la categoría: " + ex.Message);
+            }
+        }
+
+        protected void btnConfirmarEliminar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                lblMensaje.Text = "";
+
+                int idCategoria;
+
+                if (!int.TryParse(hfIdCategoriaEliminar.Value, out idCategoria))
+                {
+                    mostrarMensaje("No se pudo identificar la categoría a eliminar.");
+                    return;
+                }
+
+                CategoriaNegocio negocio = new CategoriaNegocio();
+                negocio.eliminar(idCategoria);
+
+                hfIdCategoriaEliminar.Value = "";
+
+                dgvCategorias.EditIndex = -1;
+                cargarCategorias();
+
+                mostrarMensaje("Categoría eliminada correctamente.");
             }
             catch (Exception ex)
             {

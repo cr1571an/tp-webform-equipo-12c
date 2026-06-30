@@ -11,18 +11,13 @@
             display: flex;
             gap: 6px;
             flex-wrap: nowrap;
+            justify-content: center;
         }
 
         .table td,
         .table th {
             vertical-align: middle;
             white-space: nowrap;
-        }
-
-        .form-section-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 16px;
         }
 
         .user-name-table {
@@ -43,24 +38,6 @@
             color: #6f42c1;
         }
 
-        .badge-active {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            background-color: #dcfce7;
-            color: #166534;
-        }
-
-        .badge-inactive {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            background-color: #fee2e2;
-            color: #991b1b;
-        }
-
         .empty-state {
             text-align: center;
             color: #6b7280;
@@ -70,27 +47,30 @@
         }
 
         .col-user {
-            width: 18%;
+            width: 25%;
         }
 
         .col-employee {
-            width: 24%;
+            width: 35%;
         }
 
         .col-role {
-            width: 16%;
-        }
-
-        .col-status {
-            width: 12%;
-        }
-
-        .col-security {
-            width: 14%;
+            width: 20%;
         }
 
         .col-actions {
-            width: 16%;
+            width: 20%;
+            text-align: center;
+        }
+
+        .grid-action-btn {
+            padding: 4px 10px;
+            font-size: 13px;
+            border-radius: 6px;
+        }
+
+        .modal-top .modal-dialog {
+            margin-top: 40px;
         }
     </style>
 </asp:Content>
@@ -107,47 +87,122 @@
                 Filtrar
             </button>
 
-            <a href="UsuarioFormulario.aspx" class="btn btn-primary">Nuevo usuario
+            <a href="UsuarioFormulario.aspx" class="btn btn-primary">
+                Nuevo usuario
             </a>
         </div>
     </div>
 
     <div class="dashboard-card">
 
-        <h5 class="form-section-title">Usuarios registrados</h5>
-
-    </div>
-    <div class="dashboard-card">
-
         <div class="table-responsive">
-            <asp:GridView ID="dgvUsuarios" runat="server" CssClass="table table-striped table-hover mb-0" AutoGenerateColumns="false" GridLines="None" AllowPaging="True" PageSize="10" PagerStyle-CssClass="grid-pager" OnPageIndexChanging="dgvUsuarios_PageIndexChanging">
+            <asp:GridView
+                ID="dgvUsuarios"
+                runat="server"
+                CssClass="table table-striped table-hover mb-0"
+                AutoGenerateColumns="false"
+                GridLines="None"
+                AllowPaging="True"
+                PageSize="10"
+                PagerStyle-CssClass="grid-pager"
+                OnPageIndexChanging="dgvUsuarios_PageIndexChanging"
+                OnRowCommand="dgvUsuarios_RowCommand">
+
                 <Columns>
+
                     <asp:TemplateField HeaderText="Usuario">
                         <ItemTemplate>
-                            <div class="article-cell">
-                                <span class="article-name"><%# Eval("Nombre") %></span>
-                            </div>
+                            <span class="user-name-table"><%# Eval("Nombre") %></span>
                         </ItemTemplate>
+
+                        <ItemStyle CssClass="col-user" />
+                        <HeaderStyle CssClass="col-user" />
                     </asp:TemplateField>
+
                     <asp:TemplateField HeaderText="Empleado">
                         <ItemTemplate>
-                            <span class="badge-category"><%# Eval("Empleado.Nombre") + " " + Eval("Empleado.Apellido") %></span>
+                            <span class="user-employee">
+                                <%# Eval("Empleado.Nombre") + " " + Eval("Empleado.Apellido") %>
+                            </span>
                         </ItemTemplate>
+
+                        <ItemStyle CssClass="col-employee" />
+                        <HeaderStyle CssClass="col-employee" />
                     </asp:TemplateField>
+
                     <asp:TemplateField HeaderText="Rol">
                         <ItemTemplate>
-                            <%# Eval("Rol.Nombre") %>
+                            <span class="badge-role"><%# Eval("Rol.Nombre") %></span>
                         </ItemTemplate>
+
+                        <ItemStyle CssClass="col-role" />
+                        <HeaderStyle CssClass="col-role" />
                     </asp:TemplateField>
+
                     <asp:TemplateField HeaderText="Acciones">
                         <ItemTemplate>
-                            <a href='UsuarioFormulario.aspx?id=<%# Eval("IdUsuario") %>' class="btn btn-sm btn-outline-primary grid-action-btn">Editar</a>
+                            <div class="table-actions">
+
+                                <a href='UsuarioFormulario.aspx?id=<%# Eval("IdUsuario") %>'
+                                   class="btn btn-sm btn-outline-primary grid-action-btn">
+                                    Modificar
+                                </a>
+
+                                <asp:Button
+                                    ID="btnEliminar"
+                                    runat="server"
+                                    Text="Eliminar"
+                                    CssClass="btn btn-sm btn-outline-danger grid-action-btn"
+                                    CommandName="AbrirModalEliminar"
+                                    CommandArgument='<%# Eval("IdUsuario") %>' />
+
+                            </div>
                         </ItemTemplate>
+
+                        <ItemStyle CssClass="col-actions" />
+                        <HeaderStyle CssClass="col-actions" />
                     </asp:TemplateField>
+
                 </Columns>
+
             </asp:GridView>
         </div>
 
+    </div>
+
+    <div class="modal fade modal-top" id="modalEliminarUsuario" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header justify-content-center">
+                    <h5 class="modal-title">Eliminar usuario</h5>
+                </div>
+
+                <div class="modal-body text-center">
+                    <asp:HiddenField ID="hfIdUsuarioEliminar" runat="server" />
+
+                    <p class="mb-2">
+                        ¿Seguro que querés eliminar este usuario?
+                    </p>
+                </div>
+
+                <div class="modal-footer justify-content-center">
+
+                    <asp:Button
+                        ID="btnConfirmarEliminar"
+                        runat="server"
+                        Text="Eliminar"
+                        CssClass="btn btn-danger"
+                        OnClick="btnConfirmarEliminar_Click" />
+
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
     </div>
 
 </asp:Content>

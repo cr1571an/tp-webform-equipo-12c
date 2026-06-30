@@ -41,14 +41,13 @@
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+
     <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h1 class="page-title">Registrar usuario</h1>
         </div>
-
-        <a href="Usuarios.aspx" class="btn btn-outline-secondary">Volver al listado
-        </a>
     </div>
 
     <div class="dashboard-card">
@@ -57,18 +56,42 @@
 
         <div class="row">
             <div class="col-md-4 mb-3">
-                <asp:Label ID="lblEmpleado" runat="server" CssClass="form-label-custom d-block" Text="Empleado"></asp:Label>
-                <asp:DropDownList ID="ddlEmpleado" runat="server" CssClass="form-control"></asp:DropDownList>
+                <asp:Label
+                    ID="lblEmpleado"
+                    runat="server"
+                    CssClass="form-label-custom d-block"
+                    Text="Empleado">
+                </asp:Label>
+
+                <asp:DropDownList
+                    ID="ddlEmpleado"
+                    runat="server"
+                    CssClass="form-control">
+                </asp:DropDownList>
             </div>
 
             <div class="col-md-4 mb-3">
-                <asp:Label ID="lblRol" runat="server" CssClass="form-label-custom d-block" Text="Rol"></asp:Label>
-                <asp:DropDownList ID="ddlRol" runat="server" CssClass="form-control"></asp:DropDownList>
+                <asp:Label
+                    ID="lblRol"
+                    runat="server"
+                    CssClass="form-label-custom d-block"
+                    Text="Rol">
+                </asp:Label>
+
+                <asp:DropDownList
+                    ID="ddlRol"
+                    runat="server"
+                    CssClass="form-control">
+                </asp:DropDownList>
             </div>
 
             <div class="col-md-4 mb-3">
                 <label class="form-label-custom d-block">Estado</label>
-                <asp:DropDownList ID="ddlEstado" runat="server" CssClass="form-control">
+
+                <asp:DropDownList
+                    ID="ddlEstado"
+                    runat="server"
+                    CssClass="form-control">
                 </asp:DropDownList>
             </div>
         </div>
@@ -76,8 +99,14 @@
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label class="form-label-custom d-block">Nombre de usuario</label>
-                <asp:TextBox ID="txtNombre" runat="server" CssClass="form-control" placeholder="Ej: juanp"></asp:TextBox>
-        &nbsp;</div>
+
+                <asp:TextBox
+                    ID="txtNombre"
+                    runat="server"
+                    CssClass="form-control"
+                    placeholder="Ej: juanp">
+                </asp:TextBox>
+            </div>
         </div>
 
         <div class="security-box">
@@ -86,28 +115,57 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label-custom d-block">Contraseña</label>
-                    <asp:TextBox ID="txtPassword" runat="server" CssClass="form-control" TextMode="Password" />
+
+                    <asp:TextBox
+                        ID="txtPassword"
+                        runat="server"
+                        CssClass="form-control"
+                        TextMode="Password">
+                    </asp:TextBox>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label class="form-label-custom d-block">Confirmar contraseña</label>
-                    <asp:TextBox ID="txtConfirmPassword" runat="server" CssClass="form-control" TextMode="Password" />
+
+                    <asp:TextBox
+                        ID="txtConfirmPassword"
+                        runat="server"
+                        CssClass="form-control"
+                        TextMode="Password">
+                    </asp:TextBox>
                 </div>
             </div>
         </div>
 
-
-
         <asp:UpdatePanel ID="upBotones" runat="server">
             <ContentTemplate>
+
                 <div class="mt-3">
-                    <asp:Label ID="lblMensajeError" runat="server" CssClass="alert alert-danger d-block" Visible="false" />
+                    <asp:Label
+                        ID="lblMensajeError"
+                        runat="server"
+                        CssClass="alert alert-danger d-block"
+                        Visible="false">
+                    </asp:Label>
                 </div>
 
                 <div class="form-actions">
-                    <asp:Button ID="btnEliminar" runat="server" CssClass="btn btn-danger" Text="Eliminar" Visible="false" CausesValidation="false" OnClick="btnEliminar_Click" OnClientClick="return confirm('¿Estás seguro de que deseas eliminar este artículo?');" />
-                    <asp:Button ID="btnCancelar" runat="server" CssClass="btn btn-outline-secondary" Text="Cancelar" OnClick="btnCancelar_Click" />
-                    <asp:Button ID="btnGuardar" runat="server" CssClass="btn btn-primary" Text="Guardar artículo" OnClick="btnGuardar_Click" />
+
+                    <asp:Button
+                        ID="btnCancelar"
+                        runat="server"
+                        CssClass="btn btn-outline-secondary"
+                        Text="Cancelar"
+                        CausesValidation="false"
+                        OnClick="btnCancelar_Click" />
+
+                    <asp:Button
+                        ID="btnGuardar"
+                        runat="server"
+                        CssClass="btn btn-primary"
+                        Text="Guardar usuario"
+                        OnClick="btnGuardar_Click" />
+
                 </div>
 
             </ContentTemplate>

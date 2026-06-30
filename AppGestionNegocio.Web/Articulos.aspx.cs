@@ -53,9 +53,60 @@ namespace AppGestionNegocio.Web
 
             string filtroSeleccionado = ddlFiltro.SelectedValue;
             List<Articulo> listaOrdenada = negocio.listarOrdenado(filtroSeleccionado);
+
+            Session["listaArticulos"] = listaOrdenada;
+
             dgvArticulos.DataSource = listaOrdenada;
             dgvArticulos.DataBind();
         }
 
+        protected void dgvArticulos_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            try
+            {
+                if (e.CommandName == "AbrirModalEliminar")
+                {
+                    int idArticulo = int.Parse(e.CommandArgument.ToString());
+
+                    hfIdArticuloEliminar.Value = idArticulo.ToString();
+
+                    ScriptManager.RegisterStartupScript(
+                        this,
+                        this.GetType(),
+                        "abrirModalEliminarArticulo",
+                        "$('#modalEliminarArticulo').modal('show');",
+                        true
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        protected void btnConfirmarEliminar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int idArticulo;
+
+                if (!int.TryParse(hfIdArticuloEliminar.Value, out idArticulo))
+                {
+                    return;
+                }
+
+                ArticuloNegocio negocio = new ArticuloNegocio();
+                negocio.eliminarLogico(idArticulo);
+
+                hfIdArticuloEliminar.Value = "";
+
+                CargarGridV();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }
