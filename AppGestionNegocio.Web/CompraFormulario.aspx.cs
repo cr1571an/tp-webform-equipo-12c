@@ -34,11 +34,34 @@ namespace AppGestionNegocio.Web
                 ddlMedio.Items.Insert(0, new ListItem("-- Seleccione un medio de pago --", "0"));
 
                 ddlArticulo.Items.Insert(0, new ListItem("Seleccione un artículo", "0"));
+
+                txtFechaCompra.Text = DateTime.Today.ToString("yyyy-MM-dd");
+                txtCantidad.Text = "";
+                txtPrecioUnitario.Text = "";
+                txtSubtotal.Text = "";
+
+                Session.Remove("ArticuloSeleccionado");
+                Session.Remove("DetallesCompra");
+
+                gvDetalle.DataSource = null;
+                gvDetalle.DataBind();
+                lblTotal.Text = "$ 0,00";
             }
         }
 
         protected void ddlProveedor_SelectedIndexChanged(object sender, EventArgs e)
         {
+            txtCantidad.Text = "";
+            txtPrecioUnitario.Text = "";
+            txtSubtotal.Text = "";
+
+            Session.Remove("ArticuloSeleccionado");
+            Session.Remove("DetallesCompra");
+
+            gvDetalle.DataSource = null;
+            gvDetalle.DataBind();
+            lblTotal.Text = "$ 0,00";
+
             int idProveedor = int.Parse(ddlProveedor.SelectedValue);
 
             ArticuloNegocio negocio = new ArticuloNegocio();
@@ -49,19 +72,7 @@ namespace AppGestionNegocio.Web
             ddlArticulo.DataTextField = "Nombre";
             ddlArticulo.DataValueField = "IdArticulo";
             ddlArticulo.DataBind();
-            ddlArticulo.Items.Insert(0, new ListItem("Seleccione un artículo", "0"));
-
-            txtCantidad.Text = "";
-            txtPrecioUnitario.Text = "";
-            txtSubtotal.Text = "";
-
-            Session.Remove("ArticuloSeleccionado");
-            Session.Remove("DetallesCompra");
-
-            gvDetalle.DataSource = null;
-            gvDetalle.DataBind();
-
-            lblTotal.Text = "$ 0,00";
+            ddlArticulo.Items.Insert(0, new ListItem("Seleccione un artículo", "0"));            
         }
 
         protected void ddlArticulo_SelectedIndexChanged(object sender, EventArgs e)
@@ -83,21 +94,35 @@ namespace AppGestionNegocio.Web
 
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
+
+            lblMensajeDetalle.Visible = false;
+            lblMensajeDetalle.Text = string.Empty;
+
+            lblMensajeDatos.Visible = false;
+            lblMensajeDatos.Text = string.Empty;
+
+            if (ddlProveedor.SelectedValue == "0")
+            {
+                MostrarMensaje(lblMensajeDatos, "Debe seleccionar un proveedor.");
+                return;
+            }
+
             if (ddlArticulo.SelectedValue == "0")
             {
-
-                lblMensaje.CssClass = "alert alert-warning";
-                lblMensaje.Text = "Debe seleccionar un artículo.";
-                lblMensaje.Visible = true;
+                MostrarMensaje(lblMensajeDetalle, "Debe seleccionar un artículo.");
                 return;
             }
 
 
             if (!int.TryParse(txtCantidad.Text, out int cantidad) || cantidad <= 0)
             {
-                lblMensaje.CssClass = "alert alert-warning";
-                lblMensaje.Text = "Debe ingresar un cantidad valida.";
-                lblMensaje.Visible = true;
+                MostrarMensaje(lblMensajeDetalle, "Debe ingresar un cantidad valida.");
+                return;
+            }
+
+            if (!decimal.TryParse(txtPrecioUnitario.Text, out decimal precioCompra) || precioCompra <= 0)
+            {
+                MostrarMensaje(lblMensajeDetalle, "Debe ingresar un precio valido valida.");
                 return;
             }
 
@@ -114,8 +139,11 @@ namespace AppGestionNegocio.Web
 
             if (existente != null)
             {
+
                 existente.Cantidad += cantidad;
+                existente.PrecioUnitario = precioCompra;
                 existente.Subtotal = existente.Cantidad * existente.PrecioUnitario;
+
             }
             else
             {
@@ -124,8 +152,8 @@ namespace AppGestionNegocio.Web
                     IdArticulo = articulo.IdArticulo,
                     NombreArticulo = articulo.Nombre,
                     Cantidad = cantidad,
-                    PrecioUnitario = articulo.PrecioUnitario,
-                    Subtotal = cantidad * articulo.PrecioUnitario
+                    PrecioUnitario = precioCompra,
+                    Subtotal = cantidad * precioCompra
                 });
             }
 
@@ -169,6 +197,9 @@ namespace AppGestionNegocio.Web
 
         protected void gvDetalle_RowUpdating(object sender, GridViewUpdateEventArgs e)
         {
+            lblMensajeDetalle.Visible = false;
+            lblMensajeDetalle.Text = string.Empty;
+
             List<DetalleCompraDto> detalles = (List<DetalleCompraDto>)Session["DetallesCompra"];
 
             int idArticulo = Convert.ToInt32(gvDetalle.DataKeys[e.RowIndex].Value);
@@ -179,14 +210,36 @@ namespace AppGestionNegocio.Web
 
             int cantidad = Convert.ToInt32(txtCantidadEdit.Text);
 
+            if (cantidad <= 0)
+            {
+                MostrarMensaje(lblMensajeDetalle, "Debe ingresar un cantidad valida.");
+
+                gvDetalle.DataSource = detalles;
+                gvDetalle.DataBind();
+                return;
+            }
+
             DetalleCompraDto detalle = detalles.FirstOrDefault(x => x.IdArticulo == idArticulo);
 
-            if (detalle != null)
+
+            if (detalle == null)
             {
-                detalle.Cantidad = cantidad;
-                detalle.Subtotal =
-                cantidad * detalle.PrecioUnitario;
+                MostrarMensaje(
+                    lblMensajeDetalle,
+                    "No se encontró el artículo seleccionado.");
+
+                gvDetalle.EditIndex = -1;
+
+                gvDetalle.DataSource = detalles;
+                gvDetalle.DataBind();
+
+                return;
             }
+
+            detalle.Cantidad = cantidad;
+            detalle.Subtotal =
+            cantidad * detalle.PrecioUnitario;
+
 
             Session["DetallesCompra"] = detalles;
 
@@ -235,6 +288,40 @@ namespace AppGestionNegocio.Web
             Session["DetallesCompra"] = detalles;
 
             ActualizarGrilla();
+        }
+
+        protected void btnCancelarCompra_Click(object sender, EventArgs e)
+        {
+            Session.Remove("DetallesCompra");
+            Session.Remove("ArticuloSeleccionado");
+            Session.Remove("ArticulosProveedor");
+            Response.Redirect("Compras.aspx");
+        }
+
+        protected void btnGuardarCompra_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MostrarMensaje(Label lbl, string mensaje, string cssClass = "alert alert-warning")
+        {
+            lbl.Text = mensaje;
+            lbl.CssClass = cssClass;
+            lbl.Visible = true;
+
+            string script =
+                "setTimeout(function() {" +
+                "var mensaje = document.getElementById('" + lbl.ClientID + "');" +
+                "if (mensaje) {" +
+                "mensaje.style.display = 'none';" +
+                "}" +
+                "}, 4000);";
+
+            ClientScript.RegisterStartupScript(
+                GetType(),
+                Guid.NewGuid().ToString(),
+                script,
+                true);
         }
     }
 }

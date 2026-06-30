@@ -78,6 +78,12 @@
     <div class="dashboard-card mb-3">
         <h5 class="form-section-title">Datos de la compra</h5>
 
+        <asp:Label
+            ID="lblMensajeDatos"
+            runat="server"
+            Visible="false">
+        </asp:Label>
+
         <div class="row">
             <div class="col-md-3 mb-3">
                 <label>Proveedor</label>
@@ -99,12 +105,23 @@
 
             <div class="col-md-3 mb-3">
                 <label>Fecha de compra</label>
-                <input type="date" class="form-control" />
+                <asp:TextBox
+                    ID="txtFechaCompra"
+                    runat="server"
+                    TextMode="Date"
+                    CssClass="form-control">
+                </asp:TextBox>
             </div>
 
             <div class="col-md-3 mb-3">
                 <label>Número de comprobante</label>
-                <input type="text" class="form-control" placeholder="Ej: FC-0001-00000123" />
+                <asp:TextBox
+                    ID="txtNumeroComprobante"
+                    runat="server"
+                    CssClass="form-control"
+                    MaxLength="30"
+                    placeholder="Ej: FC-0001-00000123">
+                </asp:TextBox>
             </div>
         </div>
     </div>
@@ -112,6 +129,12 @@
     <div class="dashboard-card mb-3">
 
         <h5 class="subsection-title">Detalle de compra</h5>
+
+        <asp:Label
+            ID="lblMensajeDetalle"
+            runat="server"
+            Visible="false">
+        </asp:Label>
 
         <div class="row">
 
@@ -143,7 +166,7 @@
                     ID="txtPrecioUnitario"
                     runat="server"
                     CssClass="form-control"
-                    ReadOnly="true">
+                    onkeyup="calcularSubtotal()">
                 </asp:TextBox>
             </div>
 
@@ -167,17 +190,6 @@
             </div>
 
         </div>
-
-        <div class="row">
-            <div class="col-12">
-                <asp:Label
-                    ID="lblMensaje"
-                    runat="server"
-                    Visible="false">
-                </asp:Label>
-            </div>
-        </div>
-
 
         <div class="dashboard-card">
             <div class="table-responsive mt-2">
@@ -313,13 +325,23 @@
         </div>
 
         <div class="form-actions">
-            <a href="Compras.aspx" class="btn btn-outline-secondary">Cancelar
-            </a>
 
-            <button type="button" class="btn btn-primary">
-                Guardar compra
-            </button>
+            <asp:Button
+                ID="btnCancelarCompra"
+                runat="server"
+                Text="Cancelar"
+                CssClass="btn btn-outline-secondary"
+                OnClick="btnCancelarCompra_Click" />
+
+            <asp:Button
+                ID="btnGuardarCompra"
+                runat="server"
+                Text="Guardar compra"
+                CssClass="btn btn-primary"
+                OnClick="btnGuardarCompra_Click" />
+
         </div>
+
     </div>
 
     <div class="modal fade modal-top"

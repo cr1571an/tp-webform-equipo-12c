@@ -15,6 +15,15 @@ namespace AppGestionNegocio.Web
     {
 
         /// <summary>
+        /// lblMensajeDatos control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblMensajeDatos;
+
+        /// <summary>
         /// ddlProveedor control.
         /// </summary>
         /// <remarks>
@@ -31,6 +40,33 @@ namespace AppGestionNegocio.Web
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList ddlMedio;
+
+        /// <summary>
+        /// txtFechaCompra control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtFechaCompra;
+
+        /// <summary>
+        /// txtNumeroComprobante control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtNumeroComprobante;
+
+        /// <summary>
+        /// lblMensajeDetalle control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblMensajeDetalle;
 
         /// <summary>
         /// ddlArticulo control.
@@ -78,15 +114,6 @@ namespace AppGestionNegocio.Web
         protected global::System.Web.UI.WebControls.Button btnAgregar;
 
         /// <summary>
-        /// lblMensaje control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblMensaje;
-
-        /// <summary>
         /// gvDetalle control.
         /// </summary>
         /// <remarks>
@@ -112,6 +139,24 @@ namespace AppGestionNegocio.Web
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblTotal;
+
+        /// <summary>
+        /// btnCancelarCompra control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnCancelarCompra;
+
+        /// <summary>
+        /// btnGuardarCompra control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnGuardarCompra;
 
         /// <summary>
         /// hfIdArticuloEliminar control.
