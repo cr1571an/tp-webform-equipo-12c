@@ -50,6 +50,7 @@
     <Compile Include="DetalleCompra.cs" />
     <Compile Include="DetalleVenta.cs" />
     <Compile Include="Dto\ArticuloProveedorDto.cs" />
+    <Compile Include="Dto\CompraDto.cs" />
     <Compile Include="Dto\DetalleCompraDto.cs" />
     <Compile Include="Empleado.cs" />
     <Compile Include="Marca.cs" />
