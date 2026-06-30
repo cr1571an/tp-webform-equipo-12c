@@ -56,8 +56,12 @@ namespace AppGestionNegocio.Web
             txtSubtotal.Text = "";
 
             Session.Remove("ArticuloSeleccionado");
+            Session.Remove("DetallesCompra");
 
+            gvDetalle.DataSource = null;
+            gvDetalle.DataBind();
 
+            lblTotal.Text = "$ 0,00";
         }
 
         protected void ddlArticulo_SelectedIndexChanged(object sender, EventArgs e)
@@ -140,13 +144,13 @@ namespace AppGestionNegocio.Web
         private void ActualizarGrilla()
         {
             var detalles = (List<DetalleCompraDto>)Session["DetallesCompra"];
-
+            
             gvDetalle.DataSource = detalles;
             gvDetalle.DataBind();
 
             decimal total = detalles.Sum(x => x.Subtotal);
 
-            lblTotal.Text = "$ " + total.ToString("N2");
+            lblTotal.Text = "$ " + total.ToString("N2");            
         }
 
         protected void gvDetalle_RowEditing(object sender, GridViewEditEventArgs e)
