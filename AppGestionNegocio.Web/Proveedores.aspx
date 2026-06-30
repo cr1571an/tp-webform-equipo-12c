@@ -12,11 +12,8 @@
             width: 220px;
         }
 
-        .table-actions {
-            display: flex;
-            gap: 6px;
-            flex-wrap: nowrap;
-            justify-content: center;
+        .filtro-cp {
+            width: 110px;
         }
 
         .table td,
@@ -25,32 +22,45 @@
             white-space: nowrap;
         }
 
-        .form-section-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        label {
-            font-weight: 600;
-            font-size: 14px;
-            color: #374151;
-        }
-
         .provider-name {
             font-weight: 600;
+        }
+
+        .provider-contact {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .provider-observations {
+            color: #374151;
+            font-size: 13px;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .grid-action-btn {
+            padding: 4px 10px;
+            font-size: 13px;
+            border-radius: 6px;
         }
 
         .message {
             display: block;
             font-size: 14px;
             font-weight: 600;
-            margin-top: 6px;
-            margin-bottom: 0;
+            margin-bottom: 12px;
         }
 
         .col-actions {
             text-align: center;
+        }
+
+        .modal-top .modal-dialog {
+            margin-top: 40px;
         }
     </style>
 </asp:Content>
@@ -67,7 +77,15 @@
                 ID="txtFiltroNombre"
                 runat="server"
                 CssClass="form-control filtro-input"
-                placeholder="Buscar proveedor">
+                placeholder="Nombre o CUIT">
+            </asp:TextBox>
+
+            <asp:TextBox
+                ID="txtFiltroCp"
+                runat="server"
+                CssClass="form-control filtro-cp"
+                MaxLength="6"
+                placeholder="CP">
             </asp:TextBox>
 
             <asp:Button
@@ -83,69 +101,23 @@
                 Text="Limpiar"
                 CssClass="btn btn-outline-secondary"
                 OnClick="btnLimpiarFiltro_Click" />
+
+            <a href="ProveedorFormulario.aspx" class="btn btn-primary">
+                Nuevo proveedor
+            </a>
         </div>
     </div>
 
-    <div class="dashboard-card mb-3">
-        <h5 class="form-section-title">Nuevo proveedor</h5>
-
-        <div class="row">
-            <div class="col-md-4 mb-3">
-                <label>Nombre</label>
-                <asp:TextBox
-                    ID="txtNombre"
-                    runat="server"
-                    CssClass="form-control"
-                    MaxLength="60"
-                    placeholder="Ej: Distribuidora Patitas">
-                </asp:TextBox>
-            </div>
-
-            <div class="col-md-4 mb-3">
-                <label>Teléfono</label>
-                <asp:TextBox
-                    ID="txtTelefono"
-                    runat="server"
-                    CssClass="form-control"
-                    MaxLength="11"
-                    placeholder="Ej: 1134567890">
-                </asp:TextBox>
-            </div>
-
-            <div class="col-md-4 mb-3">
-                <label>Email</label>
-                <asp:TextBox
-                    ID="txtEmail"
-                    runat="server"
-                    CssClass="form-control"
-                    MaxLength="100"
-                    placeholder="Ej: proveedor@mail.com">
-                </asp:TextBox>
-            </div>
-
-            <div class="col-md-12">
-                <asp:Label
-                    ID="lblMensaje"
-                    runat="server"
-                    CssClass="message text-danger">
-                </asp:Label>
-            </div>
-
-            <div class="col-md-12 mt-3">
-                <asp:Button
-                    ID="btnAgregar"
-                    runat="server"
-                    Text="Agregar"
-                    CssClass="btn btn-primary"
-                    OnClick="btnAgregar_Click" />
-            </div>
-        </div>
-    </div>
+    <asp:Label
+        ID="lblMensaje"
+        runat="server"
+        CssClass="message text-danger">
+    </asp:Label>
 
     <div class="dashboard-card">
-        <h5 class="form-section-title">Proveedores registrados</h5>
 
         <div class="table-responsive">
+
             <asp:GridView
                 ID="dgvProveedores"
                 runat="server"
@@ -153,100 +125,56 @@
                 AutoGenerateColumns="false"
                 GridLines="None"
                 DataKeyNames="IdProveedor"
-                EmptyDataText="No hay proveedores activos registrados."
-                OnRowEditing="dgvProveedores_RowEditing"
-                OnRowCancelingEdit="dgvProveedores_RowCancelingEdit"
-                OnRowUpdating="dgvProveedores_RowUpdating"
+                EmptyDataText="No se encontraron proveedores registrados."
                 OnRowCommand="dgvProveedores_RowCommand">
 
                 <Columns>
 
-                    <asp:TemplateField HeaderText="Nombre">
+                    <asp:TemplateField HeaderText="Proveedor">
                         <ItemTemplate>
                             <span class="provider-name"><%# Eval("Nombre") %></span>
+                            <br />
+                            <span class="provider-contact"><%# Eval("Email") %></span>
                         </ItemTemplate>
-
-                        <EditItemTemplate>
-                            <asp:TextBox
-                                ID="txtNombreEdit"
-                                runat="server"
-                                CssClass="form-control"
-                                MaxLength="60"
-                                Text='<%# Bind("Nombre") %>'>
-                            </asp:TextBox>
-                        </EditItemTemplate>
                     </asp:TemplateField>
 
-                    <asp:TemplateField HeaderText="Teléfono">
+                    <asp:BoundField HeaderText="CUIT" DataField="Cuit" />
+
+                    <asp:BoundField HeaderText="Teléfono" DataField="Telefono" />
+
+                    <asp:BoundField HeaderText="Domicilio" DataField="Domicilio" />
+
+                    <asp:BoundField HeaderText="CP" DataField="Cp" />
+
+                    <asp:BoundField HeaderText="Contacto" DataField="PersonaContacto" />
+
+                    <asp:TemplateField HeaderText="Observaciones">
                         <ItemTemplate>
-                            <%# Eval("Telefono") %>
+                            <span class="provider-observations" title='<%# Eval("Observaciones") %>'>
+                                <%# Eval("Observaciones") != null && Eval("Observaciones").ToString().Length > 45 ? Eval("Observaciones").ToString().Substring(0, 45) + "..." : Eval("Observaciones") %>
+                            </span>
                         </ItemTemplate>
-
-                        <EditItemTemplate>
-                            <asp:TextBox
-                                ID="txtTelefonoEdit"
-                                runat="server"
-                                CssClass="form-control"
-                                MaxLength="11"
-                                Text='<%# Bind("Telefono") %>'>
-                            </asp:TextBox>
-                        </EditItemTemplate>
-                    </asp:TemplateField>
-
-                    <asp:TemplateField HeaderText="Email">
-                        <ItemTemplate>
-                            <%# Eval("Email") %>
-                        </ItemTemplate>
-
-                        <EditItemTemplate>
-                            <asp:TextBox
-                                ID="txtEmailEdit"
-                                runat="server"
-                                CssClass="form-control"
-                                MaxLength="100"
-                                Text='<%# Bind("Email") %>'>
-                            </asp:TextBox>
-                        </EditItemTemplate>
                     </asp:TemplateField>
 
                     <asp:TemplateField HeaderText="Acciones">
                         <ItemTemplate>
                             <div class="table-actions">
-                                <asp:Button
-                                    ID="btnEditar"
-                                    runat="server"
-                                    Text="Modificar"
-                                    CssClass="btn btn-sm btn-outline-primary"
-                                    CommandName="Edit" />
+
+                                <a href='<%# "ProveedorFormulario.aspx?id=" + Eval("IdProveedor") %>'
+                                   class="btn btn-sm btn-outline-primary grid-action-btn">
+                                    Modificar
+                                </a>
 
                                 <asp:Button
                                     ID="btnEliminar"
                                     runat="server"
                                     Text="Eliminar"
-                                    CssClass="btn btn-sm btn-outline-danger"
-                                    CommandName="EliminarProveedor"
-                                    CommandArgument='<%# Eval("IdProveedor") %>'
-                                    OnClientClick="return confirm('¿Seguro que querés eliminar este proveedor?');" />
+                                    CssClass="btn btn-sm btn-outline-danger grid-action-btn"
+                                    CommandName="AbrirModalEliminar"
+                                    CommandArgument='<%# Eval("IdProveedor") %>' />
+
                             </div>
                         </ItemTemplate>
-
-                        <EditItemTemplate>
-                            <div class="table-actions">
-                                <asp:Button
-                                    ID="btnGuardarEdit"
-                                    runat="server"
-                                    Text="Guardar"
-                                    CssClass="btn btn-sm btn-success"
-                                    CommandName="Update" />
-
-                                <asp:Button
-                                    ID="btnCancelarEdit"
-                                    runat="server"
-                                    Text="Cancelar"
-                                    CssClass="btn btn-sm btn-secondary"
-                                    CommandName="Cancel" />
-                            </div>
-                        </EditItemTemplate>
 
                         <ItemStyle CssClass="col-actions" />
                         <HeaderStyle CssClass="col-actions" />
@@ -255,6 +183,43 @@
                 </Columns>
 
             </asp:GridView>
+
+        </div>
+
+    </div>
+
+    <div class="modal fade modal-top" id="modalEliminarProveedor" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header justify-content-center">
+                    <h5 class="modal-title">Eliminar proveedor</h5>
+                </div>
+
+                <div class="modal-body text-center">
+                    <asp:HiddenField ID="hfIdProveedorEliminar" runat="server" />
+
+                    <p class="mb-2">
+                        ¿Seguro que querés eliminar este proveedor?
+                    </p>
+                </div>
+
+                <div class="modal-footer justify-content-center">
+
+                    <asp:Button
+                        ID="btnConfirmarEliminar"
+                        runat="server"
+                        Text="Eliminar"
+                        CssClass="btn btn-danger"
+                        OnClick="btnConfirmarEliminar_Click" />
+
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                </div>
+
+            </div>
         </div>
     </div>
 

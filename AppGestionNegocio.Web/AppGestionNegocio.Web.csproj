@@ -193,6 +193,7 @@
     <Content Include="Ventas.aspx" />
     <Content Include="Web.config" />
     <Content Include="Inicio.aspx" />
+    <Content Include="ProveedorFormulario.aspx" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Acceso.aspx.cs">
@@ -324,6 +325,13 @@
     </Compile>
     <Compile Include="Ventas.aspx.designer.cs">
       <DependentUpon>Ventas.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ProveedorFormulario.aspx.cs">
+      <DependentUpon>ProveedorFormulario.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ProveedorFormulario.aspx.designer.cs">
+      <DependentUpon>ProveedorFormulario.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
