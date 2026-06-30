@@ -79,7 +79,6 @@
         <h5 class="form-section-title">Datos de la compra</h5>
 
         <div class="row">
-
             <div class="col-md-3 mb-3">
                 <label>Proveedor</label>
                 <asp:DropDownList
@@ -108,22 +107,27 @@
                 <input type="text" class="form-control" placeholder="Ej: FC-0001-00000123" />
             </div>
         </div>
+    </div>
 
-        <div class="detail-box">
-            <h6 class="subsection-title">Detalle de compra</h6>
+    <div class="dashboard-card mb-3">
 
-            <div class="row">
-                <div class="col-md-2 mb-3">
-                    <asp:DropDownList
-                        ID="ddlArticulo"
-                        runat="server"
-                        CssClass="form-control"
-                        AutoPostBack="true"
-                        OnSelectedIndexChanged="ddlArticulo_SelectedIndexChanged">
-                    </asp:DropDownList>
+        <h5 class="subsection-title">Detalle de compra</h5>
 
-                </div>
+        <div class="row">
 
+            <div class="col-md-4 mb-3">
+                <label>Artículo</label>
+                <asp:DropDownList
+                    ID="ddlArticulo"
+                    runat="server"
+                    CssClass="form-control"
+                    AutoPostBack="true"
+                    OnSelectedIndexChanged="ddlArticulo_SelectedIndexChanged">
+                </asp:DropDownList>
+            </div>
+
+            <div class="col-md-2 mb-3">
+                <label>Cantidad</label>
                 <asp:TextBox
                     ID="txtCantidad"
                     runat="server"
@@ -131,52 +135,156 @@
                     CssClass="form-control"
                     onkeyup="calcularSubtotal()">
                 </asp:TextBox>
+            </div>
 
+            <div class="col-md-2 mb-3">
+                <label>Precio unitario</label>
                 <asp:TextBox
                     ID="txtPrecioUnitario"
                     runat="server"
                     CssClass="form-control"
                     ReadOnly="true">
                 </asp:TextBox>
+            </div>
 
+            <div class="col-md-2 mb-3">
+                <label>Subtotal</label>
                 <asp:TextBox
                     ID="txtSubtotal"
                     runat="server"
                     CssClass="form-control"
                     ReadOnly="true">
                 </asp:TextBox>
+            </div>
 
+            <div class="col-md-2 mb-3 d-flex align-items-end">
+                <asp:Button
+                    ID="btnAgregar"
+                    runat="server"
+                    Text="Agregar"
+                    CssClass="btn btn-outline-primary w-100"
+                    OnClick="btnAgregar_Click" />
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-12">
                 <asp:Label
                     ID="lblMensaje"
                     runat="server"
                     Visible="false">
                 </asp:Label>
-
-                <div class="col-md-2 mb-3 d-flex align-items-end">
-                    <asp:Button
-                        ID="btnAgregar"
-                        runat="server"
-                        Text="Agregar"
-                        CssClass="btn btn-outline-primary w-100"
-                        OnClick="btnAgregar_Click" />
-                </div>
             </div>
+        </div>
 
+
+        <div class="dashboard-card">
             <div class="table-responsive mt-2">
+
                 <asp:GridView
                     ID="gvDetalle"
                     runat="server"
+                    CssClass="table table-sm table-striped table-hover mb-0"
                     AutoGenerateColumns="false"
-                    CssClass="table table-sm table-striped table-hover mb-0">
+                    GridLines="None"
+                    DataKeyNames="IdArticulo"
+                    EmptyDataText="No hay artículos agregados."
+                    OnRowEditing="gvDetalle_RowEditing"
+                    OnRowCancelingEdit="gvDetalle_RowCancelingEdit"
+                    OnRowUpdating="gvDetalle_RowUpdating"
+                    OnRowCommand="gvDetalle_RowCommand">
 
                     <Columns>
-                        <asp:BoundField DataField="NombreArticulo" HeaderText="Artículo" />
-                        <asp:BoundField DataField="Cantidad" HeaderText="Cantidad" />
-                        <asp:BoundField DataField="PrecioUnitario" HeaderText="Precio unitario" />
-                        <asp:BoundField DataField="Subtotal" HeaderText="Subtotal" />
+
+                        <asp:BoundField
+                            DataField="NombreArticulo"
+                            HeaderText="Artículo"
+                            ReadOnly="true" />
+
+                        <asp:TemplateField HeaderText="Cantidad">
+
+                            <ItemTemplate>
+                                <%# Eval("Cantidad") %>
+                            </ItemTemplate>
+
+                            <EditItemTemplate>
+                                <asp:TextBox
+                                    ID="txtCantidadEdit"
+                                    runat="server"
+                                    CssClass="form-control"
+                                    Text='<%# Bind("Cantidad") %>'
+                                    TextMode="Number">
+                                </asp:TextBox>
+                            </EditItemTemplate>
+
+                        </asp:TemplateField>
+
+                        <asp:BoundField
+                            DataField="PrecioUnitario"
+                            HeaderText="Precio unitario"
+                            ReadOnly="true"
+                            DataFormatString="{0:N2}" />
+
+                        <asp:BoundField
+                            DataField="Subtotal"
+                            HeaderText="Subtotal"
+                            ReadOnly="true"
+                            DataFormatString="{0:N2}" />
+
+                        <asp:TemplateField HeaderText="Acciones">
+
+                            <ItemTemplate>
+
+                                <div class="table-actions">
+
+                                    <asp:Button
+                                        ID="btnEditar"
+                                        runat="server"
+                                        Text="Modificar"
+                                        CssClass="btn btn-sm btn-outline-primary"
+                                        CommandName="Edit" />
+
+                                    <asp:Button
+                                        ID="btnEliminar"
+                                        runat="server"
+                                        Text="Eliminar"
+                                        CssClass="btn btn-sm btn-outline-danger"
+                                        CommandName="AbrirModalEliminar"
+                                        CommandArgument='<%# Eval("IdArticulo") %>' />
+
+                                </div>
+
+                            </ItemTemplate>
+
+                            <EditItemTemplate>
+
+                                <div class="table-actions">
+
+                                    <asp:Button
+                                        ID="btnGuardar"
+                                        runat="server"
+                                        Text="Guardar"
+                                        CssClass="btn btn-sm btn-success"
+                                        CommandName="Update" />
+
+                                    <asp:Button
+                                        ID="btnCancelar"
+                                        runat="server"
+                                        Text="Cancelar"
+                                        CssClass="btn btn-sm btn-secondary"
+                                        CommandName="Cancel" />
+
+                                </div>
+
+                            </EditItemTemplate>
+
+                        </asp:TemplateField>
+
                     </Columns>
 
                 </asp:GridView>
+
             </div>
         </div>
 
@@ -212,6 +320,53 @@
                 Guardar compra
             </button>
         </div>
+    </div>
+
+    <div class="modal fade modal-top"
+        id="modalEliminarArticulo"
+        tabindex="-1">
+
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header justify-content-center">
+                    <h5 class="modal-title">Eliminar artículo
+                    </h5>
+                </div>
+
+                <div class="modal-body text-center">
+
+                    <asp:HiddenField
+                        ID="hfIdArticuloEliminar"
+                        runat="server" />
+
+                    <p class="mb-2">
+                        ¿Seguro que querés eliminar este artículo del detalle?
+                    </p>
+
+                </div>
+
+                <div class="modal-footer justify-content-center">
+
+                    <asp:Button
+                        ID="btnConfirmarEliminarArticulo"
+                        runat="server"
+                        Text="Eliminar"
+                        CssClass="btn btn-danger"
+                        OnClick="btnConfirmarEliminarArticulo_Click" />
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+
     </div>
 
 

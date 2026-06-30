@@ -148,5 +148,25 @@ namespace AppGestionNegocio.Web
 
             lblTotal.Text = "$ " + total.ToString("N2");
         }
+
+        protected void gvDetalle_RowEditing(object sender, GridViewEditEventArgs e)
+        {
+        }
+
+        protected void gvDetalle_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
+        {
+        }
+
+        protected void gvDetalle_RowUpdating(object sender, GridViewUpdateEventArgs e)
+        {
+        }
+
+        protected void gvDetalle_RowCommand(object sender, GridViewCommandEventArgs e)
+        { 
+        }
+
+        protected void btnConfirmarEliminarArticulo_Click(object sender, EventArgs e)
+        { 
+        }
     }
 }
