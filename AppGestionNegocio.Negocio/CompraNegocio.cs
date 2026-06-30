@@ -11,8 +11,7 @@ namespace AppGestionNegocio.Negocio
     {
         public void Guardar(CompraDto compra)
         {
-            // Insert Compra
-
+            // Pendiente de implementacion. Utilizar transacciones.
         }
     }
 }

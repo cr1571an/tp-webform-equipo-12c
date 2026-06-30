@@ -376,6 +376,7 @@ namespace AppGestionNegocio.Web
 
             CompraDto compra = new CompraDto
             {
+                IdUsuario = 1, //TO DO: quitar valor hardcodeado!!
                 IdProveedor = int.Parse(ddlProveedor.SelectedValue),
                 IdMedioPago = int.Parse(ddlMedio.SelectedValue),
                 FechaCompra = fechaCompra,
