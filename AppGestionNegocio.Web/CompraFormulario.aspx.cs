@@ -144,33 +144,97 @@ namespace AppGestionNegocio.Web
         private void ActualizarGrilla()
         {
             var detalles = (List<DetalleCompraDto>)Session["DetallesCompra"];
-            
+
             gvDetalle.DataSource = detalles;
             gvDetalle.DataBind();
 
             decimal total = detalles.Sum(x => x.Subtotal);
 
-            lblTotal.Text = "$ " + total.ToString("N2");            
+            lblTotal.Text = "$ " + total.ToString("N2");
         }
 
         protected void gvDetalle_RowEditing(object sender, GridViewEditEventArgs e)
         {
+            gvDetalle.EditIndex = e.NewEditIndex;
+            gvDetalle.DataSource = (List<DetalleCompraDto>)Session["DetallesCompra"];
+            gvDetalle.DataBind();
         }
 
         protected void gvDetalle_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
         {
+            gvDetalle.EditIndex = -1;
+            gvDetalle.DataSource = (List<DetalleCompraDto>)Session["DetallesCompra"];
+            gvDetalle.DataBind();
         }
 
         protected void gvDetalle_RowUpdating(object sender, GridViewUpdateEventArgs e)
         {
+            List<DetalleCompraDto> detalles = (List<DetalleCompraDto>)Session["DetallesCompra"];
+
+            int idArticulo = Convert.ToInt32(gvDetalle.DataKeys[e.RowIndex].Value);
+
+            GridViewRow fila = gvDetalle.Rows[e.RowIndex];
+
+            TextBox txtCantidadEdit = (TextBox)fila.FindControl("txtCantidadEdit");
+
+            int cantidad = Convert.ToInt32(txtCantidadEdit.Text);
+
+            DetalleCompraDto detalle = detalles.FirstOrDefault(x => x.IdArticulo == idArticulo);
+
+            if (detalle != null)
+            {
+                detalle.Cantidad = cantidad;
+                detalle.Subtotal =
+                cantidad * detalle.PrecioUnitario;
+            }
+
+            Session["DetallesCompra"] = detalles;
+
+            gvDetalle.EditIndex = -1;
+
+            gvDetalle.DataSource = detalles;
+            gvDetalle.DataBind();
+            decimal total = detalles.Sum(x => x.Subtotal);
+
+            lblTotal.Text = "$ " + total.ToString("N2");
+
         }
 
         protected void gvDetalle_RowCommand(object sender, GridViewCommandEventArgs e)
-        { 
+        {
+            if (e.CommandName == "AbrirModalEliminar")
+            {
+                hfIdArticuloEliminar.Value =
+                    e.CommandArgument.ToString();
+
+                ScriptManager.RegisterStartupScript(
+                    this,
+                    GetType(),
+                    "abrirModalEliminar",
+                    "$('#modalEliminarArticulo').modal('show');",
+                    true);
+            }
         }
 
         protected void btnConfirmarEliminarArticulo_Click(object sender, EventArgs e)
-        { 
+        {
+            int idArticulo = Convert.ToInt32(hfIdArticuloEliminar.Value);
+
+            List<DetalleCompraDto> detalles = (List<DetalleCompraDto>)Session["DetallesCompra"];
+
+            if (detalles == null)
+                return;
+
+            var detalle = detalles.FirstOrDefault(x => x.IdArticulo == idArticulo);
+
+            if (detalle != null)
+            {
+                detalles.Remove(detalle);
+            }
+
+            Session["DetallesCompra"] = detalles;
+
+            ActualizarGrilla();
         }
     }
 }

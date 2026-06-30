@@ -213,7 +213,7 @@
                                     ID="txtCantidadEdit"
                                     runat="server"
                                     CssClass="form-control"
-                                    Text='<%# Bind("Cantidad") %>'
+                                    Text='<%# Eval("Cantidad") %>'
                                     TextMode="Number">
                                 </asp:TextBox>
                             </EditItemTemplate>
