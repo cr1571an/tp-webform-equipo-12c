@@ -5,6 +5,11 @@
         .page-actions {
             display: flex;
             gap: 8px;
+            align-items: center;
+        }
+
+        .filtro-input {
+            width: 240px;
         }
 
         .table td,
@@ -22,13 +27,10 @@
             font-size: 13px;
         }
 
-        .badge-status {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            background-color: #dcfce7;
-            color: #166534;
+        .table-actions {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
         }
 
         .grid-action-btn {
@@ -55,6 +57,21 @@
             color: white;
             border-color: #6f42c1;
         }
+
+        .message {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .col-actions {
+            text-align: center;
+        }
+
+        .modal-top .modal-dialog {
+            margin-top: 40px;
+        }
     </style>
 </asp:Content>
 
@@ -66,33 +83,60 @@
         </div>
 
         <div class="page-actions">
-            <button type="button" class="btn btn-outline-secondary">
-                Filtrar
-            </button>
+
+            <asp:TextBox
+                ID="txtFiltroCliente"
+                runat="server"
+                CssClass="form-control filtro-input"
+                placeholder="Nombre, apellido o CUIT">
+            </asp:TextBox>
+
+            <asp:Button
+                ID="btnFiltrar"
+                runat="server"
+                Text="Filtrar"
+                CssClass="btn btn-outline-secondary"
+                OnClick="btnFiltrar_Click" />
+
+            <asp:Button
+                ID="btnLimpiarFiltro"
+                runat="server"
+                Text="Limpiar"
+                CssClass="btn btn-outline-secondary"
+                OnClick="btnLimpiarFiltro_Click" />
 
             <a href="ClienteFormulario.aspx" class="btn btn-primary">
                 Nuevo cliente
             </a>
+
         </div>
     </div>
+
+    <asp:Label
+        ID="lblMensaje"
+        runat="server"
+        CssClass="message">
+    </asp:Label>
 
     <div class="dashboard-card">
 
         <div class="table-responsive">
 
-            <asp:GridView ID="dgvClientes" runat="server"
+            <asp:GridView
+                ID="dgvClientes"
+                runat="server"
                 CssClass="table table-striped table-hover mb-0"
                 AutoGenerateColumns="false"
                 GridLines="None"
+                DataKeyNames="IdCliente"
                 EmptyDataText="No se encontraron clientes registrados."
                 OnPageIndexChanging="dgvClientes_PageIndexChanging"
+                OnRowCommand="dgvClientes_RowCommand"
                 AllowPaging="True"
                 PageSize="10"
                 PagerStyle-CssClass="grid-pager">
 
                 <Columns>
-
-                    <asp:BoundField HeaderText="CUIT" DataField="Cuit" />
 
                     <asp:TemplateField HeaderText="Cliente">
                         <ItemTemplate>
@@ -102,33 +146,55 @@
                         </ItemTemplate>
                     </asp:TemplateField>
 
-                    <asp:BoundField HeaderText="Teléfono" DataField="Telefono" />
+                    <asp:TemplateField HeaderText="CUIT">
+                        <ItemTemplate>
+                            <%# !string.IsNullOrWhiteSpace(Convert.ToString(Eval("Cuit"))) ? Eval("Cuit") : "—" %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Teléfono">
+                        <ItemTemplate>
+                            <%# !string.IsNullOrWhiteSpace(Convert.ToString(Eval("Telefono"))) ? Eval("Telefono") : "—" %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
                     <asp:TemplateField HeaderText="Email">
                         <ItemTemplate>
                             <span class="client-contact">
-                                <%# Eval("Email") %>
+                                <%# !string.IsNullOrWhiteSpace(Convert.ToString(Eval("Email"))) ? Eval("Email") : "—" %>
                             </span>
                         </ItemTemplate>
                     </asp:TemplateField>
 
                     <asp:TemplateField HeaderText="Condición IVA">
                         <ItemTemplate>
-                            <%# Eval("CondicionIva.Condicion") %>
+                            <%# Eval("CondicionIva") != null ? Eval("CondicionIva.Condicion") : "—" %>
                         </ItemTemplate>
                     </asp:TemplateField>
 
-                    <asp:TemplateField HeaderText="Estado">
+                    <asp:TemplateField HeaderText="Acciones">
                         <ItemTemplate>
-                            <span class="badge-status">Activo</span>
-                        </ItemTemplate>
-                    </asp:TemplateField>
+                            <div class="table-actions">
 
-                    <asp:CommandField 
-                        HeaderText="Acciones"
-                        ShowSelectButton="true"
-                        SelectText="Ver"
-                        ControlStyle-CssClass="btn btn-sm btn-outline-primary grid-action-btn" />
+                                <a href='<%# "ClienteFormulario.aspx?id=" + Eval("IdCliente") %>'
+                                   class="btn btn-sm btn-outline-primary grid-action-btn">
+                                    Modificar
+                                </a>
+
+                                <asp:Button
+                                    ID="btnEliminar"
+                                    runat="server"
+                                    Text="Eliminar"
+                                    CssClass="btn btn-sm btn-outline-danger grid-action-btn"
+                                    CommandName="AbrirModalEliminar"
+                                    CommandArgument='<%# Eval("IdCliente") %>' />
+
+                            </div>
+                        </ItemTemplate>
+
+                        <ItemStyle CssClass="col-actions" />
+                        <HeaderStyle CssClass="col-actions" />
+                    </asp:TemplateField>
 
                 </Columns>
 
@@ -136,6 +202,43 @@
 
         </div>
 
+    </div>
+
+    <div class="modal fade modal-top" id="modalEliminarCliente" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header justify-content-center">
+                    <h5 class="modal-title">Eliminar cliente</h5>
+                </div>
+
+                <div class="modal-body text-center">
+
+                    <asp:HiddenField ID="hfIdClienteEliminar" runat="server" />
+
+                    <p class="mb-2">
+                        ¿Seguro que querés eliminar este cliente?
+                    </p>
+
+                </div>
+
+                <div class="modal-footer justify-content-center">
+
+                    <asp:Button
+                        ID="btnConfirmarEliminar"
+                        runat="server"
+                        Text="Eliminar"
+                        CssClass="btn btn-danger"
+                        OnClick="btnConfirmarEliminar_Click" />
+
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
     </div>
 
 </asp:Content>

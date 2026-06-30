@@ -39,7 +39,9 @@
         .table-actions {
             display: flex;
             gap: 6px;
+            flex-wrap: nowrap;
             justify-content: center;
+            align-items: center;
         }
 
         .grid-action-btn {
@@ -57,6 +59,8 @@
 
         .col-actions {
             text-align: center;
+            width: 150px;
+            min-width: 150px;
         }
 
         .modal-top .modal-dialog {
@@ -132,9 +136,9 @@
 
                     <asp:TemplateField HeaderText="Proveedor">
                         <ItemTemplate>
-                            <span class="provider-name"><%# Eval("Nombre") %></span>
-                            <br />
-                            <span class="provider-contact"><%# Eval("Email") %></span>
+                            <span class="provider-name">
+                                <%# Eval("Nombre") %>
+                            </span>
                         </ItemTemplate>
                     </asp:TemplateField>
 
@@ -142,16 +146,40 @@
 
                     <asp:BoundField HeaderText="Teléfono" DataField="Telefono" />
 
+                    <asp:TemplateField HeaderText="Email">
+                        <ItemTemplate>
+                            <span class="provider-contact">
+                                <%# !string.IsNullOrWhiteSpace(Convert.ToString(Eval("Email"))) ? Eval("Email") : "—" %>
+                            </span>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+
                     <asp:BoundField HeaderText="Domicilio" DataField="Domicilio" />
 
-                    <asp:BoundField HeaderText="CP" DataField="Cp" />
+                    <asp:TemplateField HeaderText="CP">
+                        <ItemTemplate>
+                            <%# !string.IsNullOrWhiteSpace(Convert.ToString(Eval("Cp"))) ? Eval("Cp") : "—" %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
-                    <asp:BoundField HeaderText="Contacto" DataField="PersonaContacto" />
+                    <asp:TemplateField HeaderText="Contacto">
+                        <ItemTemplate>
+                            <%# !string.IsNullOrWhiteSpace(Convert.ToString(Eval("PersonaContacto"))) ? Eval("PersonaContacto") : "—" %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
                     <asp:TemplateField HeaderText="Observaciones">
                         <ItemTemplate>
                             <span class="provider-observations" title='<%# Eval("Observaciones") %>'>
-                                <%# Eval("Observaciones") != null && Eval("Observaciones").ToString().Length > 45 ? Eval("Observaciones").ToString().Substring(0, 45) + "..." : Eval("Observaciones") %>
+                                <%#
+                                    !string.IsNullOrWhiteSpace(Convert.ToString(Eval("Observaciones")))
+                                    ? (
+                                        Convert.ToString(Eval("Observaciones")).Length > 80
+                                        ? Convert.ToString(Eval("Observaciones")).Substring(0, 80) + "..."
+                                        : Eval("Observaciones")
+                                      )
+                                    : "—"
+                                %>
                             </span>
                         </ItemTemplate>
                     </asp:TemplateField>
