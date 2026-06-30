@@ -72,7 +72,7 @@ namespace AppGestionNegocio.Web
             ddlArticulo.DataTextField = "Nombre";
             ddlArticulo.DataValueField = "IdArticulo";
             ddlArticulo.DataBind();
-            ddlArticulo.Items.Insert(0, new ListItem("Seleccione un artículo", "0"));            
+            ddlArticulo.Items.Insert(0, new ListItem("Seleccione un artículo", "0"));
         }
 
         protected void ddlArticulo_SelectedIndexChanged(object sender, EventArgs e)
@@ -300,6 +300,108 @@ namespace AppGestionNegocio.Web
 
         protected void btnGuardarCompra_Click(object sender, EventArgs e)
         {
+            lblMensajeDetalle.Visible = false;
+            lblMensajeDetalle.Text = string.Empty;
+
+            lblMensajeDatos.Visible = false;
+            lblMensajeDatos.Text = string.Empty;
+
+            if (ddlProveedor.SelectedValue == "0")
+            {
+                MostrarMensaje(lblMensajeDatos, "Debe seleccionar un proveedor.");
+                return;
+            }
+
+            if (ddlMedio.SelectedValue == "0")
+            {
+                MostrarMensaje(lblMensajeDatos, "Debe seleccionar un medio de pago.");
+                return;
+            }
+
+            if (!DateTime.TryParse(txtFechaCompra.Text, out DateTime fechaCompra))
+            {
+                MostrarMensaje(lblMensajeDatos, "Debe ingresar una fecha válida.");
+                return;
+            }
+
+            if (fechaCompra.Date > DateTime.Today)
+            {
+                MostrarMensaje(lblMensajeDatos, "La fecha no puede ser posterior a hoy.");
+
+                return;
+            }
+
+            if (fechaCompra.Date < DateTime.Today.AddMonths(-2))
+            {
+                MostrarMensaje(lblMensajeDatos, "La fecha no puede superar los dos meses de antigüedad.");
+                return;
+            }
+
+            string numeroComprobante = txtNumeroComprobante.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(numeroComprobante))
+            {
+                MostrarMensaje(lblMensajeDatos, "Debe ingresar un número de comprobante.");
+                return;
+            }
+
+            List<DetalleCompraDto> detalles = (List<DetalleCompraDto>)Session["DetallesCompra"];
+
+            if (detalles == null || !detalles.Any())
+            {
+                MostrarMensaje(lblMensajeDetalle, "Debe agregar al menos un artículo.");
+                return;
+            }
+
+            foreach (var detalle in detalles)
+            {
+                if (detalle.Cantidad <= 0)
+                {
+                    MostrarMensaje(lblMensajeDetalle,"Existe un artículo con cantidad inválida.");
+                    return;
+                }
+
+                if (detalle.PrecioUnitario <= 0)
+                {
+                    MostrarMensaje(lblMensajeDetalle,"Existe un artículo con precio inválido.");
+                    return;
+                }
+            }
+
+            int idProveedor = Convert.ToInt32(ddlProveedor.SelectedValue);
+
+            int idMedioPago = Convert.ToInt32(ddlMedio.SelectedValue);
+
+            string observaciones = txtObservaciones.Text.Trim();
+
+            CompraDto compra = new CompraDto
+            {
+                IdProveedor = int.Parse(ddlProveedor.SelectedValue),
+                IdMedioPago = int.Parse(ddlMedio.SelectedValue),
+                FechaCompra = fechaCompra,
+                NumeroComprobante = txtNumeroComprobante.Text.Trim(),
+                Observaciones = txtObservaciones.Text.Trim(),
+                Total = detalles.Sum(x => x.Subtotal),
+                Detalles = detalles
+            };
+
+            try
+            {
+                CompraNegocio compraNegocio = new CompraNegocio();
+
+                compraNegocio.Guardar(compra);
+
+                Session.Remove("DetallesCompra");
+                Session.Remove("ArticuloSeleccionado");
+                Session.Remove("ArticulosProveedor");
+
+                Response.Redirect(
+                    "Compras.aspx?mensaje=Compra registrada correctamente");
+            }
+            catch (Exception ex)
+            {
+                MostrarMensaje(lblMensajeDatos,"Ocurrió un error al registrar la compra.");
+            }
 
         }
 
