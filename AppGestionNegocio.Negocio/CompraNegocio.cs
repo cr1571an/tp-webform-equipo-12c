@@ -19,22 +19,12 @@ namespace AppGestionNegocio.Negocio
 
             try
             {
-                datos.setearConsulta(
-                    @"SELECT
-                    C.IdCompra,
-                    C.FechaCompra,
-                    C.NumeroFactura,
-                    C.Total,
-                    P.IdProveedor,
-                    P.Nombre AS Proveedor,
-                    M.IdMedioPago,
-                    M.Descripcion AS MedioPago
-                  FROM Compras C
-                  INNER JOIN Proveedores P
-                    ON P.IdProveedor = C.IdProveedor
-                  INNER JOIN MediosPago M
-                    ON M.IdMedioPago = C.IdMedioPago
-                  WHERE C.Activo = 1");
+                datos.setearConsulta(@"SELECT C.IdCompra,C.FechaCompra,C.NumeroFactura,C.Total,P.IdProveedor,P.Nombre AS Proveedor,M.IdMedioPago,
+                                       M.Descripcion AS MedioPago
+                                       FROM Compras C
+                                       INNER JOIN Proveedores P ON P.IdProveedor = C.IdProveedor
+                                       INNER JOIN MediosPago M ON M.IdMedioPago = C.IdMedioPago
+                                       WHERE C.Activo = 1");
 
                 datos.ejecutarLectura();
 
@@ -42,33 +32,20 @@ namespace AppGestionNegocio.Negocio
                 {
                     Compra aux = new Compra();
 
-                    aux.IdCompra =
-                        (int)datos.Lector["IdCompra"];
-
-                    aux.FechaCompra =
-                        (DateTime)datos.Lector["FechaCompra"];
-
-                    aux.NumeroComprobante =
-                        (string)datos.Lector["NumeroFactura"];
-
-                    aux.Total =
-                        (decimal)datos.Lector["Total"];
+                    aux.IdCompra = (int)datos.Lector["IdCompra"];
+                    aux.FechaCompra = (DateTime)datos.Lector["FechaCompra"];
+                    aux.NumeroComprobante = (string)datos.Lector["NumeroFactura"];
+                    aux.Total = (decimal)datos.Lector["Total"];
 
                     aux.Proveedor = new Proveedor();
 
-                    aux.Proveedor.IdProveedor =
-                        (int)datos.Lector["IdProveedor"];
-
-                    aux.Proveedor.Nombre =
-                        (string)datos.Lector["Proveedor"];
+                    aux.Proveedor.IdProveedor = (int)datos.Lector["IdProveedor"];
+                    aux.Proveedor.Nombre = (string)datos.Lector["Proveedor"];
 
                     aux.MedioPago = new MedioPago();
 
-                    aux.MedioPago.IdMedioPago =
-                        (int)datos.Lector["IdMedioPago"];
-
-                    aux.MedioPago.Descripcion =
-                        (string)datos.Lector["MedioPago"];
+                    aux.MedioPago.IdMedioPago = (int)datos.Lector["IdMedioPago"];
+                    aux.MedioPago.Descripcion = (string)datos.Lector["MedioPago"];
 
                     lista.Add(aux);
                 }
@@ -189,8 +166,99 @@ namespace AppGestionNegocio.Negocio
             }
         }
 
-        public void agregar(CompraDto compra) { }
+        public void agregar(CompraDto compra)
+        {
+            AccesoDatos datos = new AccesoDatos();
 
+            try
+            {
+                datos.iniciarTransaccion();
+
+                datos.setearConsulta(@"INSERT INTO Compras
+                                    (
+                                        IdUsuario,
+                                        IdProveedor,
+                                        IdMedioPago,
+                                        FechaCompra,
+                                        NumeroFactura,
+                                        Observaciones,
+                                        Total,
+                                        Activo
+                                    )
+                                    VALUES
+                                    (
+                                        @IdUsuario,
+                                        @IdProveedor,
+                                        @IdMedioPago,
+                                        @FechaCompra,
+                                        @NumeroFactura,
+                                        @Observaciones,
+                                        @Total,
+                                        1
+                                    );
+
+                                    SELECT SCOPE_IDENTITY();");
+
+                datos.setearParametro("@IdUsuario", compra.IdUsuario);
+                datos.setearParametro("@IdProveedor", compra.IdProveedor);
+                datos.setearParametro("@IdMedioPago", compra.IdMedioPago);
+                datos.setearParametro("@FechaCompra", compra.FechaCompra);
+                datos.setearParametro("@NumeroFactura", compra.NumeroComprobante);
+                datos.setearParametro("@Observaciones",
+                    string.IsNullOrWhiteSpace(compra.Observaciones)
+                        ? (object)DBNull.Value
+                        : compra.Observaciones);
+                datos.setearParametro("@Total", compra.Total);
+
+                int idCompra = datos.ejecutarAccionScalarTransaccion();
+
+                foreach (DetalleCompraDto detalle in compra.Detalles)
+                {
+                    guardarDetalle(datos, idCompra, detalle);
+                }
+
+                datos.confirmarTransaccion();
+            }
+            catch
+            {
+                datos.cancelarTransaccion();
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        private void guardarDetalle(AccesoDatos datos, int idCompra, DetalleCompraDto detalle)
+        {
+            datos.limpiarParametros();
+
+            datos.setearConsulta(@"INSERT INTO DetallesCompra
+                                (
+                                    IdCompra,
+                                    IdArticulo,
+                                    Cantidad,
+                                    PrecioUnitario,
+                                    SubTotal
+                                )
+                                VALUES
+                                (
+                                    @IdCompra,
+                                    @IdArticulo,
+                                    @Cantidad,
+                                    @PrecioUnitario,
+                                    @SubTotal
+                                )");
+
+            datos.setearParametro("@IdCompra", idCompra);
+            datos.setearParametro("@IdArticulo", detalle.IdArticulo);
+            datos.setearParametro("@Cantidad", detalle.Cantidad);
+            datos.setearParametro("@PrecioUnitario", detalle.PrecioUnitario);
+            datos.setearParametro("@SubTotal", detalle.Subtotal);
+
+            datos.ejecutarAccionTransaccion();
+        }
         public void modificar(CompraDto compra) { }
 
         public void eliminar(int idCompra)
