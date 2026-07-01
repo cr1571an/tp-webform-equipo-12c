@@ -156,5 +156,49 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
+
+        public MedioPago obtenerPorId(int idMedioPago)
+        {
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+
+                datos.setearConsulta(@"SELECT IdMedioPago,Nombre,Descripcion,Activo
+                                     FROM MediosPago
+                                     WHERE IdMedioPago = @IdMedioPago");
+
+
+                datos.setearParametro("@IdMedioPago", idMedioPago);
+
+                datos.ejecutarLectura();
+
+                SqlDataReader lector = datos.Lector;
+
+                if (lector.Read())
+                {
+                    MedioPago medioPago = new MedioPago();
+
+                    medioPago.IdMedioPago = (int)lector["IdMedioPago"];
+                    medioPago.Nombre = (string)lector["Nombre"];
+                    medioPago.Descripcion = lector["Descripcion"] == DBNull.Value
+                            ? string.Empty
+                            : (string)lector["Descripcion"];
+                    medioPago.Activo = (bool)lector["Activo"];
+
+                    return medioPago;
+                }
+
+                return null;
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
     }
 }
