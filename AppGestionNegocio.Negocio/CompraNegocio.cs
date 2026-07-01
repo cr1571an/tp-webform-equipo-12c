@@ -215,6 +215,7 @@ namespace AppGestionNegocio.Negocio
                 foreach (DetalleCompraDto detalle in compra.Detalles)
                 {
                     guardarDetalle(datos, idCompra, detalle);
+                    modificarStock(datos, detalle.IdArticulo, detalle.Cantidad, OperacionStock.Sumar);
                 }
 
                 datos.confirmarTransaccion();
@@ -274,7 +275,7 @@ namespace AppGestionNegocio.Negocio
 
                 foreach (DetalleCompra detalle in detalles)
                 {
-                    revertirStock(datos, detalle);
+                    modificarStock(datos, detalle.Articulo.IdArticulo, detalle.Cantidad, OperacionStock.Restar);
                 }
 
                 eliminarDetalles(datos, idCompra);
@@ -294,16 +295,20 @@ namespace AppGestionNegocio.Negocio
             }
         }
 
-        private void revertirStock(AccesoDatos datos, DetalleCompra detalle)
+        private void modificarStock(AccesoDatos datos, int idArticulo, int cantidad, OperacionStock operacion)
         {
+            string operador = operacion == OperacionStock.Sumar
+                    ? "+"
+                    : "-";
+
             datos.limpiarParametros();
 
-            datos.setearConsulta(@"UPDATE Articulos 
-                                   SET Stock = Stock - @Cantidad
-                                   WHERE IdArticulo = @IdArticulo");
+            datos.setearConsulta($@"UPDATE Articulos
+                                    SET Stock = Stock {operador} @Cantidad
+                                    WHERE IdArticulo = @IdArticulo");
 
-            datos.setearParametro("@Cantidad", detalle.Cantidad);
-            datos.setearParametro("@IdArticulo", detalle.Articulo.IdArticulo);
+            datos.setearParametro("@Cantidad", cantidad);
+            datos.setearParametro("@IdArticulo", idArticulo);
 
             datos.ejecutarAccionTransaccion();
         }
