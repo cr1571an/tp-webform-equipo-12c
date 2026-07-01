@@ -94,9 +94,19 @@ namespace AppGestionNegocio.Web
 
                 if (compra == null)
                 {
-                    MostrarMensaje(lblMensajeDatos,"No se encontró la compra seleccionada.");
+                    MostrarMensaje(lblMensajeDatos, "No se encontró la compra seleccionada.");
                     return;
                 }
+
+                ArticuloNegocio articuloNegocio = new ArticuloNegocio();
+                List<ArticuloProveedorDto> articulos = articuloNegocio.listarPorProveedor(compra.Proveedor.IdProveedor);
+                Session["ArticulosProveedor"] = articulos;
+
+                ddlArticulo.DataSource = articulos;
+                ddlArticulo.DataTextField = "Nombre";
+                ddlArticulo.DataValueField = "IdArticulo";
+                ddlArticulo.DataBind();
+                ddlArticulo.Items.Insert(0, new ListItem("Seleccione un artículo", "0"));
 
                 lblTitulo.Text = "Editar Compra";
                 ddlProveedor.SelectedValue = compra.Proveedor.IdProveedor.ToString();
@@ -456,7 +466,7 @@ namespace AppGestionNegocio.Web
             int idMedioPago = Convert.ToInt32(ddlMedio.SelectedValue);
 
             string observaciones = txtObservaciones.Text.Trim();
-            
+
             Usuario usuario = (Usuario)Session["usuario"];
 
             CompraDto compra = new CompraDto
@@ -481,16 +491,12 @@ namespace AppGestionNegocio.Web
                     compra.IdCompra = (int)ViewState["IdCompra"];
 
                     compraNegocio.modificar(compra);
-
-                    Response.Redirect(
-                        "Compras.aspx?mensaje=Compra modificada correctamente");
+                    Response.Redirect("Compras.aspx?mensaje=Compra modificada correctamente");
                 }
                 else
                 {
                     compraNegocio.agregar(compra);
-
-                    Response.Redirect(
-                        "Compras.aspx?mensaje=Compra registrada correctamente");
+                    Response.Redirect("Compras.aspx?mensaje=Compra registrada correctamente");
                 }
 
             }
