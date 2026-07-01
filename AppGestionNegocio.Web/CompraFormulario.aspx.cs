@@ -2,10 +2,8 @@
 using AppGestionNegocio.Negocio;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
 using System.Globalization;
 using System.Linq;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -15,6 +13,8 @@ namespace AppGestionNegocio.Web
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            txtFechaCompra.Attributes["max"] = DateTime.Today.ToString("yyyy-MM-dd");
+
             if (!IsPostBack)
             {
                 cargarCombos();
@@ -30,9 +30,7 @@ namespace AppGestionNegocio.Web
                     }
                     else
                     {
-                        MostrarMensaje(
-                            lblMensajeDatos,
-                            "La compra indicada no es válida.");
+                        MostrarMensaje(lblMensajeDatos, "La compra indicada no es válida.");
                     }
                 }
                 else
@@ -70,18 +68,16 @@ namespace AppGestionNegocio.Web
             ddlProveedor.DataTextField = "Nombre";
             ddlProveedor.DataValueField = "IdProveedor";
             ddlProveedor.DataBind();
-            ddlProveedor.Items.Insert(0,
-                new ListItem("-- Seleccione un proveedor --", "0"));
+            ddlProveedor.Items.Insert(0, new ListItem("-- Seleccione un proveedor --", "0"));
 
             ddlMedio.DataSource = medioPagoNegocio.listar();
             ddlMedio.DataTextField = "Nombre";
             ddlMedio.DataValueField = "IdMedioPago";
             ddlMedio.DataBind();
-            ddlMedio.Items.Insert(0,
-                new ListItem("-- Seleccione un medio de pago --", "0"));
+            ddlMedio.Items.Insert(0, new ListItem("-- Seleccione un medio de pago --", "0"));
 
-            ddlArticulo.Items.Insert(0,
-                new ListItem("Seleccione un artículo", "0"));
+            ddlArticulo.Items.Clear();
+            ddlArticulo.Items.Insert(0, new ListItem("Seleccione un artículo", "0"));
         }
 
         private void cargarCompra(int idCompra)
@@ -108,7 +104,7 @@ namespace AppGestionNegocio.Web
                 ddlArticulo.DataBind();
                 ddlArticulo.Items.Insert(0, new ListItem("Seleccione un artículo", "0"));
 
-                lblTitulo.Text = "Editar Compra";
+                lblTitulo.Text = "Editar compra";
                 ddlProveedor.SelectedValue = compra.Proveedor.IdProveedor.ToString();
                 ddlMedio.SelectedValue = compra.MedioPago.IdMedioPago.ToString();
                 txtFechaCompra.Text = compra.FechaCompra.ToString("yyyy-MM-dd");
@@ -131,14 +127,11 @@ namespace AppGestionNegocio.Web
                 gvDetalle.DataSource = detalles;
                 gvDetalle.DataBind();
 
-                lblTotal.Text =
-                    "$ " + compra.Total.ToString("N2");
+                lblTotal.Text = "$ " + compra.Total.ToString("N2");
             }
             catch (Exception ex)
             {
-                MostrarMensaje(
-                    lblMensajeDatos,
-                    "Error al cargar la compra: " + ex.Message);
+                MostrarMensaje(lblMensajeDatos, "Error al cargar la compra: " + ex.Message);
             }
         }
 
@@ -155,6 +148,14 @@ namespace AppGestionNegocio.Web
             gvDetalle.DataBind();
             lblTotal.Text = "$ 0,00";
 
+            ddlArticulo.Items.Clear();
+            ddlArticulo.Items.Insert(0, new ListItem("Seleccione un artículo", "0"));
+
+            if (ddlProveedor.SelectedValue == "0")
+            {
+                return;
+            }
+
             int idProveedor = int.Parse(ddlProveedor.SelectedValue);
 
             ArticuloNegocio negocio = new ArticuloNegocio();
@@ -170,8 +171,21 @@ namespace AppGestionNegocio.Web
 
         protected void ddlArticulo_SelectedIndexChanged(object sender, EventArgs e)
         {
+            txtPrecioUnitario.Text = "";
+            txtSubtotal.Text = "";
+            Session.Remove("ArticuloSeleccionado");
 
-            List<ArticuloProveedorDto> articulos = (List<ArticuloProveedorDto>)Session["ArticulosProveedor"];
+            if (ddlArticulo.SelectedValue == "0")
+            {
+                return;
+            }
+
+            List<ArticuloProveedorDto> articulos = Session["ArticulosProveedor"] as List<ArticuloProveedorDto>;
+
+            if (articulos == null)
+            {
+                return;
+            }
 
             int idArticulo = int.Parse(ddlArticulo.SelectedValue);
 
@@ -182,12 +196,10 @@ namespace AppGestionNegocio.Web
                 Session["ArticuloSeleccionado"] = articulo;
                 txtPrecioUnitario.Text = articulo.PrecioUnitario.ToString("F2", CultureInfo.InvariantCulture);
             }
-
         }
 
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
-
             lblMensajeDetalle.Visible = false;
             lblMensajeDetalle.Text = string.Empty;
 
@@ -206,16 +218,32 @@ namespace AppGestionNegocio.Web
                 return;
             }
 
-
             if (!int.TryParse(txtCantidad.Text, out int cantidad) || cantidad <= 0)
             {
-                MostrarMensaje(lblMensajeDetalle, "Debe ingresar un cantidad valida.");
+                MostrarMensaje(lblMensajeDetalle, "Debe ingresar una cantidad válida.");
                 return;
             }
 
-            if (!decimal.TryParse(txtPrecioUnitario.Text, out decimal precioCompra) || precioCompra <= 0)
+            decimal precioCompra;
+
+            if (!decimal.TryParse(txtPrecioUnitario.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out precioCompra) &&
+                !decimal.TryParse(txtPrecioUnitario.Text, NumberStyles.Number, CultureInfo.CurrentCulture, out precioCompra))
             {
-                MostrarMensaje(lblMensajeDetalle, "Debe ingresar un precio valido valida.");
+                MostrarMensaje(lblMensajeDetalle, "Debe ingresar un precio válido.");
+                return;
+            }
+
+            if (precioCompra <= 0)
+            {
+                MostrarMensaje(lblMensajeDetalle, "Debe ingresar un precio válido.");
+                return;
+            }
+
+            ArticuloProveedorDto articulo = Session["ArticuloSeleccionado"] as ArticuloProveedorDto;
+
+            if (articulo == null)
+            {
+                MostrarMensaje(lblMensajeDetalle, "No se pudo identificar el artículo seleccionado.");
                 return;
             }
 
@@ -226,17 +254,13 @@ namespace AppGestionNegocio.Web
             else
                 detalles = (List<DetalleCompraDto>)Session["DetallesCompra"];
 
-            ArticuloProveedorDto articulo = (ArticuloProveedorDto)Session["ArticuloSeleccionado"];
-
             var existente = detalles.FirstOrDefault(x => x.IdArticulo == articulo.IdArticulo);
 
             if (existente != null)
             {
-
                 existente.Cantidad += cantidad;
                 existente.PrecioUnitario = precioCompra;
                 existente.Subtotal = existente.Cantidad * existente.PrecioUnitario;
-
             }
             else
             {
@@ -264,7 +288,15 @@ namespace AppGestionNegocio.Web
 
         private void ActualizarGrilla()
         {
-            var detalles = (List<DetalleCompraDto>)Session["DetallesCompra"];
+            List<DetalleCompraDto> detalles = Session["DetallesCompra"] as List<DetalleCompraDto>;
+
+            if (detalles == null)
+            {
+                gvDetalle.DataSource = null;
+                gvDetalle.DataBind();
+                lblTotal.Text = "$ 0,00";
+                return;
+            }
 
             gvDetalle.DataSource = detalles;
             gvDetalle.DataBind();
@@ -293,7 +325,13 @@ namespace AppGestionNegocio.Web
             lblMensajeDetalle.Visible = false;
             lblMensajeDetalle.Text = string.Empty;
 
-            List<DetalleCompraDto> detalles = (List<DetalleCompraDto>)Session["DetallesCompra"];
+            List<DetalleCompraDto> detalles = Session["DetallesCompra"] as List<DetalleCompraDto>;
+
+            if (detalles == null)
+            {
+                MostrarMensaje(lblMensajeDetalle, "No hay artículos cargados en el detalle.");
+                return;
+            }
 
             int idArticulo = Convert.ToInt32(gvDetalle.DataKeys[e.RowIndex].Value);
 
@@ -301,11 +339,11 @@ namespace AppGestionNegocio.Web
 
             TextBox txtCantidadEdit = (TextBox)fila.FindControl("txtCantidadEdit");
 
-            int cantidad = Convert.ToInt32(txtCantidadEdit.Text);
+            int cantidad;
 
-            if (cantidad <= 0)
+            if (!int.TryParse(txtCantidadEdit.Text, out cantidad) || cantidad <= 0)
             {
-                MostrarMensaje(lblMensajeDetalle, "Debe ingresar un cantidad valida.");
+                MostrarMensaje(lblMensajeDetalle, "Debe ingresar una cantidad válida.");
 
                 gvDetalle.DataSource = detalles;
                 gvDetalle.DataBind();
@@ -314,12 +352,9 @@ namespace AppGestionNegocio.Web
 
             DetalleCompraDto detalle = detalles.FirstOrDefault(x => x.IdArticulo == idArticulo);
 
-
             if (detalle == null)
             {
-                MostrarMensaje(
-                    lblMensajeDetalle,
-                    "No se encontró el artículo seleccionado.");
+                MostrarMensaje(lblMensajeDetalle, "No se encontró el artículo seleccionado.");
 
                 gvDetalle.EditIndex = -1;
 
@@ -330,9 +365,7 @@ namespace AppGestionNegocio.Web
             }
 
             detalle.Cantidad = cantidad;
-            detalle.Subtotal =
-            cantidad * detalle.PrecioUnitario;
-
+            detalle.Subtotal = cantidad * detalle.PrecioUnitario;
 
             Session["DetallesCompra"] = detalles;
 
@@ -340,25 +373,19 @@ namespace AppGestionNegocio.Web
 
             gvDetalle.DataSource = detalles;
             gvDetalle.DataBind();
+
             decimal total = detalles.Sum(x => x.Subtotal);
 
             lblTotal.Text = "$ " + total.ToString("N2");
-
         }
 
         protected void gvDetalle_RowCommand(object sender, GridViewCommandEventArgs e)
         {
             if (e.CommandName == "AbrirModalEliminar")
             {
-                hfIdArticuloEliminar.Value =
-                    e.CommandArgument.ToString();
+                hfIdArticuloEliminar.Value = e.CommandArgument.ToString();
 
-                ScriptManager.RegisterStartupScript(
-                    this,
-                    GetType(),
-                    "abrirModalEliminar",
-                    "$('#modalEliminarArticulo').modal('show');",
-                    true);
+                ScriptManager.RegisterStartupScript(this, GetType(), "abrirModalEliminar", "$('#modalEliminarArticulo').modal('show');", true);
             }
         }
 
@@ -366,7 +393,7 @@ namespace AppGestionNegocio.Web
         {
             int idArticulo = Convert.ToInt32(hfIdArticuloEliminar.Value);
 
-            List<DetalleCompraDto> detalles = (List<DetalleCompraDto>)Session["DetallesCompra"];
+            List<DetalleCompraDto> detalles = Session["DetallesCompra"] as List<DetalleCompraDto>;
 
             if (detalles == null)
                 return;
@@ -420,7 +447,6 @@ namespace AppGestionNegocio.Web
             if (fechaCompra.Date > DateTime.Today)
             {
                 MostrarMensaje(lblMensajeDatos, "La fecha no puede ser posterior a hoy.");
-
                 return;
             }
 
@@ -438,7 +464,22 @@ namespace AppGestionNegocio.Web
                 return;
             }
 
-            List<DetalleCompraDto> detalles = (List<DetalleCompraDto>)Session["DetallesCompra"];
+            int? idCompraActual = null;
+
+            if (ViewState["IdCompra"] != null)
+            {
+                idCompraActual = (int)ViewState["IdCompra"];
+            }
+
+            CompraNegocio compraNegocio = new CompraNegocio();
+
+            if (compraNegocio.existeNumeroComprobante(numeroComprobante, idCompraActual))
+            {
+                MostrarMensaje(lblMensajeDatos, "Ya existe una compra registrada con ese número de comprobante.");
+                return;
+            }
+
+            List<DetalleCompraDto> detalles = Session["DetallesCompra"] as List<DetalleCompraDto>;
 
             if (detalles == null || !detalles.Any())
             {
@@ -459,15 +500,29 @@ namespace AppGestionNegocio.Web
                     MostrarMensaje(lblMensajeDetalle, "Existe un artículo con precio inválido.");
                     return;
                 }
+
+                if (detalle.Subtotal <= 0)
+                {
+                    MostrarMensaje(lblMensajeDetalle, "Existe un artículo con subtotal inválido.");
+                    return;
+                }
             }
 
-            int idProveedor = Convert.ToInt32(ddlProveedor.SelectedValue);
+            decimal totalCompra = detalles.Sum(x => x.Subtotal);
 
-            int idMedioPago = Convert.ToInt32(ddlMedio.SelectedValue);
+            if (totalCompra <= 0)
+            {
+                MostrarMensaje(lblMensajeDetalle, "El total de la compra debe ser mayor a cero.");
+                return;
+            }
 
-            string observaciones = txtObservaciones.Text.Trim();
+            Usuario usuario = Session["usuario"] as Usuario;
 
-            Usuario usuario = (Usuario)Session["usuario"];
+            if (usuario == null)
+            {
+                MostrarMensaje(lblMensajeDatos, "No se pudo identificar el usuario logueado.");
+                return;
+            }
 
             CompraDto compra = new CompraDto
             {
@@ -475,57 +530,43 @@ namespace AppGestionNegocio.Web
                 IdProveedor = int.Parse(ddlProveedor.SelectedValue),
                 IdMedioPago = int.Parse(ddlMedio.SelectedValue),
                 FechaCompra = fechaCompra,
-                NumeroComprobante = txtNumeroComprobante.Text.Trim(),
+                NumeroComprobante = numeroComprobante,
                 Observaciones = txtObservaciones.Text.Trim(),
-                Total = detalles.Sum(x => x.Subtotal),
+                Total = totalCompra,
                 Detalles = detalles
             };
 
             try
             {
-
-                CompraNegocio compraNegocio = new CompraNegocio();
-
                 if (ViewState["IdCompra"] != null)
                 {
                     compra.IdCompra = (int)ViewState["IdCompra"];
 
                     compraNegocio.modificar(compra);
-                    Response.Redirect("Compras.aspx?mensaje=Compra modificada correctamente");
+                    Response.Redirect("Compras.aspx?mensaje=Compra modificada correctamente", false);
                 }
                 else
                 {
                     compraNegocio.agregar(compra);
-                    Response.Redirect("Compras.aspx?mensaje=Compra registrada correctamente");
+                    Response.Redirect("Compras.aspx?mensaje=Compra registrada correctamente", false);
                 }
-
             }
             catch (Exception ex)
             {
-                MostrarMensaje(lblMensajeDatos, "Ocurrió un error al registrar la compra.");
+                MostrarMensaje(lblMensajeDatos, "Ocurrió un error al registrar la compra: " + ex.Message);
             }
-
         }
 
-        private void MostrarMensaje(Label lbl, string mensaje, string cssClass = "alert alert-warning")
+        private void MostrarMensaje(Label lbl, string mensaje, string cssClass = "alert alert-danger d-block")
         {
             lbl.Text = mensaje;
             lbl.CssClass = cssClass;
             lbl.Visible = true;
+            lbl.Style["display"] = "block";
 
-            string script =
-                "setTimeout(function() {" +
-                "var mensaje = document.getElementById('" + lbl.ClientID + "');" +
-                "if (mensaje) {" +
-                "mensaje.style.display = 'none';" +
-                "}" +
-                "}, 4000);";
+            string script = "setTimeout(function() { var mensaje = document.getElementById('" + lbl.ClientID + "'); if (mensaje) { mensaje.innerHTML = ''; mensaje.classList.remove('d-block'); mensaje.classList.add('d-none'); mensaje.style.display = 'none'; } }, 4000);";
 
-            ClientScript.RegisterStartupScript(
-                GetType(),
-                Guid.NewGuid().ToString(),
-                script,
-                true);
+            ClientScript.RegisterStartupScript(GetType(), Guid.NewGuid().ToString(), script, true);
         }
     }
 }
