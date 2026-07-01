@@ -2,6 +2,7 @@
 using AppGestionNegocio.Negocio;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Globalization;
 using System.Linq;
 using System.Web;
@@ -22,10 +23,9 @@ namespace AppGestionNegocio.Web
                 {
                     int idCompra;
 
-                    if (int.TryParse(
-                        Request.QueryString["id"],
-                        out idCompra))
+                    if (int.TryParse(Request.QueryString["id"], out idCompra))
                     {
+                        ViewState["IdCompra"] = idCompra;
                         cargarCompra(idCompra);
                     }
                     else
@@ -59,7 +59,6 @@ namespace AppGestionNegocio.Web
             lblTotal.Text = "$ 0,00";
 
             lblTitulo.Text = "Registrar compra";
-            btnGuardarCompra.Text = "Guardar compra";
         }
 
         private void cargarCombos()
@@ -95,13 +94,21 @@ namespace AppGestionNegocio.Web
 
                 if (compra == null)
                 {
-                    MostrarMensaje(
-                        lblMensajeDatos,
-                        "No se encontró la compra seleccionada.");
-
+                    MostrarMensaje(lblMensajeDatos, "No se encontró la compra seleccionada.");
                     return;
                 }
 
+                ArticuloNegocio articuloNegocio = new ArticuloNegocio();
+                List<ArticuloProveedorDto> articulos = articuloNegocio.listarPorProveedor(compra.Proveedor.IdProveedor);
+                Session["ArticulosProveedor"] = articulos;
+
+                ddlArticulo.DataSource = articulos;
+                ddlArticulo.DataTextField = "Nombre";
+                ddlArticulo.DataValueField = "IdArticulo";
+                ddlArticulo.DataBind();
+                ddlArticulo.Items.Insert(0, new ListItem("Seleccione un artículo", "0"));
+
+                lblTitulo.Text = "Editar Compra";
                 ddlProveedor.SelectedValue = compra.Proveedor.IdProveedor.ToString();
                 ddlMedio.SelectedValue = compra.MedioPago.IdMedioPago.ToString();
                 txtFechaCompra.Text = compra.FechaCompra.ToString("yyyy-MM-dd");
@@ -460,9 +467,11 @@ namespace AppGestionNegocio.Web
 
             string observaciones = txtObservaciones.Text.Trim();
 
+            Usuario usuario = (Usuario)Session["usuario"];
+
             CompraDto compra = new CompraDto
             {
-                IdUsuario = 1, //TO DO: quitar valor hardcodeado!!
+                IdUsuario = usuario.IdUsuario,
                 IdProveedor = int.Parse(ddlProveedor.SelectedValue),
                 IdMedioPago = int.Parse(ddlMedio.SelectedValue),
                 FechaCompra = fechaCompra,
@@ -474,16 +483,22 @@ namespace AppGestionNegocio.Web
 
             try
             {
+
                 CompraNegocio compraNegocio = new CompraNegocio();
 
-                compraNegocio.agregar(compra);
+                if (ViewState["IdCompra"] != null)
+                {
+                    compra.IdCompra = (int)ViewState["IdCompra"];
 
-                Session.Remove("DetallesCompra");
-                Session.Remove("ArticuloSeleccionado");
-                Session.Remove("ArticulosProveedor");
+                    compraNegocio.modificar(compra);
+                    Response.Redirect("Compras.aspx?mensaje=Compra modificada correctamente");
+                }
+                else
+                {
+                    compraNegocio.agregar(compra);
+                    Response.Redirect("Compras.aspx?mensaje=Compra registrada correctamente");
+                }
 
-                Response.Redirect(
-                    "Compras.aspx?mensaje=Compra registrada correctamente");
             }
             catch (Exception ex)
             {

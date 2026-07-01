@@ -342,7 +342,7 @@
             <asp:Button
                 ID="btnGuardarCompra"
                 runat="server"
-                Text="Guardar compra"
+                Text="Guardar"
                 CssClass="btn btn-primary"
                 OnClick="btnGuardarCompra_Click" />
 
