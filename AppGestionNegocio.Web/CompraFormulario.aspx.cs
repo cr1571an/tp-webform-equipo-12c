@@ -26,11 +26,6 @@ namespace AppGestionNegocio.Web
                         Request.QueryString["id"],
                         out idCompra))
                     {
-                        ViewState["IdCompra"] = idCompra;
-
-                        lblTitulo.Text = "Modificar compra";
-                        btnGuardarCompra.Text = "Guardar cambios";
-
                         cargarCompra(idCompra);
                     }
                     else
@@ -42,21 +37,29 @@ namespace AppGestionNegocio.Web
                 }
                 else
                 {
-                    lblTitulo.Text = "Registrar compra";
-                    btnGuardarCompra.Text = "Guardar compra";
-
-                    txtFechaCompra.Text =
-                        DateTime.Today.ToString("yyyy-MM-dd");
-
-                    Session.Remove("ArticuloSeleccionado");
-                    Session.Remove("DetallesCompra");
-
-                    gvDetalle.DataSource = null;
-                    gvDetalle.DataBind();
-
-                    lblTotal.Text = "$ 0,00";
+                    inicializarNuevaCompra();
                 }
             }
+        }
+
+        private void inicializarNuevaCompra()
+        {
+            txtFechaCompra.Text = DateTime.Today.ToString("yyyy-MM-dd");
+
+            txtCantidad.Text = "";
+            txtPrecioUnitario.Text = "";
+            txtSubtotal.Text = "";
+
+            Session.Remove("ArticuloSeleccionado");
+            Session.Remove("DetallesCompra");
+
+            gvDetalle.DataSource = null;
+            gvDetalle.DataBind();
+
+            lblTotal.Text = "$ 0,00";
+
+            lblTitulo.Text = "Registrar compra";
+            btnGuardarCompra.Text = "Guardar compra";
         }
 
         private void cargarCombos()
@@ -99,27 +102,26 @@ namespace AppGestionNegocio.Web
                     return;
                 }
 
-                ddlProveedor.SelectedValue =
-                    compra.Proveedor.IdProveedor.ToString();
+                ddlProveedor.SelectedValue = compra.Proveedor.IdProveedor.ToString();
+                ddlMedio.SelectedValue = compra.MedioPago.IdMedioPago.ToString();
+                txtFechaCompra.Text = compra.FechaCompra.ToString("yyyy-MM-dd");
+                txtNumeroComprobante.Text = compra.NumeroComprobante;
+                txtObservaciones.Text = compra.Observaciones;
 
-                ddlMedio.SelectedValue =
-                    compra.MedioPago.IdMedioPago.ToString();
+                List<DetalleCompraDto> detalles = compra.DetallesCompra
+                    .Select(d => new DetalleCompraDto
+                    {
+                        IdArticulo = d.Articulo.IdArticulo,
+                        NombreArticulo = d.Articulo.Nombre,
+                        Cantidad = d.Cantidad,
+                        PrecioUnitario = d.PrecioUnitario,
+                        Subtotal = d.Subtotal
+                    })
+                    .ToList();
 
-                txtFechaCompra.Text =
-                    compra.FechaCompra.ToString("yyyy-MM-dd");
+                Session["DetallesCompra"] = detalles;
 
-                txtNumeroComprobante.Text =
-                    compra.NumeroComprobante;
-
-                txtObservaciones.Text =
-                    compra.Observaciones;
-
-                Session["DetallesCompra"] =
-                    compra.DetallesCompra;
-
-                gvDetalle.DataSource =
-                    compra.DetallesCompra;
-
+                gvDetalle.DataSource = detalles;
                 gvDetalle.DataBind();
 
                 lblTotal.Text =
