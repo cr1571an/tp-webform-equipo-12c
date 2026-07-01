@@ -77,17 +77,85 @@ namespace AppGestionNegocio.Web
 
         protected void btnConfirmarEliminar_Click(object sender, EventArgs e)
         {
+            try
+            {
+                lblMensaje.Text = "";
 
+                int idCompra;
+
+                if (!int.TryParse(hfIdCompraEliminar.Value, out idCompra))
+                {
+                    mostrarMensaje(
+                        "No se pudo identificar la compra a eliminar.",
+                        true);
+
+                    return;
+                }
+
+                CompraNegocio negocio = new CompraNegocio();
+
+                negocio.eliminar(idCompra);
+
+                hfIdCompraEliminar.Value = "";
+
+                cargarCompras();
+
+                mostrarMensaje(
+                    "Compra eliminada correctamente.",
+                    false);
+            }
+            catch (Exception ex)
+            {
+                mostrarMensaje(
+                    "Error al eliminar compra: " + ex.Message,
+                    true);
+            }
         }
 
-        protected void dgvCompras_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        protected void dgvCompras_PageIndexChanging(object sender,GridViewPageEventArgs e)
         {
+            dgvCompras.PageIndex = e.NewPageIndex;
 
+            if (Session["listaCompras"] != null)
+            {
+                dgvCompras.DataSource = Session["listaCompras"];
+                dgvCompras.DataBind();
+            }
+            else
+            {
+                cargarCompras();
+            }
         }
 
         protected void dgvCompras_RowCommand(object sender, GridViewCommandEventArgs e)
         {
+            try
+            {
+                lblMensaje.Text = "";
 
+                if (e.CommandName == "AbrirModalEliminar")
+                {
+                    int idCompra = int.Parse(
+                        e.CommandArgument.ToString());
+
+                    hfIdCompraEliminar.Value =
+                        idCompra.ToString();
+
+                    ScriptManager.RegisterStartupScript(
+                        this,
+                        GetType(),
+                        "abrirModalEliminarCompra",
+                        "$('#modalEliminarCompra').modal('show');",
+                        true
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                mostrarMensaje(
+                    "Error al seleccionar la compra: " + ex.Message,
+                    true);
+            }
         }
 
         private void mostrarMensaje(string mensaje, bool esError)

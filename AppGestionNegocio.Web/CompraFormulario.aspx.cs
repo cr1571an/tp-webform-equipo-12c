@@ -14,38 +14,122 @@ namespace AppGestionNegocio.Web
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
-
             if (!IsPostBack)
             {
-                ProveedorNegocio proveedorNegocio = new ProveedorNegocio();
-                MedioPagoNegocio medioPagoNegocio = new MedioPagoNegocio();
+                cargarCombos();
 
-                ddlProveedor.DataSource = proveedorNegocio.listar();
-                ddlProveedor.DataTextField = "Nombre";
-                ddlProveedor.DataValueField = "IdProveedor";
-                ddlProveedor.DataBind();
-                ddlProveedor.Items.Insert(0, new ListItem("-- Seleccione un proveedor --", "0"));
+                if (Request.QueryString["id"] != null)
+                {
+                    int idCompra;
 
-                ddlMedio.DataSource = medioPagoNegocio.listar();
-                ddlMedio.DataTextField = "Nombre";
-                ddlMedio.DataValueField = "IdMedioPago";
-                ddlMedio.DataBind();
-                ddlMedio.Items.Insert(0, new ListItem("-- Seleccione un medio de pago --", "0"));
+                    if (int.TryParse(
+                        Request.QueryString["id"],
+                        out idCompra))
+                    {
+                        ViewState["IdCompra"] = idCompra;
 
-                ddlArticulo.Items.Insert(0, new ListItem("Seleccione un artículo", "0"));
+                        lblTitulo.Text = "Modificar compra";
+                        btnGuardarCompra.Text = "Guardar cambios";
 
-                txtFechaCompra.Text = DateTime.Today.ToString("yyyy-MM-dd");
-                txtCantidad.Text = "";
-                txtPrecioUnitario.Text = "";
-                txtSubtotal.Text = "";
+                        cargarCompra(idCompra);
+                    }
+                    else
+                    {
+                        MostrarMensaje(
+                            lblMensajeDatos,
+                            "La compra indicada no es válida.");
+                    }
+                }
+                else
+                {
+                    lblTitulo.Text = "Registrar compra";
+                    btnGuardarCompra.Text = "Guardar compra";
 
-                Session.Remove("ArticuloSeleccionado");
-                Session.Remove("DetallesCompra");
+                    txtFechaCompra.Text =
+                        DateTime.Today.ToString("yyyy-MM-dd");
 
-                gvDetalle.DataSource = null;
+                    Session.Remove("ArticuloSeleccionado");
+                    Session.Remove("DetallesCompra");
+
+                    gvDetalle.DataSource = null;
+                    gvDetalle.DataBind();
+
+                    lblTotal.Text = "$ 0,00";
+                }
+            }
+        }
+
+        private void cargarCombos()
+        {
+            ProveedorNegocio proveedorNegocio = new ProveedorNegocio();
+            MedioPagoNegocio medioPagoNegocio = new MedioPagoNegocio();
+
+            ddlProveedor.DataSource = proveedorNegocio.listar();
+            ddlProveedor.DataTextField = "Nombre";
+            ddlProveedor.DataValueField = "IdProveedor";
+            ddlProveedor.DataBind();
+            ddlProveedor.Items.Insert(0,
+                new ListItem("-- Seleccione un proveedor --", "0"));
+
+            ddlMedio.DataSource = medioPagoNegocio.listar();
+            ddlMedio.DataTextField = "Nombre";
+            ddlMedio.DataValueField = "IdMedioPago";
+            ddlMedio.DataBind();
+            ddlMedio.Items.Insert(0,
+                new ListItem("-- Seleccione un medio de pago --", "0"));
+
+            ddlArticulo.Items.Insert(0,
+                new ListItem("Seleccione un artículo", "0"));
+        }
+
+        private void cargarCompra(int idCompra)
+        {
+            try
+            {
+                CompraNegocio negocio = new CompraNegocio();
+
+                Compra compra = negocio.obtener(idCompra);
+
+                if (compra == null)
+                {
+                    MostrarMensaje(
+                        lblMensajeDatos,
+                        "No se encontró la compra seleccionada.");
+
+                    return;
+                }
+
+                ddlProveedor.SelectedValue =
+                    compra.Proveedor.IdProveedor.ToString();
+
+                ddlMedio.SelectedValue =
+                    compra.MedioPago.IdMedioPago.ToString();
+
+                txtFechaCompra.Text =
+                    compra.FechaCompra.ToString("yyyy-MM-dd");
+
+                txtNumeroComprobante.Text =
+                    compra.NumeroComprobante;
+
+                txtObservaciones.Text =
+                    compra.Observaciones;
+
+                Session["DetallesCompra"] =
+                    compra.DetallesCompra;
+
+                gvDetalle.DataSource =
+                    compra.DetallesCompra;
+
                 gvDetalle.DataBind();
-                lblTotal.Text = "$ 0,00";
+
+                lblTotal.Text =
+                    "$ " + compra.Total.ToString("N2");
+            }
+            catch (Exception ex)
+            {
+                MostrarMensaje(
+                    lblMensajeDatos,
+                    "Error al cargar la compra: " + ex.Message);
             }
         }
 
@@ -357,13 +441,13 @@ namespace AppGestionNegocio.Web
             {
                 if (detalle.Cantidad <= 0)
                 {
-                    MostrarMensaje(lblMensajeDetalle,"Existe un artículo con cantidad inválida.");
+                    MostrarMensaje(lblMensajeDetalle, "Existe un artículo con cantidad inválida.");
                     return;
                 }
 
                 if (detalle.PrecioUnitario <= 0)
                 {
-                    MostrarMensaje(lblMensajeDetalle,"Existe un artículo con precio inválido.");
+                    MostrarMensaje(lblMensajeDetalle, "Existe un artículo con precio inválido.");
                     return;
                 }
             }
@@ -401,7 +485,7 @@ namespace AppGestionNegocio.Web
             }
             catch (Exception ex)
             {
-                MostrarMensaje(lblMensajeDatos,"Ocurrió un error al registrar la compra.");
+                MostrarMensaje(lblMensajeDatos, "Ocurrió un error al registrar la compra.");
             }
 
         }

@@ -68,7 +68,13 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h1 class="page-title">Registrar compra</h1>
+            <h1 class="page-title">
+                <asp:Label
+                    ID="lblTitulo"
+                    runat="server"
+                    Text="Registrar compra">
+                </asp:Label>
+            </h1>
         </div>
 
         <a href="Compras.aspx" class="btn btn-outline-secondary">Volver al listado
