@@ -193,7 +193,7 @@
                     <asp:TemplateField HeaderText="Descripción">
                         <ItemTemplate>
                             <span class="role-description" title='<%# Eval("Descripcion") %>'>
-                                <%# Eval("Descripcion") != null && Eval("Descripcion").ToString().Length > 40 ? Eval("Descripcion").ToString().Substring(0, 40) + "..." : Eval("Descripcion") %>
+                                <%# Eval("Descripcion") != null && Eval("Descripcion").ToString().Length > 80 ? Eval("Descripcion").ToString().Substring(0, 80) + "..." : Eval("Descripcion") %>
                             </span>
                         </ItemTemplate>
 
