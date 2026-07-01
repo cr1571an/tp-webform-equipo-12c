@@ -403,5 +403,31 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
+
+        public List<Articulo> listarPorCategoria(int idCategoria)
+        {
+            List<Articulo> lista = new List<Articulo>();
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                datos.setearConsulta(CONSULTA + " AND A.IdCategoria = @idCategoria");
+                datos.setearParametro("@idCategoria", idCategoria);
+                datos.ejecutarLectura();
+
+                while (datos.Lector.Read())
+                {
+                    lista.Add(MapearArticulo(datos.Lector));
+                }
+                return lista;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
     }
 }
