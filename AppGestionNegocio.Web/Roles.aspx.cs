@@ -20,9 +20,22 @@ namespace AppGestionNegocio.Web
         {
             RolNegocio negocio = new RolNegocio();
 
-            string nombre = txtFiltroNombre.Text.Trim();
+            bool verInactivos = chkVerInactivos.Checked;
 
-            dgvRoles.DataSource = negocio.filtrar(nombre);
+            cardNuevoRol.Visible = !verInactivos;
+
+            if (verInactivos)
+            {
+                lblTituloListado.Text = "Roles inactivos";
+                dgvRoles.EmptyDataText = "No hay roles inactivos registrados.";
+            }
+            else
+            {
+                lblTituloListado.Text = "Roles registrados";
+                dgvRoles.EmptyDataText = "No hay roles activos registrados.";
+            }
+
+            dgvRoles.DataSource = negocio.listar(null, verInactivos);
             dgvRoles.DataBind();
         }
 
@@ -30,9 +43,17 @@ namespace AppGestionNegocio.Web
         {
             lbl.Text = mensaje;
 
-            string script = "setTimeout(function() { " + "var mensaje = document.getElementById('" + lbl.ClientID + "'); " + "if (mensaje) { mensaje.innerHTML = ''; } " + "}, 4000);";
+            string script = "setTimeout(function() { var mensaje = document.getElementById('" + lbl.ClientID + "'); if (mensaje) { mensaje.innerHTML = ''; } }, 4000);";
 
-            ClientScript.RegisterStartupScript(this.GetType(), "ocultarMensaje", script, true);
+            ClientScript.RegisterStartupScript(this.GetType(), "ocultarMensaje" + lbl.ClientID, script, true);
+        }
+
+        protected void chkVerInactivos_CheckedChanged(object sender, EventArgs e)
+        {
+            dgvRoles.EditIndex = -1;
+            lblMensaje.Text = "";
+            lblMensajeListado.Text = "";
+            cargarRoles();
         }
 
         protected void btnAgregar_Click(object sender, EventArgs e)
@@ -57,7 +78,6 @@ namespace AppGestionNegocio.Web
 
                 txtNombre.Text = "";
                 txtDescripcion.Text = "";
-                txtFiltroNombre.Text = "";
 
                 cargarRoles();
             }
@@ -67,19 +87,14 @@ namespace AppGestionNegocio.Web
             }
         }
 
-        protected void btnFiltrar_Click(object sender, EventArgs e)
-        {
-            cargarRoles();
-        }
-
-        protected void btnLimpiarFiltro_Click(object sender, EventArgs e)
-        {
-            txtFiltroNombre.Text = "";
-            cargarRoles();
-        }
-
         protected void dgvRoles_RowEditing(object sender, GridViewEditEventArgs e)
         {
+            if (chkVerInactivos.Checked)
+            {
+                e.Cancel = true;
+                return;
+            }
+
             dgvRoles.EditIndex = e.NewEditIndex;
             cargarRoles();
         }
@@ -132,6 +147,7 @@ namespace AppGestionNegocio.Web
             try
             {
                 lblMensaje.Text = "";
+                lblMensajeListado.Text = "";
 
                 if (e.CommandName == "AbrirModalEliminar")
                 {
@@ -139,18 +155,45 @@ namespace AppGestionNegocio.Web
 
                     hfIdRolEliminar.Value = idRol.ToString();
 
-                    ScriptManager.RegisterStartupScript(
-                        this,
-                        this.GetType(),
-                        "abrirModalEliminarRol",
-                        "$('#modalEliminarRol').modal('show');",
-                        true
-                    );
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "abrirModalEliminarRol", "$('#modalEliminarRol').modal('show');", true);
+                }
+
+                if (e.CommandName == "Restaurar")
+                {
+                    int idRol = int.Parse(e.CommandArgument.ToString());
+
+                    RolNegocio negocio = new RolNegocio();
+                    negocio.restaurar(idRol);
+
+                    cargarRoles();
+
+                    mostrarMensaje(lblMensajeListado, "Rol restaurado correctamente.");
                 }
             }
             catch (Exception ex)
             {
-                mostrarMensaje(lblMensaje, "Error al seleccionar el rol: " + ex.Message);
+                mostrarMensaje(lblMensajeListado, "Error al seleccionar el rol: " + ex.Message);
+            }
+        }
+
+        protected void dgvRoles_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                bool verInactivos = chkVerInactivos.Checked;
+
+                Button btnEditar = (Button)e.Row.FindControl("btnEditar");
+                Button btnEliminar = (Button)e.Row.FindControl("btnEliminar");
+                Button btnRestaurar = (Button)e.Row.FindControl("btnRestaurar");
+
+                if (btnEditar != null)
+                    btnEditar.Visible = !verInactivos;
+
+                if (btnEliminar != null)
+                    btnEliminar.Visible = !verInactivos;
+
+                if (btnRestaurar != null)
+                    btnRestaurar.Visible = verInactivos;
             }
         }
 
@@ -159,6 +202,7 @@ namespace AppGestionNegocio.Web
             try
             {
                 lblMensaje.Text = "";
+                lblMensajeListado.Text = "";
 
                 int idRol;
 

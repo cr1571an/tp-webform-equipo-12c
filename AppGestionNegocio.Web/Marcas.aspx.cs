@@ -12,6 +12,7 @@ namespace AppGestionNegocio.Web
         {
             if (!IsPostBack)
             {
+                contenedorInactivos.Visible = Seguridad.esAdmin(Session["usuario"]);
                 cargarMarcas();
             }
         }
@@ -21,8 +22,22 @@ namespace AppGestionNegocio.Web
             MarcaNegocio negocio = new MarcaNegocio();
 
             string nombre = txtFiltroNombre.Text.Trim();
+            bool verInactivos = Seguridad.esAdmin(Session["usuario"]) && chkVerInactivos.Checked;
 
-            dgvMarcas.DataSource = negocio.filtrar(nombre);
+            cardNuevaMarca.Visible = !verInactivos;
+
+            if (verInactivos)
+            {
+                lblTituloListado.Text = "Marcas inactivas";
+                dgvMarcas.EmptyDataText = "No hay marcas inactivas registradas.";
+            }
+            else
+            {
+                lblTituloListado.Text = "Marcas registradas";
+                dgvMarcas.EmptyDataText = "No hay marcas activas registradas.";
+            }
+
+            dgvMarcas.DataSource = negocio.filtrar(nombre, verInactivos);
             dgvMarcas.DataBind();
         }
 
@@ -33,6 +48,15 @@ namespace AppGestionNegocio.Web
             string script = "setTimeout(function() { " + "var mensaje = document.getElementById('" + lblMensaje.ClientID + "'); " + "if (mensaje) { mensaje.innerHTML = ''; } " + "}, 4000);";
 
             ClientScript.RegisterStartupScript(this.GetType(), "ocultarMensaje", script, true);
+        }
+
+        private void mostrarMensajeListado(string mensaje)
+        {
+            lblMensajeListado.Text = mensaje;
+
+            string script = "setTimeout(function() { " + "var mensaje = document.getElementById('" + lblMensajeListado.ClientID + "'); " + "if (mensaje) { mensaje.innerHTML = ''; } " + "}, 4000);";
+
+            ClientScript.RegisterStartupScript(this.GetType(), "ocultarMensajeListado", script, true);
         }
 
         protected void btnAgregar_Click(object sender, EventArgs e)
@@ -76,8 +100,22 @@ namespace AppGestionNegocio.Web
             cargarMarcas();
         }
 
+        protected void chkVerInactivos_CheckedChanged(object sender, EventArgs e)
+        {
+            dgvMarcas.EditIndex = -1;
+            lblMensaje.Text = "";
+            lblMensajeListado.Text = "";
+            cargarMarcas();
+        }
+
         protected void dgvMarcas_RowEditing(object sender, GridViewEditEventArgs e)
         {
+            if (chkVerInactivos.Checked)
+            {
+                e.Cancel = true;
+                return;
+            }
+
             dgvMarcas.EditIndex = e.NewEditIndex;
             cargarMarcas();
         }
@@ -128,6 +166,7 @@ namespace AppGestionNegocio.Web
             try
             {
                 lblMensaje.Text = "";
+                lblMensajeListado.Text = "";
 
                 if (e.CommandName == "AbrirModalEliminar")
                 {
@@ -135,18 +174,45 @@ namespace AppGestionNegocio.Web
 
                     hfIdMarcaEliminar.Value = idMarca.ToString();
 
-                    ScriptManager.RegisterStartupScript(
-                        this,
-                        this.GetType(),
-                        "abrirModalEliminarMarca",
-                        "$('#modalEliminarMarca').modal('show');",
-                        true
-                    );
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "abrirModalEliminarMarca", "$('#modalEliminarMarca').modal('show');", true);
+                }
+
+                if (e.CommandName == "Restaurar")
+                {
+                    int idMarca = int.Parse(e.CommandArgument.ToString());
+
+                    MarcaNegocio negocio = new MarcaNegocio();
+                    negocio.restaurar(idMarca);
+
+                    cargarMarcas();
+
+                    mostrarMensajeListado("Marca restaurada correctamente.");
                 }
             }
             catch (Exception ex)
             {
-                mostrarMensaje("Error al seleccionar la marca: " + ex.Message);
+                mostrarMensajeListado("Error al seleccionar la marca: " + ex.Message);
+            }
+        }
+
+        protected void dgvMarcas_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                bool verInactivos = Seguridad.esAdmin(Session["usuario"]) && chkVerInactivos.Checked;
+
+                Button btnEditar = (Button)e.Row.FindControl("btnEditar");
+                Button btnEliminar = (Button)e.Row.FindControl("btnEliminar");
+                Button btnRestaurar = (Button)e.Row.FindControl("btnRestaurar");
+
+                if (btnEditar != null)
+                    btnEditar.Visible = !verInactivos;
+
+                if (btnEliminar != null)
+                    btnEliminar.Visible = !verInactivos;
+
+                if (btnRestaurar != null)
+                    btnRestaurar.Visible = verInactivos;
             }
         }
 
@@ -155,6 +221,7 @@ namespace AppGestionNegocio.Web
             try
             {
                 lblMensaje.Text = "";
+                lblMensajeListado.Text = "";
 
                 int idMarca;
 

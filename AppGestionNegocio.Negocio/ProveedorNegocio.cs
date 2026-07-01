@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data.SqlClient;
 using AppGestionNegocio.Dominio;
 
@@ -10,14 +7,15 @@ namespace AppGestionNegocio.Negocio
 {
     public class ProveedorNegocio
     {
-        public List<Proveedor> listar()
+        public List<Proveedor> listar(bool verInactivos = false)
         {
             List<Proveedor> lista = new List<Proveedor>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("SELECT IdProveedor, Nombre, Cuit, Telefono, Email, Domicilio, Cp, PersonaContacto, Observaciones, Activo " + "FROM Proveedores " + "WHERE Activo = 1 " + "ORDER BY Nombre");
+                datos.setearConsulta("SELECT IdProveedor, Nombre, Cuit, Telefono, Email, Domicilio, Cp, PersonaContacto, Observaciones, Activo FROM Proveedores WHERE Activo = @Activo ORDER BY Nombre");
+                datos.setearParametro("@Activo", verInactivos ? 0 : 1);
                 datos.ejecutarLectura();
 
                 SqlDataReader lector = datos.Lector;
@@ -46,7 +44,7 @@ namespace AppGestionNegocio.Negocio
 
             try
             {
-                datos.setearConsulta("SELECT IdProveedor, Nombre, Cuit, Telefono, Email, Domicilio, Cp, PersonaContacto, Observaciones, Activo " + "FROM Proveedores " + "WHERE IdProveedor = @IdProveedor AND Activo = 1");
+                datos.setearConsulta("SELECT IdProveedor, Nombre, Cuit, Telefono, Email, Domicilio, Cp, PersonaContacto, Observaciones, Activo FROM Proveedores WHERE IdProveedor = @IdProveedor AND Activo = 1");
                 datos.setearParametro("@IdProveedor", idProveedor);
                 datos.ejecutarLectura();
 
@@ -75,7 +73,7 @@ namespace AppGestionNegocio.Negocio
 
             try
             {
-                datos.setearConsulta("INSERT INTO Proveedores " + "(Nombre, Cuit, Telefono, Email, Domicilio, Cp, PersonaContacto, Observaciones, Activo) " + "VALUES " + "(@Nombre, @Cuit, @Telefono, @Email, @Domicilio, @Cp, @PersonaContacto, @Observaciones, 1)");
+                datos.setearConsulta("INSERT INTO Proveedores (Nombre, Cuit, Telefono, Email, Domicilio, Cp, PersonaContacto, Observaciones, Activo) VALUES (@Nombre, @Cuit, @Telefono, @Email, @Domicilio, @Cp, @PersonaContacto, @Observaciones, 1)");
                 datos.setearParametro("@Nombre", nuevo.Nombre);
                 datos.setearParametro("@Cuit", nuevo.Cuit);
                 datos.setearParametro("@Telefono", nuevo.Telefono);
@@ -103,7 +101,7 @@ namespace AppGestionNegocio.Negocio
 
             try
             {
-                datos.setearConsulta("UPDATE Proveedores SET " + "Nombre = @Nombre, " + "Cuit = @Cuit, " + "Telefono = @Telefono, " + "Email = @Email, " + "Domicilio = @Domicilio, " + "Cp = @Cp, " + "PersonaContacto = @PersonaContacto, " + "Observaciones = @Observaciones, " + "Activo = @Activo " + "WHERE IdProveedor = @IdProveedor");
+                datos.setearConsulta("UPDATE Proveedores SET Nombre = @Nombre, Cuit = @Cuit, Telefono = @Telefono, Email = @Email, Domicilio = @Domicilio, Cp = @Cp, PersonaContacto = @PersonaContacto, Observaciones = @Observaciones, Activo = @Activo WHERE IdProveedor = @IdProveedor");
                 datos.setearParametro("@Nombre", proveedor.Nombre);
                 datos.setearParametro("@Cuit", proveedor.Cuit);
                 datos.setearParametro("@Telefono", proveedor.Telefono);
@@ -147,15 +145,35 @@ namespace AppGestionNegocio.Negocio
             }
         }
 
-        public List<Proveedor> filtrar(string filtro, string cp)
+        public void restaurar(int idProveedor)
+        {
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                datos.setearConsulta("UPDATE Proveedores SET Activo = 1 WHERE IdProveedor = @IdProveedor");
+                datos.setearParametro("@IdProveedor", idProveedor);
+                datos.ejecutarAccion();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        public List<Proveedor> filtrar(string filtro, string cp, bool verInactivos = false)
         {
             List<Proveedor> lista = new List<Proveedor>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                string consulta = "SELECT IdProveedor, Nombre, Cuit, Telefono, Email, Domicilio, Cp, PersonaContacto, Observaciones, Activo " + "FROM Proveedores " + "WHERE Activo = 1 ";
-                
+                string consulta = "SELECT IdProveedor, Nombre, Cuit, Telefono, Email, Domicilio, Cp, PersonaContacto, Observaciones, Activo FROM Proveedores WHERE Activo = @Activo ";
+
                 if (!string.IsNullOrWhiteSpace(filtro))
                 {
                     consulta += "AND (Nombre LIKE @filtro OR Cuit LIKE @filtro) ";
@@ -169,6 +187,7 @@ namespace AppGestionNegocio.Negocio
                 consulta += "ORDER BY Nombre";
 
                 datos.setearConsulta(consulta);
+                datos.setearParametro("@Activo", verInactivos ? 0 : 1);
 
                 if (!string.IsNullOrWhiteSpace(filtro))
                 {
@@ -200,7 +219,113 @@ namespace AppGestionNegocio.Negocio
             {
                 datos.cerrarConexion();
             }
-        }     
+        }
+
+        public bool existeNombre(string nombre, int? idProveedorActual = null)
+        {
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                string consulta = "SELECT IdProveedor FROM Proveedores WHERE UPPER(Nombre) = UPPER(@Nombre) ";
+
+                if (idProveedorActual.HasValue)
+                {
+                    consulta += "AND IdProveedor <> @IdProveedor ";
+                }
+
+                datos.setearConsulta(consulta);
+                datos.setearParametro("@Nombre", nombre.Trim());
+
+                if (idProveedorActual.HasValue)
+                {
+                    datos.setearParametro("@IdProveedor", idProveedorActual.Value);
+                }
+
+                datos.ejecutarLectura();
+
+                return datos.Lector.Read();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        public bool existeCuit(string cuit, int? idProveedorActual = null)
+        {
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                string consulta = "SELECT IdProveedor FROM Proveedores WHERE Cuit = @Cuit ";
+
+                if (idProveedorActual.HasValue)
+                {
+                    consulta += "AND IdProveedor <> @IdProveedor ";
+                }
+
+                datos.setearConsulta(consulta);
+                datos.setearParametro("@Cuit", cuit.Trim());
+
+                if (idProveedorActual.HasValue)
+                {
+                    datos.setearParametro("@IdProveedor", idProveedorActual.Value);
+                }
+
+                datos.ejecutarLectura();
+
+                return datos.Lector.Read();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        public bool existeEmail(string email, int? idProveedorActual = null)
+        {
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                string consulta = "SELECT IdProveedor FROM Proveedores WHERE UPPER(Email) = UPPER(@Email) ";
+
+                if (idProveedorActual.HasValue)
+                {
+                    consulta += "AND IdProveedor <> @IdProveedor ";
+                }
+
+                datos.setearConsulta(consulta);
+                datos.setearParametro("@Email", email.Trim());
+
+                if (idProveedorActual.HasValue)
+                {
+                    datos.setearParametro("@IdProveedor", idProveedorActual.Value);
+                }
+
+                datos.ejecutarLectura();
+
+                return datos.Lector.Read();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
         private Proveedor cargarProveedor(SqlDataReader lector)
         {
             Proveedor aux = new Proveedor();

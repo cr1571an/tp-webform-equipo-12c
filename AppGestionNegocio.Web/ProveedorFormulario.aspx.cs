@@ -74,6 +74,33 @@ namespace AppGestionNegocio.Web
                     return;
                 }
 
+                int? idProveedorActual = null;
+
+                if (ViewState["IdProveedor"] != null)
+                {
+                    idProveedorActual = (int)ViewState["IdProveedor"];
+                }
+
+                ProveedorNegocio negocio = new ProveedorNegocio();
+
+                if (negocio.existeNombre(txtNombre.Text.Trim(), idProveedorActual))
+                {
+                    mostrarMensaje("Error: Ya existe un proveedor registrado con ese nombre.");
+                    return;
+                }
+
+                if (negocio.existeCuit(txtCuit.Text.Trim(), idProveedorActual))
+                {
+                    mostrarMensaje("Error: Ya existe un proveedor registrado con ese CUIT.");
+                    return;
+                }
+
+                if (negocio.existeEmail(txtEmail.Text.Trim(), idProveedorActual))
+                {
+                    mostrarMensaje("Error: Ya existe un proveedor registrado con ese email.");
+                    return;
+                }
+
                 Proveedor proveedor = new Proveedor();
 
                 proveedor.Nombre = txtNombre.Text.Trim();
@@ -85,8 +112,6 @@ namespace AppGestionNegocio.Web
                 proveedor.PersonaContacto = txtPersonaContacto.Text.Trim();
                 proveedor.Observaciones = txtObservaciones.Text.Trim();
                 proveedor.Activo = true;
-
-                ProveedorNegocio negocio = new ProveedorNegocio();
 
                 if (ViewState["IdProveedor"] != null)
                 {
@@ -110,35 +135,65 @@ namespace AppGestionNegocio.Web
         {
             if (string.IsNullOrWhiteSpace(txtNombre.Text))
             {
-                mostrarMensaje("Debe ingresar el nombre del proveedor.");
+                mostrarMensaje("Error: Debe ingresar el nombre del proveedor.");
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(txtCuit.Text))
             {
-                mostrarMensaje("Debe ingresar el CUIT del proveedor.");
+                mostrarMensaje("Error: Debe ingresar el CUIT del proveedor.");
+                return false;
+            }
+
+            if (!cuitValido(txtCuit.Text.Trim()))
+            {
+                mostrarMensaje("Error: El CUIT debe tener el formato 30-12345678-9.");
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(txtTelefono.Text))
             {
-                mostrarMensaje("Debe ingresar el teléfono del proveedor.");
+                mostrarMensaje("Error: Debe ingresar el teléfono del proveedor.");
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(txtEmail.Text))
             {
-                mostrarMensaje("Debe ingresar el email del proveedor.");
+                mostrarMensaje("Error: Debe ingresar el email del proveedor.");
+                return false;
+            }
+
+            if (!emailValido(txtEmail.Text.Trim()))
+            {
+                mostrarMensaje("Error: El email ingresado no tiene un formato válido.");
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(txtDomicilio.Text))
             {
-                mostrarMensaje("Debe ingresar el domicilio del proveedor.");
+                mostrarMensaje("Error: Debe ingresar el domicilio del proveedor.");
                 return false;
             }
 
             return true;
+        }
+
+        private bool cuitValido(string cuit)
+        {
+            return System.Text.RegularExpressions.Regex.IsMatch(cuit, @"^\d{2}-\d{8}-\d{1}$");
+        }
+
+        private bool emailValido(string email)
+        {
+            try
+            {
+                var mail = new System.Net.Mail.MailAddress(email);
+                return mail.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         protected void btnCancelar_Click(object sender, EventArgs e)
@@ -149,8 +204,9 @@ namespace AppGestionNegocio.Web
         private void mostrarMensaje(string mensaje)
         {
             lblMensaje.Text = mensaje;
+            lblMensaje.Style["display"] = "block";
 
-            string script = "setTimeout(function() { " + "var mensaje = document.getElementById('" + lblMensaje.ClientID + "'); " + "if (mensaje) { mensaje.innerHTML = ''; } " + "}, 4000);";
+            string script = "setTimeout(function() { var mensaje = document.getElementById('" + lblMensaje.ClientID + "'); if (mensaje) { mensaje.innerHTML = ''; mensaje.style.display = 'none'; } }, 4000);";
 
             ClientScript.RegisterStartupScript(this.GetType(), "ocultarMensaje", script, true);
         }

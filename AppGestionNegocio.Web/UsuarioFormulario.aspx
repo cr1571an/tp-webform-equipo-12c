@@ -37,6 +37,12 @@
             padding-top: 18px;
             margin-top: 10px;
         }
+
+        .section-divider {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 18px;
+            margin-top: 8px;
+        }
     </style>
 </asp:Content>
 
@@ -46,71 +52,128 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h1 class="page-title">Registrar usuario</h1>
+            <h1 class="page-title">
+                <asp:Label ID="lblTituloPagina" runat="server" Text="Registrar usuario"></asp:Label>
+            </h1>
         </div>
     </div>
 
     <div class="dashboard-card">
 
-        <h5 class="form-section-title">Datos del usuario</h5>
+        <h5 class="form-section-title">Datos del empleado</h5>
 
         <div class="row">
             <div class="col-md-4 mb-3">
-                <asp:Label
-                    ID="lblEmpleado"
-                    runat="server"
-                    CssClass="form-label-custom d-block"
-                    Text="Empleado">
-                </asp:Label>
+                <label class="form-label-custom d-block">Nombre</label>
 
-                <asp:DropDownList
-                    ID="ddlEmpleado"
+                <asp:TextBox
+                    ID="txtEmpleadoNombre"
                     runat="server"
-                    CssClass="form-control">
-                </asp:DropDownList>
+                    CssClass="form-control"
+                    placeholder="Ej: Juan">
+                </asp:TextBox>
             </div>
 
             <div class="col-md-4 mb-3">
-                <asp:Label
-                    ID="lblRol"
-                    runat="server"
-                    CssClass="form-label-custom d-block"
-                    Text="Rol">
-                </asp:Label>
+                <label class="form-label-custom d-block">Apellido</label>
 
-                <asp:DropDownList
-                    ID="ddlRol"
+                <asp:TextBox
+                    ID="txtEmpleadoApellido"
                     runat="server"
-                    CssClass="form-control">
-                </asp:DropDownList>
+                    CssClass="form-control"
+                    placeholder="Ej: Pérez">
+                </asp:TextBox>
             </div>
 
             <div class="col-md-4 mb-3">
-                <label class="form-label-custom d-block">Estado</label>
+                <label class="form-label-custom d-block">DNI</label>
 
-                <asp:DropDownList
-                    ID="ddlEstado"
+                <asp:TextBox
+                    ID="txtEmpleadoDni"
                     runat="server"
-                    CssClass="form-control">
-                </asp:DropDownList>
+                    CssClass="form-control"
+                    placeholder="Ej: 40111222">
+                </asp:TextBox>
             </div>
         </div>
 
         <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label-custom d-block">Nombre de usuario</label>
+            <div class="col-md-4 mb-3">
+                <label class="form-label-custom d-block">Teléfono</label>
 
                 <asp:TextBox
-                    ID="txtNombre"
+                    ID="txtEmpleadoTelefono"
                     runat="server"
                     CssClass="form-control"
-                    placeholder="Ej: juanp">
+                    placeholder="Ej: 1122334455">
                 </asp:TextBox>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label class="form-label-custom d-block">Email</label>
+
+                <asp:TextBox
+                    ID="txtEmpleadoEmail"
+                    runat="server"
+                    CssClass="form-control"
+                    placeholder="Ej: empleado@email.com">
+                </asp:TextBox>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label class="form-label-custom d-block">Fecha de ingreso</label>
+
+                <asp:TextBox
+                    ID="txtFechaIngreso"
+                    runat="server"
+                    CssClass="form-control"
+                    TextMode="Date">
+                </asp:TextBox>
+            </div>
+        </div>
+
+        <div class="section-divider">
+            <h5 class="form-section-title">Datos de acceso</h5>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <asp:Label
+                        ID="lblRol"
+                        runat="server"
+                        CssClass="form-label-custom d-block"
+                        Text="Rol">
+                    </asp:Label>
+
+                    <asp:DropDownList
+                        ID="ddlRol"
+                        runat="server"
+                        CssClass="form-control">
+                    </asp:DropDownList>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label-custom d-block">Nombre de usuario</label>
+
+                    <asp:TextBox
+                        ID="txtNombre"
+                        runat="server"
+                        CssClass="form-control"
+                        placeholder="Ej: juanp">
+                    </asp:TextBox>
+                </div>
             </div>
         </div>
 
         <div class="security-box">
             <h5 class="form-section-title">Seguridad</h5>
+
+            <asp:Label
+                ID="lblPasswordHelper"
+                runat="server"
+                CssClass="helper-text d-block mb-2"
+                Text="Si no querés cambiar la contraseña, dejá estos campos vacíos."
+                Visible="false">
+            </asp:Label>
 
             <div class="row">
                 <div class="col-md-6 mb-3">

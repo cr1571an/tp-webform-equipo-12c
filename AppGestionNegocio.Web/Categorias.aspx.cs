@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using AppGestionNegocio.Dominio;
@@ -15,6 +12,7 @@ namespace AppGestionNegocio.Web
         {
             if (!IsPostBack)
             {
+                contenedorInactivos.Visible = Seguridad.esAdmin(Session["usuario"]);
                 cargarCategorias();
             }
         }
@@ -24,8 +22,22 @@ namespace AppGestionNegocio.Web
             CategoriaNegocio negocio = new CategoriaNegocio();
 
             string nombre = txtFiltroNombre.Text.Trim();
+            bool verInactivos = Seguridad.esAdmin(Session["usuario"]) && chkVerInactivos.Checked;
 
-            dgvCategorias.DataSource = negocio.filtrar(nombre);
+            cardNuevaCategoria.Visible = !verInactivos;
+
+            if (verInactivos)
+            {
+                lblTituloListado.Text = "Categorías inactivas";
+                dgvCategorias.EmptyDataText = "No hay categorías inactivas registradas.";
+            }
+            else
+            {
+                lblTituloListado.Text = "Categorías registradas";
+                dgvCategorias.EmptyDataText = "No hay categorías activas registradas.";
+            }
+
+            dgvCategorias.DataSource = negocio.filtrar(nombre, verInactivos);
             dgvCategorias.DataBind();
         }
 
@@ -36,6 +48,15 @@ namespace AppGestionNegocio.Web
             string script = "setTimeout(function() { " + "var mensaje = document.getElementById('" + lblMensaje.ClientID + "'); " + "if (mensaje) { mensaje.innerHTML = ''; } " + "}, 4000);";
 
             ClientScript.RegisterStartupScript(this.GetType(), "ocultarMensaje", script, true);
+        }
+
+        private void mostrarMensajeListado(string mensaje)
+        {
+            lblMensajeListado.Text = mensaje;
+
+            string script = "setTimeout(function() { " + "var mensaje = document.getElementById('" + lblMensajeListado.ClientID + "'); " + "if (mensaje) { mensaje.innerHTML = ''; } " + "}, 4000);";
+
+            ClientScript.RegisterStartupScript(this.GetType(), "ocultarMensajeListado", script, true);
         }
 
         protected void btnAgregar_Click(object sender, EventArgs e)
@@ -79,8 +100,22 @@ namespace AppGestionNegocio.Web
             cargarCategorias();
         }
 
+        protected void chkVerInactivos_CheckedChanged(object sender, EventArgs e)
+        {
+            dgvCategorias.EditIndex = -1;
+            lblMensaje.Text = "";
+            lblMensajeListado.Text = "";
+            cargarCategorias();
+        }
+
         protected void dgvCategorias_RowEditing(object sender, GridViewEditEventArgs e)
         {
+            if (chkVerInactivos.Checked)
+            {
+                e.Cancel = true;
+                return;
+            }
+
             dgvCategorias.EditIndex = e.NewEditIndex;
             cargarCategorias();
         }
@@ -131,6 +166,7 @@ namespace AppGestionNegocio.Web
             try
             {
                 lblMensaje.Text = "";
+                lblMensajeListado.Text = "";
 
                 if (e.CommandName == "AbrirModalEliminar")
                 {
@@ -138,18 +174,45 @@ namespace AppGestionNegocio.Web
 
                     hfIdCategoriaEliminar.Value = idCategoria.ToString();
 
-                    ScriptManager.RegisterStartupScript(
-                        this,
-                        this.GetType(),
-                        "abrirModalEliminarCategoria",
-                        "$('#modalEliminarCategoria').modal('show');",
-                        true
-                    );
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "abrirModalEliminarCategoria", "$('#modalEliminarCategoria').modal('show');", true);
+                }
+
+                if (e.CommandName == "Restaurar")
+                {
+                    int idCategoria = int.Parse(e.CommandArgument.ToString());
+
+                    CategoriaNegocio negocio = new CategoriaNegocio();
+                    negocio.restaurar(idCategoria);
+
+                    cargarCategorias();
+
+                    mostrarMensajeListado("Categoría restaurada correctamente.");
                 }
             }
             catch (Exception ex)
             {
-                mostrarMensaje("Error al seleccionar la categoría: " + ex.Message);
+                mostrarMensajeListado("Error al seleccionar la categoría: " + ex.Message);
+            }
+        }
+
+        protected void dgvCategorias_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow && e.Row.RowState != DataControlRowState.Edit && e.Row.RowState != (DataControlRowState.Alternate | DataControlRowState.Edit))
+            {
+                bool verInactivos = Seguridad.esAdmin(Session["usuario"]) && chkVerInactivos.Checked;
+
+                Button btnEditar = (Button)e.Row.FindControl("btnEditar");
+                Button btnEliminar = (Button)e.Row.FindControl("btnEliminar");
+                Button btnRestaurar = (Button)e.Row.FindControl("btnRestaurar");
+
+                if (btnEditar != null)
+                    btnEditar.Visible = !verInactivos;
+
+                if (btnEliminar != null)
+                    btnEliminar.Visible = !verInactivos;
+
+                if (btnRestaurar != null)
+                    btnRestaurar.Visible = verInactivos;
             }
         }
 
@@ -158,6 +221,7 @@ namespace AppGestionNegocio.Web
             try
             {
                 lblMensaje.Text = "";
+                lblMensajeListado.Text = "";
 
                 int idCategoria;
 
