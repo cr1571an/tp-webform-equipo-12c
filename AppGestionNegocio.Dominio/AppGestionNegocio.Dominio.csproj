@@ -53,6 +53,7 @@
     <Compile Include="Dto\CompraDto.cs" />
     <Compile Include="Dto\DetalleCompraDto.cs" />
     <Compile Include="Empleado.cs" />
+    <Compile Include="Enum\OperacionStock.cs" />
     <Compile Include="Marca.cs" />
     <Compile Include="MedioPago.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

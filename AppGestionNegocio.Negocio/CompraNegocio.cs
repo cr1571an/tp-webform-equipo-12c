@@ -215,6 +215,7 @@ namespace AppGestionNegocio.Negocio
                 foreach (DetalleCompraDto detalle in compra.Detalles)
                 {
                     guardarDetalle(datos, idCompra, detalle);
+                    modificarStock(datos, detalle.IdArticulo, detalle.Cantidad, OperacionStock.Sumar);
                 }
 
                 datos.confirmarTransaccion();
@@ -263,7 +264,77 @@ namespace AppGestionNegocio.Negocio
 
         public void eliminar(int idCompra)
         {
+            AccesoDatos datos = new AccesoDatos();
 
+            datos.iniciarTransaccion();
+
+            try
+            {
+                List<DetalleCompra> detalles =
+                    obtenerDetalles(idCompra);
+
+                foreach (DetalleCompra detalle in detalles)
+                {
+                    modificarStock(datos, detalle.Articulo.IdArticulo, detalle.Cantidad, OperacionStock.Restar);
+                }
+
+                eliminarDetalles(datos, idCompra);
+
+                desactivarCompra(datos, idCompra);
+
+                datos.confirmarTransaccion();
+            }
+            catch
+            {
+                datos.cancelarTransaccion();
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        private void modificarStock(AccesoDatos datos, int idArticulo, int cantidad, OperacionStock operacion)
+        {
+            string operador = operacion == OperacionStock.Sumar
+                    ? "+"
+                    : "-";
+
+            datos.limpiarParametros();
+
+            datos.setearConsulta($@"UPDATE Articulos
+                                    SET Stock = Stock {operador} @Cantidad
+                                    WHERE IdArticulo = @IdArticulo");
+
+            datos.setearParametro("@Cantidad", cantidad);
+            datos.setearParametro("@IdArticulo", idArticulo);
+
+            datos.ejecutarAccionTransaccion();
+        }
+
+        private void eliminarDetalles(AccesoDatos datos, int idCompra)
+        {
+            datos.limpiarParametros();
+
+            datos.setearConsulta(@"DELETE FROM DetallesCompra
+                                   WHERE IdCompra = @IdCompra");
+
+            datos.setearParametro("@IdCompra", idCompra);
+
+            datos.ejecutarAccionTransaccion();
+        }
+
+        private void desactivarCompra(AccesoDatos datos, int idCompra)
+        {
+            datos.limpiarParametros();
+
+            datos.setearConsulta(@"UPDATE Compras
+                                  SET Activo = 0
+                                  WHERE IdCompra = @IdCompra");
+            datos.setearParametro("@IdCompra", idCompra);
+
+            datos.ejecutarAccionTransaccion();
         }
     }
 }
