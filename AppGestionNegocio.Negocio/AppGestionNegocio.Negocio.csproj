@@ -52,6 +52,7 @@
     <Compile Include="MedioPagoNegocio.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EmpleadoNegocio.cs" />
+    <Compile Include="Seguridad.cs" />
     <Compile Include="UsuarioNegocio.cs" />
     <Compile Include="RolNegocio.cs" />
     <Compile Include="ProveedorNegocio.cs" />
