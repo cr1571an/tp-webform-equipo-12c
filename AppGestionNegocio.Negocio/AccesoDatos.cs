@@ -12,6 +12,7 @@ namespace AppGestionNegocio.Negocio
         private SqlConnection conexion;
         private SqlCommand comando;
         private SqlDataReader lector;
+        private SqlTransaction transaccion;
         public SqlDataReader Lector
         {
             get { return lector; }
@@ -90,5 +91,36 @@ namespace AppGestionNegocio.Negocio
             conexion.Close();
         }
 
+        public void iniciarTransaccion()
+        {
+            conexion.Open();
+            transaccion = conexion.BeginTransaction();
+            comando.Connection = conexion;
+            comando.Transaction = transaccion;
+        }
+
+        public void confirmarTransaccion()
+        {
+            transaccion.Commit();
+        }
+
+        public void cancelarTransaccion()
+        {
+            transaccion?.Rollback();
+        }
+
+        public int ejecutarAccionScalarTransaccion()
+        {
+            return int.Parse(comando.ExecuteScalar().ToString());
+        }
+
+        public void ejecutarAccionTransaccion()
+        {
+            comando.ExecuteNonQuery();
+        }
+        public void limpiarParametros()
+        {
+            comando.Parameters.Clear();
+        }
     }
 }

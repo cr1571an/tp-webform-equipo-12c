@@ -111,48 +111,168 @@
         </div>
 
         <div class="page-actions">
-            <button type="button" class="btn btn-outline-secondary">
-                Filtrar
-            </button>
 
-            <a href="CompraFormulario.aspx" class="btn btn-primary">
-                Registrar compra
+            <asp:TextBox
+                ID="txtFiltroCompra"
+                runat="server"
+                CssClass="form-control filtro-input"
+                placeholder="Proveedor o comprobante">
+            </asp:TextBox>
+
+            <asp:Button
+                ID="btnFiltrar"
+                runat="server"
+                Text="Filtrar"
+                CssClass="btn btn-outline-secondary"
+                OnClick="btnFiltrar_Click" />
+
+            <asp:Button
+                ID="btnLimpiarFiltro"
+                runat="server"
+                Text="Limpiar"
+                CssClass="btn btn-outline-secondary"
+                OnClick="btnLimpiarFiltro_Click" />
+
+            <a href="CompraFormulario.aspx"
+                class="btn btn-primary">Registrar compra
             </a>
+
         </div>
     </div>
 
+    <asp:Label
+        ID="lblMensaje"
+        runat="server"
+        CssClass="message">
+    </asp:Label>
+
     <div class="dashboard-card">
 
-        <h5 class="form-section-title">Compras registradas</h5>
-
         <div class="table-responsive">
-            <table class="table table-striped table-hover mb-0">
-                <colgroup>
-                    <col class="col-date" />
-                    <col class="col-provider" />
-                    <col class="col-user" />
-                    <col class="col-payment" />
-                    <col class="col-receipt" />
-                    <col class="col-items" />
-                    <col class="col-total" />
-                    <col class="col-observations" />
-                    <col class="col-actions" />
-                </colgroup>
 
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Proveedor</th>
-                        <th>Usuario</th>
-                        <th>Medio de pago</th>
-                        <th>Comprobante</th>
-                        <th>Artículos</th>
-                        <th>Total</th>
-                        <th>Observaciones</th>
-                        <th class="text-center">Acciones</th>
-                    </tr>
-                </thead>
-            </table>
+            <asp:GridView
+                ID="dgvCompras"
+                runat="server"
+                CssClass="table table-striped table-hover mb-0"
+                AutoGenerateColumns="false"
+                GridLines="None"
+                DataKeyNames="IdCompra"
+                EmptyDataText="No se encontraron compras registradas."
+                OnPageIndexChanging="dgvCompras_PageIndexChanging"
+                OnRowCommand="dgvCompras_RowCommand"
+                AllowPaging="True"
+                PageSize="10"
+                PagerStyle-CssClass="grid-pager">
+
+                <Columns>
+
+                    <asp:TemplateField HeaderText="Fecha">
+                        <ItemTemplate>
+                            <%# Eval("FechaCompra", "{0:dd/MM/yyyy}") %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Proveedor">
+                        <ItemTemplate>
+                            <span class="client-name">
+                                <%# Eval("Proveedor.Nombre") %>
+                            </span>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Medio de pago">
+                        <ItemTemplate>
+                            <%# Eval("MedioPago.Descripcion") %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Comprobante">
+                        <ItemTemplate>
+                            <%# Eval("NumeroComprobante") %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Total">
+                        <ItemTemplate>
+                            $ <%# Eval("Total", "{0:N2}") %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Acciones">
+
+                        <ItemTemplate>
+
+                            <div class="table-actions">
+
+                                <a href='<%# "CompraFormulario.aspx?id=" + Eval("IdCompra") %>'
+                                    class="btn btn-sm btn-outline-primary grid-action-btn">Modificar
+                                </a>
+
+                                <asp:Button
+                                    ID="btnEliminar"
+                                    runat="server"
+                                    Text="Eliminar"
+                                    CssClass="btn btn-sm btn-outline-danger grid-action-btn"
+                                    CommandName="AbrirModalEliminar"
+                                    CommandArgument='<%# Eval("IdCompra") %>' />
+
+                            </div>
+
+                        </ItemTemplate>
+
+                        <ItemStyle CssClass="col-actions" />
+                        <HeaderStyle CssClass="col-actions" />
+                    </asp:TemplateField>
+
+                </Columns>
+
+            </asp:GridView>
+
+        </div>
+
+    </div>
+
+    <div class="modal fade modal-top" id="modalEliminarCompra" tabindex="-1">
+
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header justify-content-center">
+                    <h5 class="modal-title">Eliminar compra
+                    </h5>
+                </div>
+
+                <div class="modal-body text-center">
+
+                    <asp:HiddenField
+                        ID="hfIdCompraEliminar"
+                        runat="server" />
+
+                    <p class="mb-2">
+                        ¿Seguro que querés eliminar esta compra?
+                    </p>
+
+                </div>
+
+                <div class="modal-footer justify-content-center">
+
+                    <asp:Button
+                        ID="btnConfirmarEliminar"
+                        runat="server"
+                        Text="Eliminar"
+                        CssClass="btn btn-danger"
+                        OnClick="btnConfirmarEliminar_Click" />
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                </div>
+
+            </div>
         </div>
 
     </div>

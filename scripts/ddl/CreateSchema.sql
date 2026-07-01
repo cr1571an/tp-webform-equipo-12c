@@ -181,6 +181,7 @@ CREATE TABLE Compras (
     IdMedioPago INT NOT NULL,
     FechaCompra DATETIME NOT NULL DEFAULT GETDATE(),
     NumeroFactura VARCHAR(30) NOT NULL,
+    Observaciones VARCHAR(255) NULL,
     Total MONEY NOT NULL,
     Activo BIT NOT NULL DEFAULT 1,
     CONSTRAINT PK_Compras PRIMARY KEY (IdCompra),
