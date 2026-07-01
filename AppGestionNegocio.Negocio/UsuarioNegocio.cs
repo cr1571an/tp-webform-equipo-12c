@@ -142,6 +142,53 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
+        public bool Login(Usuario usuario)
+        {
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                datos.setearConsulta("SELECT u.IdUsuario, u.IdEmpleado, u.IdRol, u.NombreUsuario, u.PasswordHash, u.Activo AS UsuarioActivo, e.IdEmpleado AS EmpIdEmpleado, e.Nombre, e.Apellido, e.Email, r.IdRol AS RolIdRol, r.NombreRol, r.Descripcion, r.Activo AS RolActivo FROM Usuarios u INNER JOIN Empleados e ON u.IdEmpleado = e.IdEmpleado INNER JOIN Roles r ON u.IdRol = r.IdRol WHERE (u.NombreUsuario = @login OR e.Email = @login) AND u.PasswordHash = @password AND u.Activo = 1");
+                datos.setearParametro("@login", usuario.Nombre);
+                datos.setearParametro("@password", usuario.PasswordHash);
+
+                datos.ejecutarLectura();
+
+                if (datos.Lector.Read())
+                {
+                    usuario.IdUsuario = (int)datos.Lector["IdUsuario"];
+                    usuario.Nombre = (string)datos.Lector["NombreUsuario"];
+                    usuario.PasswordHash = (string)datos.Lector["PasswordHash"];
+                    usuario.Activo = (bool)datos.Lector["UsuarioActivo"];
+
+                    Empleado empleado = new Empleado();
+                    empleado.IdEmpleado = (int)datos.Lector["EmpIdEmpleado"];
+                    empleado.Nombre = (string)datos.Lector["Nombre"];
+                    empleado.Apellido = (string)datos.Lector["Apellido"];
+                    empleado.Email = (string)datos.Lector["Email"];
+                    usuario.Empleado = empleado;
+
+                    Rol rol = new Rol();
+                    rol.IdRol = (int)datos.Lector["RolIdRol"];
+                    rol.Nombre = (string)datos.Lector["NombreRol"];
+                    rol.Descripcion = (string)datos.Lector["Descripcion"];
+                    rol.Activo = (bool)datos.Lector["RolActivo"];
+                    usuario.Rol = rol;
+
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
         public List<Usuario> filtrar(string filtro)
         {
             List<Usuario> lista = new List<Usuario>();
@@ -149,13 +196,7 @@ namespace AppGestionNegocio.Negocio
 
             try
             {
-                string consulta = @"SELECT u.IdUsuario, u.NombreUsuario, u.Activo AS UsuarioActivo, u.PasswordHash,
-                    e.IdEmpleado, e.Nombre, e.Apellido,
-                    r.IdRol, r.NombreRol
-                    FROM Usuarios u
-                    INNER JOIN Empleados e ON u.IdEmpleado = e.IdEmpleado
-                    INNER JOIN Roles r ON u.IdRol = r.IdRol
-                    WHERE u.Activo = 1";
+                string consulta = "SELECT u.IdUsuario, u.NombreUsuario, u.Activo AS UsuarioActivo, u.PasswordHash, e.IdEmpleado, e.Nombre, e.Apellido, r.IdRol, r.NombreRol FROM Usuarios u INNER JOIN Empleados e ON u.IdEmpleado = e.IdEmpleado INNER JOIN Roles r ON u.IdRol = r.IdRol WHERE u.Activo = 1";
 
                 if (!string.IsNullOrWhiteSpace(filtro))
                 {

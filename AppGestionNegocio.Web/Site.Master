@@ -75,23 +75,23 @@
             font-weight: 500;
         }
 
-            .sidebar-link i {
-                width: 24px;
-                margin-right: 12px;
-                font-size: 16px;
-                color: #c4b5fd;
-            }
+        .sidebar-link i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 16px;
+            color: #c4b5fd;
+        }
 
-            .sidebar-link:hover {
-                background-color: #6f42c1;
-                color: white;
-                text-decoration: none;
-                transform: translateX(3px);
-            }
+        .sidebar-link:hover {
+            background-color: #6f42c1;
+            color: white;
+            text-decoration: none;
+            transform: translateX(3px);
+        }
 
-                .sidebar-link:hover i {
-                    color: white;
-                }
+        .sidebar-link:hover i {
+            color: white;
+        }
 
         .sidebar-footer {
             margin-top: 40px;
@@ -142,7 +142,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 17px;
+            font-weight: 700;
         }
 
         .user-info {
@@ -183,9 +184,9 @@
             padding: 22px;
         }
 
-            .dashboard-card:hover {
-                box-shadow: 0 8px 22px rgba(15, 23, 42, 0.10);
-            }
+        .dashboard-card:hover {
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.10);
+        }
 
         .module-card {
             background-color: white;
@@ -224,11 +225,11 @@
             background-color: white;
         }
 
-            .table th {
-                background-color: #f3f4f6;
-                color: #374151;
-                font-weight: 700;
-            }
+        .table th {
+            background-color: #f3f4f6;
+            color: #374151;
+            font-weight: 700;
+        }
 
         @media (max-width: 768px) {
             .app-wrapper {
@@ -304,16 +305,16 @@
                     <i class="fas fa-credit-card"></i> Medios de Pago
                 </a>
 
-                <a class="sidebar-link" href="Usuarios.aspx">
+                <a id="lnkUsuarios" runat="server" class="sidebar-link" href="Usuarios.aspx">
                     <i class="fas fa-user"></i> Usuarios
                 </a>
 
-                <a class="sidebar-link" href="Roles.aspx">
+                <a id="lnkRoles" runat="server" class="sidebar-link" href="Roles.aspx">
                     <i class="fas fa-user-shield"></i> Roles
                 </a>
 
                 <div class="sidebar-footer">
-                    <a class="sidebar-link" href="Acceso.aspx">
+                    <a class="sidebar-link" href="Acceso.aspx?logout=1">
                         <i class="fas fa-sign-out-alt"></i> Cerrar sesión
                     </a>
                 </div>
@@ -332,12 +333,16 @@
                         </div>
 
                         <div class="user-avatar">
-                            <i class="fas fa-user"></i>
+                            <asp:Label ID="lblInicialUsuario" runat="server" Text="U"></asp:Label>
                         </div>
 
                         <div class="user-info">
-                            <p class="user-name">Usuario Logueado</p>
-                            <p class="user-role">Administrador</p>
+                            <p class="user-name">
+                                <asp:Label ID="lblNombreUsuario" runat="server" Text="Usuario"></asp:Label>
+                            </p>
+                            <p class="user-role">
+                                <asp:Label ID="lblRolUsuario" runat="server" Text="Rol"></asp:Label>
+                            </p>
                         </div>
                     </div>
                 </div>
