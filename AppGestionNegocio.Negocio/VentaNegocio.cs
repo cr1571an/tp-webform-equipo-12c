@@ -170,11 +170,64 @@ namespace AppGestionNegocio.Negocio
             }
         }
 
-        private void agregarDetalle(int idVenta, DetalleVenta detalle)
+        public void agregar(Venta venta)
         {
+            AccesoDatos datos = new AccesoDatos();
 
+            try
+            {
+                datos.iniciarTransaccion();
+
+                datos.setearProcedimiento("sp_CrearCabeceraVenta");
+                datos.setearParametro("@IdCliente", venta.Cliente.IdCliente);
+                datos.setearParametro("@IdUsuario", venta.Usuario.IdUsuario);
+                datos.setearParametro("@IdMedioPago", venta.MedioPago.IdMedioPago);
+                datos.setearParametro("@NumeroFactura", venta.NumeroFactura);
+                datos.setearParametro("@Total", venta.Total); 
+                int idVenta = datos.ejecutarAccionScalarTransaccion();
+
+                foreach (DetalleVenta detalle in venta.DetallesVenta)
+                {
+                    datos.limpiarParametros();
+                    datos.setearProcedimiento("sp_AgregarDetalleVenta");
+
+                    datos.setearParametro("@IdVenta", idVenta);
+                    datos.setearParametro("@IdArticulo", detalle.Articulo.IdArticulo);
+                    datos.setearParametro("@Cantidad", detalle.Cantidad);
+
+                    datos.ejecutarAccionTransaccion();
+                }
+                datos.confirmarTransaccion();
+            }
+            catch (Exception ex)
+            {
+                datos.cancelarTransaccion();
+                throw new Exception("Error al procesar la venta: " + ex.Message);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
         }
 
+        public void eliminar(int idVenta)
+        {
+            AccesoDatos datos = new AccesoDatos();
+            try
+            {
+                datos.setearProcedimiento("sp_EliminarVenta");
+                datos.setearParametro("@IdVenta", idVenta);
+                datos.ejecutarAccion();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al eliminar la venta: " + ex.Message);
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
 
     }
 }
