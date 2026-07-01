@@ -99,15 +99,19 @@
 
         .activity-content {
             flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 8px 4px;
         }
 
         .empty-activity {
             text-align: center;
             color: #6b7280;
             font-weight: 500;
+            height: 100%;
+            min-height: 260px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .empty-activity i {
@@ -120,6 +124,61 @@
             line-height: 64px;
             border-radius: 50%;
             margin: 0 auto 12px auto;
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 10px 4px;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .activity-icon-small {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background-color: #ede9fe;
+            color: #6f42c1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        .activity-title {
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 2px;
+        }
+
+        .activity-meta {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .activity-amount {
+            font-weight: 700;
+            color: #111827;
+            white-space: nowrap;
+            margin-left: 10px;
         }
     </style>
 </asp:Content>
@@ -141,8 +200,14 @@
 
                 <div>
                     <p class="stat-title">Ventas del día</p>
-                    <h3 class="stat-value">$ 0,00</h3>
-                    <p class="stat-detail">0 ventas</p>
+
+                    <h3 class="stat-value">
+                        <asp:Label ID="lblTotalVentasDia" runat="server" Text="$ 0,00"></asp:Label>
+                    </h3>
+
+                    <p class="stat-detail">
+                        <asp:Label ID="lblCantidadVentasDia" runat="server" Text="0 ventas"></asp:Label>
+                    </p>
                 </div>
             </div>
         </div>
@@ -155,8 +220,14 @@
 
                 <div>
                     <p class="stat-title">Compras del día</p>
-                    <h3 class="stat-value">$ 0,00</h3>
-                    <p class="stat-detail">0 compras</p>
+
+                    <h3 class="stat-value">
+                        <asp:Label ID="lblTotalComprasDia" runat="server" Text="$ 0,00"></asp:Label>
+                    </h3>
+
+                    <p class="stat-detail">
+                        <asp:Label ID="lblCantidadComprasDia" runat="server" Text="0 compras"></asp:Label>
+                    </p>
                 </div>
             </div>
         </div>
@@ -169,7 +240,11 @@
 
                 <div>
                     <p class="stat-title">Artículos</p>
-                    <h3 class="stat-value">0</h3>
+
+                    <h3 class="stat-value">
+                        <asp:Label ID="lblCantidadArticulos" runat="server" Text="0"></asp:Label>
+                    </h3>
+
                     <p class="stat-detail">Activos</p>
                 </div>
             </div>
@@ -183,7 +258,11 @@
 
                 <div>
                     <p class="stat-title">Clientes</p>
-                    <h3 class="stat-value">0</h3>
+
+                    <h3 class="stat-value">
+                        <asp:Label ID="lblCantidadClientes" runat="server" Text="0"></asp:Label>
+                    </h3>
+
                     <p class="stat-detail">Activos</p>
                 </div>
             </div>
@@ -300,14 +379,50 @@
 
         <div class="col-lg-4 mb-4 d-flex flex-column">
 
-            <h3 class="mb-4">Actividad reciente</h3>
+            <h3 class="mb-4">Últimos movimientos</h3>
 
             <div class="dashboard-card activity-card">
                 <div class="activity-content">
-                    <div class="empty-activity">
+
+                    <asp:Panel ID="pnlActividadVacia" runat="server" CssClass="empty-activity">
                         <i class="bi bi-clock-history"></i>
                         No hay actividad reciente para mostrar.
-                    </div>
+                    </asp:Panel>
+
+                    <asp:Panel ID="pnlActividadLista" runat="server" Visible="false">
+                        <div class="activity-list">
+
+                            <asp:Repeater ID="rptActividadReciente" runat="server">
+                                <ItemTemplate>
+                                    <div class="activity-item">
+
+                                        <div class="activity-left">
+                                            <div class="activity-icon-small">
+                                                <i class='<%# Eval("Tipo").ToString() == "Venta" ? "bi bi-receipt" : "bi bi-cart-check" %>'></i>
+                                            </div>
+
+                                            <div>
+                                                <div class="activity-title">
+                                                    <%# Eval("Tipo").ToString() == "Venta" ? "Venta a " + Eval("Persona") : "Compra a " + Eval("Persona") %>
+                                                </div>
+
+                                                <div class="activity-meta">
+                                                    Factura <%# Eval("NumeroFactura") %> · <%# Eval("Fecha", "{0:dd/MM/yyyy}") %>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="activity-amount">
+                                            <%# string.Format(new System.Globalization.CultureInfo("es-AR"), "{0:C}", Eval("Total")) %>
+                                        </div>
+
+                                    </div>
+                                </ItemTemplate>
+                            </asp:Repeater>
+
+                        </div>
+                    </asp:Panel>
+
                 </div>
             </div>
 
