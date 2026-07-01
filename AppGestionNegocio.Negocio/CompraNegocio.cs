@@ -260,7 +260,83 @@ namespace AppGestionNegocio.Negocio
 
             datos.ejecutarAccionTransaccion();
         }
-        public void modificar(CompraDto compra) { }
+        public void modificar(CompraDto compra)
+        {
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                datos.iniciarTransaccion();
+
+                List<DetalleCompra> detallesActuales =
+                    obtenerDetalles(compra.IdCompra);
+
+                foreach (DetalleCompra detalle in detallesActuales)
+                {
+                    modificarStock(
+                        datos,
+                        detalle.Articulo.IdArticulo,
+                        detalle.Cantidad,
+                        OperacionStock.Restar);
+                }
+
+                eliminarDetalles(datos, compra.IdCompra);
+
+                actualizarCabecera(datos, compra);
+
+                foreach (DetalleCompraDto detalle in compra.Detalles)
+                {
+                    guardarDetalle(
+                        datos,
+                        compra.IdCompra,
+                        detalle);
+
+                    modificarStock(
+                        datos,
+                        detalle.IdArticulo,
+                        detalle.Cantidad,
+                        OperacionStock.Sumar);
+                }
+
+                datos.confirmarTransaccion();
+            }
+            catch
+            {
+                datos.cancelarTransaccion();
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        private void actualizarCabecera(AccesoDatos datos, CompraDto compra)
+        {
+            datos.limpiarParametros();
+
+            datos.setearConsulta(@"UPDATE Compras
+                                   SET IdProveedor = @IdProveedor,
+                                       IdMedioPago = @IdMedioPago,
+                                       FechaCompra = @FechaCompra,
+                                       NumeroFactura = @NumeroFactura,
+                                       Observaciones = @Observaciones,
+                                       Total = @Total                                   
+                                   WHERE IdCompra = @IdCompra");
+
+            datos.setearParametro("@IdCompra", compra.IdCompra);
+            datos.setearParametro("@IdProveedor", compra.IdProveedor);
+            datos.setearParametro("@IdMedioPago", compra.IdMedioPago);
+            datos.setearParametro("@FechaCompra", compra.FechaCompra);
+            datos.setearParametro("@NumeroFactura", compra.NumeroComprobante);
+
+            datos.setearParametro("@Observaciones",string.IsNullOrWhiteSpace(compra.Observaciones)
+                    ? (object)DBNull.Value
+                    : compra.Observaciones);
+
+            datos.setearParametro("@Total", compra.Total);
+            datos.ejecutarAccionTransaccion();
+        }
 
         public void eliminar(int idCompra)
         {

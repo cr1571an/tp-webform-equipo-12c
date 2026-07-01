@@ -8,6 +8,8 @@ namespace AppGestionNegocio.Dominio
 {
     public class CompraDto
     {
+
+        public int IdCompra { get; set; }
         public int IdProveedor { get; set; }
         public int IdMedioPago { get; set; }
         public int IdUsuario { get; set; }
