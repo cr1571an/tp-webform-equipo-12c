@@ -11,6 +11,7 @@ namespace AppGestionNegocio.Web
         {
             if (!IsPostBack)
             {
+                contenedorInactivos.Visible = Seguridad.esAdmin(Session["usuario"]);
                 cargarProveedores();
             }
         }
@@ -23,8 +24,22 @@ namespace AppGestionNegocio.Web
 
                 string filtro = txtFiltroNombre.Text.Trim();
                 string cp = txtFiltroCp.Text.Trim();
+                bool verInactivos = Seguridad.esAdmin(Session["usuario"]) && chkVerInactivos.Checked;
 
-                dgvProveedores.DataSource = negocio.filtrar(filtro, cp);
+                lnkNuevoProveedor.Visible = !verInactivos;
+
+                if (verInactivos)
+                {
+                    lblTituloListado.Text = "Proveedores inactivos";
+                    dgvProveedores.EmptyDataText = "No hay proveedores inactivos registrados.";
+                }
+                else
+                {
+                    lblTituloListado.Text = "Proveedores registrados";
+                    dgvProveedores.EmptyDataText = "No hay proveedores activos registrados.";
+                }
+
+                dgvProveedores.DataSource = negocio.filtrar(filtro, cp, verInactivos);
                 dgvProveedores.DataBind();
             }
             catch (Exception ex)
@@ -32,6 +47,7 @@ namespace AppGestionNegocio.Web
                 mostrarMensaje("Error al cargar proveedores: " + ex.Message);
             }
         }
+
         private void mostrarMensaje(string mensaje)
         {
             lblMensaje.Text = mensaje;
@@ -53,6 +69,13 @@ namespace AppGestionNegocio.Web
 
             cargarProveedores();
         }
+
+        protected void chkVerInactivos_CheckedChanged(object sender, EventArgs e)
+        {
+            lblMensaje.Text = "";
+            cargarProveedores();
+        }
+
         protected void dgvProveedores_RowCommand(object sender, GridViewCommandEventArgs e)
         {
             try
@@ -65,18 +88,45 @@ namespace AppGestionNegocio.Web
 
                     hfIdProveedorEliminar.Value = idProveedor.ToString();
 
-                    ScriptManager.RegisterStartupScript(
-                        this,
-                        this.GetType(),
-                        "abrirModalEliminarProveedor",
-                        "$('#modalEliminarProveedor').modal('show');",
-                        true
-                    );
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "abrirModalEliminarProveedor", "$('#modalEliminarProveedor').modal('show');", true);
+                }
+
+                if (e.CommandName == "Restaurar")
+                {
+                    int idProveedor = int.Parse(e.CommandArgument.ToString());
+
+                    ProveedorNegocio negocio = new ProveedorNegocio();
+                    negocio.restaurar(idProveedor);
+
+                    cargarProveedores();
+
+                    mostrarMensaje("Proveedor restaurado correctamente.");
                 }
             }
             catch (Exception ex)
             {
                 mostrarMensaje("Error al seleccionar el proveedor: " + ex.Message);
+            }
+        }
+
+        protected void dgvProveedores_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                bool verInactivos = Seguridad.esAdmin(Session["usuario"]) && chkVerInactivos.Checked;
+
+                HyperLink lnkModificar = (HyperLink)e.Row.FindControl("lnkModificar");
+                Button btnEliminar = (Button)e.Row.FindControl("btnEliminar");
+                Button btnRestaurar = (Button)e.Row.FindControl("btnRestaurar");
+
+                if (lnkModificar != null)
+                    lnkModificar.Visible = !verInactivos;
+
+                if (btnEliminar != null)
+                    btnEliminar.Visible = !verInactivos;
+
+                if (btnRestaurar != null)
+                    btnRestaurar.Visible = verInactivos;
             }
         }
 

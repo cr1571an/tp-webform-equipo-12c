@@ -7,14 +7,15 @@ namespace AppGestionNegocio.Negocio
 {
     public class MarcaNegocio
     {
-        public List<Marca> listar()
+        public List<Marca> listar(bool verInactivos = false)
         {
             List<Marca> lista = new List<Marca>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("SELECT IdMarca, Nombre, Activo FROM Marcas WHERE Activo = 1 ORDER BY Nombre");
+                datos.setearConsulta("SELECT IdMarca, Nombre, Activo FROM Marcas WHERE Activo = @Activo ORDER BY Nombre");
+                datos.setearParametro("@Activo", verInactivos ? 0 : 1);
                 datos.ejecutarLectura();
 
                 SqlDataReader lector = datos.Lector;
@@ -41,6 +42,7 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
+
         public void agregar(Marca nueva)
         {
             AccesoDatos datos = new AccesoDatos();
@@ -60,6 +62,7 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
+
         public void modificar(Marca marca)
         {
             AccesoDatos datos = new AccesoDatos();
@@ -81,6 +84,7 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
+
         public void eliminar(int idMarca)
         {
             AccesoDatos datos = new AccesoDatos();
@@ -100,14 +104,35 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
-        public List<Marca> filtrar(string filtro)
+
+        public void restaurar(int idMarca)
+        {
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                datos.setearConsulta("UPDATE Marcas SET Activo = 1 WHERE IdMarca = @IdMarca");
+                datos.setearParametro("@IdMarca", idMarca);
+                datos.ejecutarAccion();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        public List<Marca> filtrar(string filtro, bool verInactivos = false)
         {
             List<Marca> lista = new List<Marca>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                string consulta = "SELECT IdMarca, Nombre, Activo FROM Marcas WHERE Activo = 1";
+                string consulta = "SELECT IdMarca, Nombre, Activo FROM Marcas WHERE Activo = @Activo";
 
                 if (!string.IsNullOrWhiteSpace(filtro))
                 {
@@ -117,6 +142,7 @@ namespace AppGestionNegocio.Negocio
                 consulta += " ORDER BY Nombre";
 
                 datos.setearConsulta(consulta);
+                datos.setearParametro("@Activo", verInactivos ? 0 : 1);
 
                 if (!string.IsNullOrWhiteSpace(filtro))
                 {

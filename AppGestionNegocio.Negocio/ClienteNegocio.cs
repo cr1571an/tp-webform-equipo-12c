@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data.SqlClient;
 using AppGestionNegocio.Dominio;
 
@@ -10,18 +7,19 @@ namespace AppGestionNegocio.Negocio
 {
     public class ClienteNegocio
     {
-        private const string CONSULTA = "SELECT c.IdCliente, c.IdCondicionIva, c.Cuit, c.Nombre, c.Apellido, " + "c.Telefono, c.Email, c.Cp, c.Domicilio, c.Activo, ci.Condicion " + "FROM Clientes c " + "JOIN CondicionIva ci ON ci.IdCondicionIva = c.IdCondicionIva " + "WHERE c.Activo = 1 ";
+        private const string CONSULTA = "SELECT c.IdCliente, c.IdCondicionIva, c.Cuit, c.Nombre, c.Apellido, c.Telefono, c.Email, c.Cp, c.Domicilio, c.Activo, ci.Condicion FROM Clientes c JOIN CondicionIva ci ON ci.IdCondicionIva = c.IdCondicionIva ";
 
-        public List<Cliente> listar()
+        public List<Cliente> listar(bool verInactivos = false)
         {
             List<Cliente> lista = new List<Cliente>();
             AccesoDatos accesoDatos = new AccesoDatos();
 
             try
             {
-                string consulta = CONSULTA + "ORDER BY c.Nombre, c.Apellido";
+                string consulta = CONSULTA + "WHERE c.Activo = @Activo ORDER BY c.Nombre, c.Apellido";
 
                 accesoDatos.setearConsulta(consulta);
+                accesoDatos.setearParametro("@Activo", verInactivos ? 0 : 1);
                 accesoDatos.ejecutarLectura();
 
                 SqlDataReader lector = accesoDatos.Lector;
@@ -50,7 +48,7 @@ namespace AppGestionNegocio.Negocio
 
             try
             {
-                string consulta = CONSULTA + "AND c.IdCliente = @IdCliente";
+                string consulta = CONSULTA + "WHERE c.Activo = 1 AND c.IdCliente = @IdCliente";
 
                 accesoDatos.setearConsulta(consulta);
                 accesoDatos.setearParametro("@IdCliente", idCliente);
@@ -81,15 +79,15 @@ namespace AppGestionNegocio.Negocio
 
             try
             {
-                datos.setearConsulta("INSERT INTO Clientes " + "(IdCondicionIva, Cuit, Nombre, Apellido, Telefono, Email, Cp, Domicilio, Activo) " + "VALUES " + "(@IdCondicionIva, @Cuit, @Nombre, @Apellido, @Telefono, @Email, @Cp, @Domicilio, 1)");
+                datos.setearConsulta("INSERT INTO Clientes (IdCondicionIva, Cuit, Nombre, Apellido, Telefono, Email, Cp, Domicilio, Activo) VALUES (@IdCondicionIva, @Cuit, @Nombre, @Apellido, @Telefono, @Email, @Cp, @Domicilio, 1)");
                 datos.setearParametro("@IdCondicionIva", nuevo.CondicionIva.IdCondicionIva);
                 datos.setearParametro("@Cuit", string.IsNullOrWhiteSpace(nuevo.Cuit) ? (object)DBNull.Value : nuevo.Cuit);
                 datos.setearParametro("@Nombre", nuevo.Nombre);
                 datos.setearParametro("@Apellido", nuevo.Apellido);
-                datos.setearParametro("@Telefono", string.IsNullOrWhiteSpace(nuevo.Telefono) ? (object)DBNull.Value : nuevo.Telefono);
-                datos.setearParametro("@Email", string.IsNullOrWhiteSpace(nuevo.Email) ? (object)DBNull.Value : nuevo.Email);
-                datos.setearParametro("@Cp", string.IsNullOrWhiteSpace(nuevo.Cp) ? (object)DBNull.Value : nuevo.Cp);
-                datos.setearParametro("@Domicilio", string.IsNullOrWhiteSpace(nuevo.Domicilio) ? (object)DBNull.Value : nuevo.Domicilio);
+                datos.setearParametro("@Telefono", nuevo.Telefono);
+                datos.setearParametro("@Email", nuevo.Email);
+                datos.setearParametro("@Cp", nuevo.Cp);
+                datos.setearParametro("@Domicilio", nuevo.Domicilio);
 
                 datos.ejecutarAccion();
             }
@@ -109,15 +107,15 @@ namespace AppGestionNegocio.Negocio
 
             try
             {
-                datos.setearConsulta("UPDATE Clientes SET " + "IdCondicionIva = @IdCondicionIva, " + "Cuit = @Cuit, " + "Nombre = @Nombre, " + "Apellido = @Apellido, " + "Telefono = @Telefono, " + "Email = @Email, " + "Cp = @Cp, " + "Domicilio = @Domicilio " + "WHERE IdCliente = @IdCliente");
+                datos.setearConsulta("UPDATE Clientes SET IdCondicionIva = @IdCondicionIva, Cuit = @Cuit, Nombre = @Nombre, Apellido = @Apellido, Telefono = @Telefono, Email = @Email, Cp = @Cp, Domicilio = @Domicilio WHERE IdCliente = @IdCliente");
                 datos.setearParametro("@IdCondicionIva", cliente.CondicionIva.IdCondicionIva);
                 datos.setearParametro("@Cuit", string.IsNullOrWhiteSpace(cliente.Cuit) ? (object)DBNull.Value : cliente.Cuit);
                 datos.setearParametro("@Nombre", cliente.Nombre);
                 datos.setearParametro("@Apellido", cliente.Apellido);
-                datos.setearParametro("@Telefono", string.IsNullOrWhiteSpace(cliente.Telefono) ? (object)DBNull.Value : cliente.Telefono);
-                datos.setearParametro("@Email", string.IsNullOrWhiteSpace(cliente.Email) ? (object)DBNull.Value : cliente.Email);
-                datos.setearParametro("@Cp", string.IsNullOrWhiteSpace(cliente.Cp) ? (object)DBNull.Value : cliente.Cp);
-                datos.setearParametro("@Domicilio", string.IsNullOrWhiteSpace(cliente.Domicilio) ? (object)DBNull.Value : cliente.Domicilio);
+                datos.setearParametro("@Telefono", cliente.Telefono);
+                datos.setearParametro("@Email", cliente.Email);
+                datos.setearParametro("@Cp", cliente.Cp);
+                datos.setearParametro("@Domicilio", cliente.Domicilio);
                 datos.setearParametro("@IdCliente", cliente.IdCliente);
 
                 datos.ejecutarAccion();
@@ -152,14 +150,34 @@ namespace AppGestionNegocio.Negocio
             }
         }
 
-        public List<Cliente> filtrar(string filtro)
+        public void restaurar(int idCliente)
+        {
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                datos.setearConsulta("UPDATE Clientes SET Activo = 1 WHERE IdCliente = @IdCliente");
+                datos.setearParametro("@IdCliente", idCliente);
+                datos.ejecutarAccion();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        public List<Cliente> filtrar(string filtro, bool verInactivos = false)
         {
             List<Cliente> lista = new List<Cliente>();
             AccesoDatos accesoDatos = new AccesoDatos();
 
             try
             {
-                string consulta = CONSULTA;
+                string consulta = CONSULTA + "WHERE c.Activo = @Activo ";
 
                 if (!string.IsNullOrWhiteSpace(filtro))
                 {
@@ -169,6 +187,7 @@ namespace AppGestionNegocio.Negocio
                 consulta += "ORDER BY c.Nombre, c.Apellido";
 
                 accesoDatos.setearConsulta(consulta);
+                accesoDatos.setearParametro("@Activo", verInactivos ? 0 : 1);
 
                 if (!string.IsNullOrWhiteSpace(filtro))
                 {
@@ -194,6 +213,41 @@ namespace AppGestionNegocio.Negocio
             finally
             {
                 accesoDatos.cerrarConexion();
+            }
+        }
+
+        public bool existeEmail(string email, int? idClienteActual = null)
+        {
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                string consulta = "SELECT IdCliente FROM Clientes WHERE UPPER(Email) = UPPER(@Email) ";
+
+                if (idClienteActual.HasValue)
+                {
+                    consulta += "AND IdCliente <> @IdCliente ";
+                }
+
+                datos.setearConsulta(consulta);
+                datos.setearParametro("@Email", email.Trim());
+
+                if (idClienteActual.HasValue)
+                {
+                    datos.setearParametro("@IdCliente", idClienteActual.Value);
+                }
+
+                datos.ejecutarLectura();
+
+                return datos.Lector.Read();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
             }
         }
 

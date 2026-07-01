@@ -83,6 +83,21 @@ namespace AppGestionNegocio.Web
                     return;
                 }
 
+                int? idClienteActual = null;
+
+                if (ViewState["IdCliente"] != null)
+                {
+                    idClienteActual = (int)ViewState["IdCliente"];
+                }
+
+                ClienteNegocio negocio = new ClienteNegocio();
+
+                if (negocio.existeEmail(txtEmail.Text.Trim(), idClienteActual))
+                {
+                    mostrarMensaje("Error: Ya existe un cliente registrado con ese email.");
+                    return;
+                }
+
                 Cliente cliente = new Cliente();
 
                 cliente.Nombre = txtNombre.Text.Trim();
@@ -97,8 +112,6 @@ namespace AppGestionNegocio.Web
                 cliente.CondicionIva = new CondicionIva();
                 cliente.CondicionIva.IdCondicionIva = int.Parse(ddlCondicionIva.SelectedValue);
 
-                ClienteNegocio negocio = new ClienteNegocio();
-
                 if (ViewState["IdCliente"] != null)
                 {
                     cliente.IdCliente = (int)ViewState["IdCliente"];
@@ -109,7 +122,7 @@ namespace AppGestionNegocio.Web
                     negocio.agregar(cliente);
                 }
 
-                Response.Redirect("Clientes.aspx");
+                Response.Redirect("Clientes.aspx", false);
             }
             catch (Exception ex)
             {
@@ -121,47 +134,83 @@ namespace AppGestionNegocio.Web
         {
             if (string.IsNullOrWhiteSpace(txtNombre.Text))
             {
-                mostrarMensaje("Debe ingresar el nombre del cliente.");
+                mostrarMensaje("Error: Debe ingresar el nombre del cliente.");
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(txtApellido.Text))
             {
-                mostrarMensaje("Debe ingresar el apellido del cliente.");
+                mostrarMensaje("Error: Debe ingresar el apellido del cliente.");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(ddlCondicionIva.SelectedValue))
+            {
+                mostrarMensaje("Error: Debe seleccionar la condición IVA.");
                 return false;
             }
 
             if (ddlCondicionIva.SelectedValue != "3" && string.IsNullOrWhiteSpace(txtCuit.Text))
             {
-                mostrarMensaje("Debe ingresar el CUIT del cliente.");
+                mostrarMensaje("Error: Debe ingresar el CUIT del cliente.");
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(txtCuit.Text) && !cuitValido(txtCuit.Text.Trim()))
+            {
+                mostrarMensaje("Error: El CUIT debe tener el formato 20-12345678-9.");
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(txtTelefono.Text))
             {
-                mostrarMensaje("Debe ingresar el teléfono del cliente.");
+                mostrarMensaje("Error: Debe ingresar el teléfono del cliente.");
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(txtEmail.Text))
             {
-                mostrarMensaje("Debe ingresar el email del cliente.");
+                mostrarMensaje("Error: Debe ingresar el email del cliente.");
+                return false;
+            }
+
+            if (!emailValido(txtEmail.Text.Trim()))
+            {
+                mostrarMensaje("Error: El email ingresado no tiene un formato válido.");
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(txtCodigoPostal.Text))
             {
-                mostrarMensaje("Debe ingresar el código postal del cliente.");
+                mostrarMensaje("Error: Debe ingresar el código postal del cliente.");
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(txtDomicilio.Text))
             {
-                mostrarMensaje("Debe ingresar el domicilio del cliente.");
+                mostrarMensaje("Error: Debe ingresar el domicilio del cliente.");
                 return false;
             }
 
             return true;
+        }
+
+        private bool cuitValido(string cuit)
+        {
+            return System.Text.RegularExpressions.Regex.IsMatch(cuit, @"^\d{2}-\d{8}-\d{1}$");
+        }
+
+        private bool emailValido(string email)
+        {
+            try
+            {
+                var mail = new System.Net.Mail.MailAddress(email);
+                return mail.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         protected void btnCancelar_Click(object sender, EventArgs e)
@@ -173,7 +222,7 @@ namespace AppGestionNegocio.Web
         {
             lblMensaje.Text = mensaje;
 
-            string script = "setTimeout(function() { " + "var mensaje = document.getElementById('" + lblMensaje.ClientID + "'); " + "if (mensaje) { mensaje.innerHTML = ''; } " + "}, 4000);";
+            string script = "setTimeout(function() { var mensaje = document.getElementById('" + lblMensaje.ClientID + "'); if (mensaje) { mensaje.innerHTML = ''; } }, 4000);";
 
             ClientScript.RegisterStartupScript(this.GetType(), "ocultarMensajeCliente", script, true);
         }

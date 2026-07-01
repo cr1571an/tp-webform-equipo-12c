@@ -15,6 +15,7 @@ namespace AppGestionNegocio.Dominio
         public string Email { get; set; }
         public string Dni { get; set; }
         public DateTime FechaIngreso { get; set; }
+        public bool Activo { get; set; }
         public override string ToString()
         {
             return Nombre + " " + Apellido;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using AppGestionNegocio.Dominio;
@@ -14,6 +13,7 @@ namespace AppGestionNegocio.Web
         {
             if (!IsPostBack)
             {
+                contenedorInactivos.Visible = Seguridad.esAdmin(Session["usuario"]);
                 cargarClientes();
             }
         }
@@ -23,19 +23,24 @@ namespace AppGestionNegocio.Web
             try
             {
                 ClienteNegocio negocio = new ClienteNegocio();
-                List<Cliente> lista = negocio.listar();
 
                 string filtro = txtFiltroCliente.Text.Trim();
+                bool verInactivos = Seguridad.esAdmin(Session["usuario"]) && chkVerInactivos.Checked;
 
-                if (!string.IsNullOrWhiteSpace(filtro))
+                lnkNuevoCliente.Visible = !verInactivos;
+
+                if (verInactivos)
                 {
-                    lista = lista.Where(cliente =>
-                        contiene(cliente.Nombre, filtro) ||
-                        contiene(cliente.Apellido, filtro) ||
-                        contiene(cliente.Cuit, filtro) ||
-                        contiene(cliente.Nombre + " " + cliente.Apellido, filtro)
-                    ).ToList();
+                    lblTituloListado.Text = "Clientes inactivos";
+                    dgvClientes.EmptyDataText = "No hay clientes inactivos registrados.";
                 }
+                else
+                {
+                    lblTituloListado.Text = "Clientes registrados";
+                    dgvClientes.EmptyDataText = "No hay clientes activos registrados.";
+                }
+
+                List<Cliente> lista = negocio.filtrar(filtro, verInactivos);
 
                 Session["listaClientes"] = lista;
 
@@ -48,16 +53,6 @@ namespace AppGestionNegocio.Web
             }
         }
 
-        private bool contiene(string valor, string filtro)
-        {
-            if (string.IsNullOrWhiteSpace(valor))
-            {
-                return false;
-            }
-
-            return valor.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) >= 0;
-        }
-
         protected void btnFiltrar_Click(object sender, EventArgs e)
         {
             dgvClientes.PageIndex = 0;
@@ -67,6 +62,13 @@ namespace AppGestionNegocio.Web
         protected void btnLimpiarFiltro_Click(object sender, EventArgs e)
         {
             txtFiltroCliente.Text = "";
+            dgvClientes.PageIndex = 0;
+            cargarClientes();
+        }
+
+        protected void chkVerInactivos_CheckedChanged(object sender, EventArgs e)
+        {
+            lblMensaje.Text = "";
             dgvClientes.PageIndex = 0;
             cargarClientes();
         }
@@ -98,18 +100,45 @@ namespace AppGestionNegocio.Web
 
                     hfIdClienteEliminar.Value = idCliente.ToString();
 
-                    ScriptManager.RegisterStartupScript(
-                        this,
-                        this.GetType(),
-                        "abrirModalEliminarCliente",
-                        "$('#modalEliminarCliente').modal('show');",
-                        true
-                    );
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "abrirModalEliminarCliente", "$('#modalEliminarCliente').modal('show');", true);
+                }
+
+                if (e.CommandName == "Restaurar")
+                {
+                    int idCliente = int.Parse(e.CommandArgument.ToString());
+
+                    ClienteNegocio negocio = new ClienteNegocio();
+                    negocio.restaurar(idCliente);
+
+                    cargarClientes();
+
+                    mostrarMensaje("Cliente restaurado correctamente.", false);
                 }
             }
             catch (Exception ex)
             {
                 mostrarMensaje("Error al seleccionar el cliente: " + ex.Message, true);
+            }
+        }
+
+        protected void dgvClientes_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                bool verInactivos = Seguridad.esAdmin(Session["usuario"]) && chkVerInactivos.Checked;
+
+                HyperLink lnkModificar = (HyperLink)e.Row.FindControl("lnkModificar");
+                Button btnEliminar = (Button)e.Row.FindControl("btnEliminar");
+                Button btnRestaurar = (Button)e.Row.FindControl("btnRestaurar");
+
+                if (lnkModificar != null)
+                    lnkModificar.Visible = !verInactivos;
+
+                if (btnEliminar != null)
+                    btnEliminar.Visible = !verInactivos;
+
+                if (btnRestaurar != null)
+                    btnRestaurar.Visible = verInactivos;
             }
         }
 
@@ -132,6 +161,7 @@ namespace AppGestionNegocio.Web
 
                 hfIdClienteEliminar.Value = "";
 
+                dgvClientes.PageIndex = 0;
                 cargarClientes();
 
                 mostrarMensaje("Cliente eliminado correctamente.", false);
@@ -145,20 +175,11 @@ namespace AppGestionNegocio.Web
         private void mostrarMensaje(string mensaje, bool esError)
         {
             lblMensaje.Text = mensaje;
-            lblMensaje.CssClass = esError ? "message text-danger" : "message text-success";
+            lblMensaje.CssClass = "message text-danger";
 
-            string script = "setTimeout(function() { " +
-                            "var mensaje = document.getElementById('" + lblMensaje.ClientID + "'); " +
-                            "if (mensaje) { mensaje.innerHTML = ''; } " +
-                            "}, 4000);";
+            string script = "setTimeout(function() { var mensaje = document.getElementById('" + lblMensaje.ClientID + "'); if (mensaje) { mensaje.innerHTML = ''; } }, 4000);";
 
-            ScriptManager.RegisterStartupScript(
-                this,
-                this.GetType(),
-                "ocultarMensajeCliente",
-                script,
-                true
-            );
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "ocultarMensajeCliente", script, true);
         }
     }
 }

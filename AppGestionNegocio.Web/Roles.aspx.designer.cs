@@ -15,31 +15,31 @@ namespace AppGestionNegocio.Web
     {
 
         /// <summary>
-        /// Control txtFiltroNombre.
+        /// Control contenedorInactivos.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtFiltroNombre;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl contenedorInactivos;
 
         /// <summary>
-        /// Control btnFiltrar.
+        /// Control chkVerInactivos.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnFiltrar;
+        protected global::System.Web.UI.WebControls.CheckBox chkVerInactivos;
 
         /// <summary>
-        /// Control btnLimpiarFiltro.
+        /// Control cardNuevoRol.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnLimpiarFiltro;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl cardNuevoRol;
 
         /// <summary>
         /// Control txtNombre.
@@ -76,6 +76,24 @@ namespace AppGestionNegocio.Web
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblMensaje;
+
+        /// <summary>
+        /// Control lblTituloListado.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblTituloListado;
+
+        /// <summary>
+        /// Control lblMensajeListado.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblMensajeListado;
 
         /// <summary>
         /// Control dgvRoles.
