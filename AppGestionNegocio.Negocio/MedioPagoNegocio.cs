@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data.SqlClient;
 using AppGestionNegocio.Dominio;
 
@@ -10,41 +7,37 @@ namespace AppGestionNegocio.Negocio
 {
     public class MedioPagoNegocio
     {
-        public List<MedioPago> listar()
+        public List<MedioPago> listar(bool verInactivos = false)
         {
             List<MedioPago> lista = new List<MedioPago>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta("SELECT IdMedioPago, Nombre, Descripcion, Activo FROM MediosPago WHERE Activo = 1 ORDER BY Nombre");
+                datos.setearConsulta("SELECT IdMedioPago, Nombre, Descripcion, Activo FROM MediosPago WHERE Activo = @Activo ORDER BY Nombre");
+                datos.setearParametro("@Activo", verInactivos ? 0 : 1);
                 datos.ejecutarLectura();
 
                 SqlDataReader lector = datos.Lector;
 
                 while (lector.Read())
                 {
-                    MedioPago aux = new MedioPago();
-
-                    aux.IdMedioPago = (int)lector["IdMedioPago"];
-                    aux.Nombre = (string)lector["Nombre"];
-                    aux.Descripcion = lector["Descripcion"] != DBNull.Value ? (string)lector["Descripcion"] : "";
-                    aux.Activo = bool.Parse(lector["Activo"].ToString());
-
+                    MedioPago aux = cargarMedioPago(lector);
                     lista.Add(aux);
                 }
 
                 return lista;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
             finally
             {
                 datos.cerrarConexion();
             }
         }
+
         public void agregar(MedioPago nuevo)
         {
             AccesoDatos datos = new AccesoDatos();
@@ -53,18 +46,19 @@ namespace AppGestionNegocio.Negocio
             {
                 datos.setearConsulta("INSERT INTO MediosPago (Nombre, Descripcion, Activo) VALUES (@Nombre, @Descripcion, 1)");
                 datos.setearParametro("@Nombre", nuevo.Nombre);
-                datos.setearParametro("@Descripcion", nuevo.Descripcion);
+                datos.setearParametro("@Descripcion", string.IsNullOrWhiteSpace(nuevo.Descripcion) ? (object)DBNull.Value : nuevo.Descripcion);
                 datos.ejecutarAccion();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
             finally
             {
                 datos.cerrarConexion();
             }
         }
+
         public void modificar(MedioPago medioPago)
         {
             AccesoDatos datos = new AccesoDatos();
@@ -73,20 +67,21 @@ namespace AppGestionNegocio.Negocio
             {
                 datos.setearConsulta("UPDATE MediosPago SET Nombre = @Nombre, Descripcion = @Descripcion, Activo = @Activo WHERE IdMedioPago = @IdMedioPago");
                 datos.setearParametro("@Nombre", medioPago.Nombre);
-                datos.setearParametro("@Descripcion", medioPago.Descripcion);
+                datos.setearParametro("@Descripcion", string.IsNullOrWhiteSpace(medioPago.Descripcion) ? (object)DBNull.Value : medioPago.Descripcion);
                 datos.setearParametro("@Activo", medioPago.Activo);
                 datos.setearParametro("@IdMedioPago", medioPago.IdMedioPago);
                 datos.ejecutarAccion();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
             finally
             {
                 datos.cerrarConexion();
             }
         }
+
         public void eliminar(int idMedioPago)
         {
             AccesoDatos datos = new AccesoDatos();
@@ -97,59 +92,29 @@ namespace AppGestionNegocio.Negocio
                 datos.setearParametro("@IdMedioPago", idMedioPago);
                 datos.ejecutarAccion();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
             finally
             {
                 datos.cerrarConexion();
             }
         }
-        public List<MedioPago> filtrar(string filtro)
+
+        public void restaurar(int idMedioPago)
         {
-            List<MedioPago> lista = new List<MedioPago>();
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                string consulta = "SELECT IdMedioPago, Nombre, Descripcion, Activo FROM MediosPago WHERE Activo = 1";
-
-                if (!string.IsNullOrWhiteSpace(filtro))
-                {
-                    consulta += " AND Nombre LIKE @filtro";
-                }
-
-                consulta += " ORDER BY Nombre";
-
-                datos.setearConsulta(consulta);
-
-                if (!string.IsNullOrWhiteSpace(filtro))
-                {
-                    datos.setearParametro("@filtro", "%" + filtro.Trim() + "%");
-                }
-
-                datos.ejecutarLectura();
-
-                SqlDataReader lector = datos.Lector;
-
-                while (lector.Read())
-                {
-                    MedioPago aux = new MedioPago();
-
-                    aux.IdMedioPago = (int)lector["IdMedioPago"];
-                    aux.Nombre = (string)lector["Nombre"];
-                    aux.Descripcion = lector["Descripcion"] != DBNull.Value ? (string)lector["Descripcion"] : "";
-                    aux.Activo = bool.Parse(lector["Activo"].ToString());
-
-                    lista.Add(aux);
-                }
-
-                return lista;
+                datos.setearConsulta("UPDATE MediosPago SET Activo = 1 WHERE IdMedioPago = @IdMedioPago");
+                datos.setearParametro("@IdMedioPago", idMedioPago);
+                datos.ejecutarAccion();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -163,35 +128,20 @@ namespace AppGestionNegocio.Negocio
 
             try
             {
-
-                datos.setearConsulta(@"SELECT IdMedioPago,Nombre,Descripcion,Activo
-                                     FROM MediosPago
-                                     WHERE IdMedioPago = @IdMedioPago");
-
-
+                datos.setearConsulta("SELECT IdMedioPago, Nombre, Descripcion, Activo FROM MediosPago WHERE IdMedioPago = @IdMedioPago");
                 datos.setearParametro("@IdMedioPago", idMedioPago);
-
                 datos.ejecutarLectura();
 
                 SqlDataReader lector = datos.Lector;
 
                 if (lector.Read())
                 {
-                    MedioPago medioPago = new MedioPago();
-
-                    medioPago.IdMedioPago = (int)lector["IdMedioPago"];
-                    medioPago.Nombre = (string)lector["Nombre"];
-                    medioPago.Descripcion = lector["Descripcion"] == DBNull.Value
-                            ? string.Empty
-                            : (string)lector["Descripcion"];
-                    medioPago.Activo = (bool)lector["Activo"];
-
-                    return medioPago;
+                    return cargarMedioPago(lector);
                 }
 
                 return null;
             }
-            catch
+            catch (Exception)
             {
                 throw;
             }
@@ -199,6 +149,18 @@ namespace AppGestionNegocio.Negocio
             {
                 datos.cerrarConexion();
             }
+        }
+
+        private MedioPago cargarMedioPago(SqlDataReader lector)
+        {
+            MedioPago aux = new MedioPago();
+
+            aux.IdMedioPago = (int)lector["IdMedioPago"];
+            aux.Nombre = lector["Nombre"].ToString();
+            aux.Descripcion = lector["Descripcion"] != DBNull.Value ? lector["Descripcion"].ToString() : "";
+            aux.Activo = bool.Parse(lector["Activo"].ToString());
+
+            return aux;
         }
     }
 }

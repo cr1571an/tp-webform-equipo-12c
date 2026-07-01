@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using AppGestionNegocio.Dominio;
@@ -15,6 +12,7 @@ namespace AppGestionNegocio.Web
         {
             if (!IsPostBack)
             {
+                contenedorInactivos.Visible = Seguridad.esAdmin(Session["usuario"]);
                 cargarMediosPago();
             }
         }
@@ -23,19 +21,32 @@ namespace AppGestionNegocio.Web
         {
             MedioPagoNegocio negocio = new MedioPagoNegocio();
 
-            string nombre = txtFiltroNombre.Text.Trim();
+            bool verInactivos = Seguridad.esAdmin(Session["usuario"]) && chkVerInactivos.Checked;
 
-            dgvMediosPago.DataSource = negocio.filtrar(nombre);
+            cardNuevoMedioPago.Visible = !verInactivos;
+
+            if (verInactivos)
+            {
+                lblTituloListado.Text = "Medios de pago inactivos";
+                dgvMediosPago.EmptyDataText = "No hay medios de pago inactivos registrados.";
+            }
+            else
+            {
+                lblTituloListado.Text = "Medios de pago registrados";
+                dgvMediosPago.EmptyDataText = "No hay medios de pago activos registrados.";
+            }
+
+            dgvMediosPago.DataSource = negocio.listar(verInactivos);
             dgvMediosPago.DataBind();
         }
 
-        private void mostrarMensaje(string mensaje)
+        private void mostrarMensaje(Label lbl, string mensaje)
         {
-            lblMensaje.Text = mensaje;
+            lbl.Text = mensaje;
 
-            string script = "setTimeout(function() { " + "var mensaje = document.getElementById('" + lblMensaje.ClientID + "'); " + "if (mensaje) { mensaje.innerHTML = ''; } " + "}, 4000);";
+            string script = "setTimeout(function() { var mensaje = document.getElementById('" + lbl.ClientID + "'); if (mensaje) { mensaje.innerHTML = ''; } }, 4000);";
 
-            ClientScript.RegisterStartupScript(this.GetType(), "ocultarMensaje", script, true);
+            ClientScript.RegisterStartupScript(this.GetType(), "ocultarMensaje" + lbl.ClientID, script, true);
         }
 
         protected void btnAgregar_Click(object sender, EventArgs e)
@@ -46,7 +57,7 @@ namespace AppGestionNegocio.Web
 
                 if (string.IsNullOrWhiteSpace(txtNombre.Text))
                 {
-                    mostrarMensaje("Debe ingresar el nombre del medio de pago.");
+                    mostrarMensaje(lblMensaje, "Debe ingresar el nombre del medio de pago.");
                     return;
                 }
 
@@ -60,29 +71,31 @@ namespace AppGestionNegocio.Web
 
                 txtNombre.Text = "";
                 txtDescripcion.Text = "";
-                txtFiltroNombre.Text = "";
 
                 cargarMediosPago();
             }
             catch (Exception ex)
             {
-                mostrarMensaje("Error al agregar el medio de pago: " + ex.Message);
+                mostrarMensaje(lblMensaje, "Error al agregar el medio de pago: " + ex.Message);
             }
         }
 
-        protected void btnFiltrar_Click(object sender, EventArgs e)
+        protected void chkVerInactivos_CheckedChanged(object sender, EventArgs e)
         {
-            cargarMediosPago();
-        }
-
-        protected void btnLimpiarFiltro_Click(object sender, EventArgs e)
-        {
-            txtFiltroNombre.Text = "";
+            dgvMediosPago.EditIndex = -1;
+            lblMensaje.Text = "";
+            lblMensajeListado.Text = "";
             cargarMediosPago();
         }
 
         protected void dgvMediosPago_RowEditing(object sender, GridViewEditEventArgs e)
         {
+            if (chkVerInactivos.Checked)
+            {
+                e.Cancel = true;
+                return;
+            }
+
             dgvMediosPago.EditIndex = e.NewEditIndex;
             cargarMediosPago();
         }
@@ -108,7 +121,7 @@ namespace AppGestionNegocio.Web
 
                 if (string.IsNullOrWhiteSpace(txtNombreEdit.Text))
                 {
-                    mostrarMensaje("Debe ingresar el nombre del medio de pago.");
+                    mostrarMensaje(lblMensaje, "Debe ingresar el nombre del medio de pago.");
                     return;
                 }
 
@@ -126,7 +139,7 @@ namespace AppGestionNegocio.Web
             }
             catch (Exception ex)
             {
-                mostrarMensaje("Error al modificar el medio de pago: " + ex.Message);
+                mostrarMensaje(lblMensaje, "Error al modificar el medio de pago: " + ex.Message);
             }
         }
 
@@ -135,6 +148,7 @@ namespace AppGestionNegocio.Web
             try
             {
                 lblMensaje.Text = "";
+                lblMensajeListado.Text = "";
 
                 if (e.CommandName == "AbrirModalEliminar")
                 {
@@ -142,18 +156,45 @@ namespace AppGestionNegocio.Web
 
                     hfIdMedioPagoEliminar.Value = idMedioPago.ToString();
 
-                    ScriptManager.RegisterStartupScript(
-                        this,
-                        this.GetType(),
-                        "abrirModalEliminarMedioPago",
-                        "$('#modalEliminarMedioPago').modal('show');",
-                        true
-                    );
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "abrirModalEliminarMedioPago", "$('#modalEliminarMedioPago').modal('show');", true);
+                }
+
+                if (e.CommandName == "Restaurar")
+                {
+                    int idMedioPago = int.Parse(e.CommandArgument.ToString());
+
+                    MedioPagoNegocio negocio = new MedioPagoNegocio();
+                    negocio.restaurar(idMedioPago);
+
+                    cargarMediosPago();
+
+                    mostrarMensaje(lblMensajeListado, "Medio de pago restaurado correctamente.");
                 }
             }
             catch (Exception ex)
             {
-                mostrarMensaje("Error al seleccionar el medio de pago: " + ex.Message);
+                mostrarMensaje(lblMensajeListado, "Error al seleccionar el medio de pago: " + ex.Message);
+            }
+        }
+
+        protected void dgvMediosPago_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                bool verInactivos = Seguridad.esAdmin(Session["usuario"]) && chkVerInactivos.Checked;
+
+                Button btnEditar = (Button)e.Row.FindControl("btnEditar");
+                Button btnEliminar = (Button)e.Row.FindControl("btnEliminar");
+                Button btnRestaurar = (Button)e.Row.FindControl("btnRestaurar");
+
+                if (btnEditar != null)
+                    btnEditar.Visible = !verInactivos;
+
+                if (btnEliminar != null)
+                    btnEliminar.Visible = !verInactivos;
+
+                if (btnRestaurar != null)
+                    btnRestaurar.Visible = verInactivos;
             }
         }
 
@@ -162,12 +203,13 @@ namespace AppGestionNegocio.Web
             try
             {
                 lblMensaje.Text = "";
+                lblMensajeListado.Text = "";
 
                 int idMedioPago;
 
                 if (!int.TryParse(hfIdMedioPagoEliminar.Value, out idMedioPago))
                 {
-                    mostrarMensaje("No se pudo identificar el medio de pago a eliminar.");
+                    mostrarMensaje(lblMensaje, "No se pudo identificar el medio de pago a eliminar.");
                     return;
                 }
 
@@ -179,11 +221,11 @@ namespace AppGestionNegocio.Web
                 dgvMediosPago.EditIndex = -1;
                 cargarMediosPago();
 
-                mostrarMensaje("Medio de pago eliminado correctamente.");
+                mostrarMensaje(lblMensaje, "Medio de pago eliminado correctamente.");
             }
             catch (Exception ex)
             {
-                mostrarMensaje("Error al eliminar el medio de pago: " + ex.Message);
+                mostrarMensaje(lblMensaje, "Error al eliminar el medio de pago: " + ex.Message);
             }
         }
     }

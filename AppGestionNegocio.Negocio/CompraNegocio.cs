@@ -2,29 +2,20 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AppGestionNegocio.Negocio
 {
-
     public class CompraNegocio
     {
-        public List<Compra> listar()
+        public List<Compra> listar(bool verAnuladas = false)
         {
             List<Compra> lista = new List<Compra>();
-
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta(@"SELECT C.IdCompra,C.FechaCompra,C.NumeroFactura,C.Total,P.IdProveedor,P.Nombre AS Proveedor,M.IdMedioPago,
-                                       M.Descripcion AS MedioPago
-                                       FROM Compras C
-                                       INNER JOIN Proveedores P ON P.IdProveedor = C.IdProveedor
-                                       INNER JOIN MediosPago M ON M.IdMedioPago = C.IdMedioPago
-                                       WHERE C.Activo = 1");
+                datos.setearConsulta("SELECT C.IdCompra, C.FechaCompra, C.NumeroFactura, C.Total, P.IdProveedor, P.Nombre AS Proveedor, M.IdMedioPago, M.Descripcion AS MedioPago FROM Compras C INNER JOIN Proveedores P ON P.IdProveedor = C.IdProveedor INNER JOIN MediosPago M ON M.IdMedioPago = C.IdMedioPago WHERE C.Activo = @Activo ORDER BY C.FechaCompra DESC");
+                datos.setearParametro("@Activo", verAnuladas ? 0 : 1);
 
                 datos.ejecutarLectura();
 
@@ -38,12 +29,10 @@ namespace AppGestionNegocio.Negocio
                     aux.Total = (decimal)datos.Lector["Total"];
 
                     aux.Proveedor = new Proveedor();
-
                     aux.Proveedor.IdProveedor = (int)datos.Lector["IdProveedor"];
                     aux.Proveedor.Nombre = (string)datos.Lector["Proveedor"];
 
                     aux.MedioPago = new MedioPago();
-
                     aux.MedioPago.IdMedioPago = (int)datos.Lector["IdMedioPago"];
                     aux.MedioPago.Descripcion = (string)datos.Lector["MedioPago"];
 
@@ -61,18 +50,13 @@ namespace AppGestionNegocio.Negocio
                 datos.cerrarConexion();
             }
         }
-
         public Compra obtener(int idCompra)
         {
             AccesoDatos datos = new AccesoDatos();
 
             try
             {
-                datos.setearConsulta(@"SELECT IdCompra,IdUsuario,IdProveedor,IdMedioPago,FechaCompra,NumeroFactura,Observaciones,Total                                       
-                                       FROM Compras
-                                       WHERE IdCompra = @IdCompra
-                                       AND Activo = 1");
-
+                datos.setearConsulta("SELECT IdCompra, IdUsuario, IdProveedor, IdMedioPago, FechaCompra, NumeroFactura, Observaciones, Total FROM Compras WHERE IdCompra = @IdCompra AND Activo = 1");
                 datos.setearParametro("@IdCompra", idCompra);
                 datos.ejecutarLectura();
 
@@ -84,13 +68,11 @@ namespace AppGestionNegocio.Negocio
                 Compra compra = new Compra();
 
                 compra.IdCompra = (int)lector["IdCompra"];
-
                 compra.FechaCompra = (DateTime)lector["FechaCompra"];
                 compra.NumeroComprobante = (string)lector["NumeroFactura"];
                 compra.Total = (decimal)lector["Total"];
-                compra.Observaciones = lector["Observaciones"] == DBNull.Value
-                        ? string.Empty
-                        : (string)lector["Observaciones"];
+                compra.Observaciones = lector["Observaciones"] == DBNull.Value ? string.Empty : (string)lector["Observaciones"];
+
                 int idProveedor = (int)lector["IdProveedor"];
                 int idMedioPago = (int)lector["IdMedioPago"];
                 int idUsuario = (int)lector["IdUsuario"];
@@ -99,13 +81,11 @@ namespace AppGestionNegocio.Negocio
 
                 compra.Proveedor = new ProveedorNegocio().obtenerPorId(idProveedor);
                 compra.MedioPago = new MedioPagoNegocio().obtenerPorId(idMedioPago);
-                compra.Usuario = new Usuario
-                {
-                    IdUsuario = idUsuario
-                };
+
+                compra.Usuario = new Usuario();
+                compra.Usuario.IdUsuario = idUsuario;
 
                 List<DetalleCompra> detalleCompra = obtenerDetalles(idCompra);
-
                 compra.DetallesCompra = detalleCompra;
 
                 return compra;
@@ -127,13 +107,8 @@ namespace AppGestionNegocio.Negocio
 
             try
             {
-                datos.setearConsulta(@"SELECT DC.IdDetalleCompra,DC.IdArticulo,DC.Cantidad,DC.PrecioUnitario,DC.SubTotal,A.Nombre
-                                      FROM DetallesCompra DC
-                                      INNER JOIN Articulos A ON A.IdArticulo = DC.IdArticulo
-                                      WHERE DC.IdCompra = @IdCompra");
-
+                datos.setearConsulta("SELECT DC.IdDetalleCompra, DC.IdArticulo, DC.Cantidad, DC.PrecioUnitario, DC.SubTotal, A.Nombre FROM DetallesCompra DC INNER JOIN Articulos A ON A.IdArticulo = DC.IdArticulo WHERE DC.IdCompra = @IdCompra");
                 datos.setearParametro("@IdCompra", idCompra);
-
                 datos.ejecutarLectura();
 
                 SqlDataReader lector = datos.Lector;
@@ -150,11 +125,48 @@ namespace AppGestionNegocio.Negocio
                     Articulo articulo = new Articulo();
                     articulo.IdArticulo = (int)lector["IdArticulo"];
                     articulo.Nombre = (string)lector["Nombre"];
+
                     detalle.Articulo = articulo;
+
                     lista.Add(detalle);
                 }
 
                 return lista;
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                datos.cerrarConexion();
+            }
+        }
+
+        public bool existeNumeroComprobante(string numeroComprobante, int? idCompraActual = null)
+        {
+            AccesoDatos datos = new AccesoDatos();
+
+            try
+            {
+                string consulta = "SELECT IdCompra FROM Compras WHERE UPPER(NumeroFactura) = UPPER(@NumeroFactura) ";
+
+                if (idCompraActual.HasValue)
+                {
+                    consulta += "AND IdCompra <> @IdCompra ";
+                }
+
+                datos.setearConsulta(consulta);
+                datos.setearParametro("@NumeroFactura", numeroComprobante.Trim());
+
+                if (idCompraActual.HasValue)
+                {
+                    datos.setearParametro("@IdCompra", idCompraActual.Value);
+                }
+
+                datos.ejecutarLectura();
+
+                return datos.Lector.Read();
             }
             catch
             {
@@ -174,40 +186,13 @@ namespace AppGestionNegocio.Negocio
             {
                 datos.iniciarTransaccion();
 
-                datos.setearConsulta(@"INSERT INTO Compras
-                                    (
-                                        IdUsuario,
-                                        IdProveedor,
-                                        IdMedioPago,
-                                        FechaCompra,
-                                        NumeroFactura,
-                                        Observaciones,
-                                        Total,
-                                        Activo
-                                    )
-                                    VALUES
-                                    (
-                                        @IdUsuario,
-                                        @IdProveedor,
-                                        @IdMedioPago,
-                                        @FechaCompra,
-                                        @NumeroFactura,
-                                        @Observaciones,
-                                        @Total,
-                                        1
-                                    );
-
-                                    SELECT SCOPE_IDENTITY();");
-
+                datos.setearConsulta("INSERT INTO Compras (IdUsuario, IdProveedor, IdMedioPago, FechaCompra, NumeroFactura, Observaciones, Total, Activo) VALUES (@IdUsuario, @IdProveedor, @IdMedioPago, @FechaCompra, @NumeroFactura, @Observaciones, @Total, 1); SELECT SCOPE_IDENTITY();");
                 datos.setearParametro("@IdUsuario", compra.IdUsuario);
                 datos.setearParametro("@IdProveedor", compra.IdProveedor);
                 datos.setearParametro("@IdMedioPago", compra.IdMedioPago);
                 datos.setearParametro("@FechaCompra", compra.FechaCompra);
                 datos.setearParametro("@NumeroFactura", compra.NumeroComprobante);
-                datos.setearParametro("@Observaciones",
-                    string.IsNullOrWhiteSpace(compra.Observaciones)
-                        ? (object)DBNull.Value
-                        : compra.Observaciones);
+                datos.setearParametro("@Observaciones", string.IsNullOrWhiteSpace(compra.Observaciones) ? (object)DBNull.Value : compra.Observaciones);
                 datos.setearParametro("@Total", compra.Total);
 
                 int idCompra = datos.ejecutarAccionScalarTransaccion();
@@ -235,23 +220,7 @@ namespace AppGestionNegocio.Negocio
         {
             datos.limpiarParametros();
 
-            datos.setearConsulta(@"INSERT INTO DetallesCompra
-                                (
-                                    IdCompra,
-                                    IdArticulo,
-                                    Cantidad,
-                                    PrecioUnitario,
-                                    SubTotal
-                                )
-                                VALUES
-                                (
-                                    @IdCompra,
-                                    @IdArticulo,
-                                    @Cantidad,
-                                    @PrecioUnitario,
-                                    @SubTotal
-                                )");
-
+            datos.setearConsulta("INSERT INTO DetallesCompra (IdCompra, IdArticulo, Cantidad, PrecioUnitario, SubTotal) VALUES (@IdCompra, @IdArticulo, @Cantidad, @PrecioUnitario, @SubTotal)");
             datos.setearParametro("@IdCompra", idCompra);
             datos.setearParametro("@IdArticulo", detalle.IdArticulo);
             datos.setearParametro("@Cantidad", detalle.Cantidad);
@@ -260,6 +229,7 @@ namespace AppGestionNegocio.Negocio
 
             datos.ejecutarAccionTransaccion();
         }
+
         public void modificar(CompraDto compra)
         {
             AccesoDatos datos = new AccesoDatos();
@@ -268,16 +238,11 @@ namespace AppGestionNegocio.Negocio
             {
                 datos.iniciarTransaccion();
 
-                List<DetalleCompra> detallesActuales =
-                    obtenerDetalles(compra.IdCompra);
+                List<DetalleCompra> detallesActuales = obtenerDetalles(compra.IdCompra);
 
                 foreach (DetalleCompra detalle in detallesActuales)
                 {
-                    modificarStock(
-                        datos,
-                        detalle.Articulo.IdArticulo,
-                        detalle.Cantidad,
-                        OperacionStock.Restar);
+                    modificarStock(datos, detalle.Articulo.IdArticulo, detalle.Cantidad, OperacionStock.Restar);
                 }
 
                 eliminarDetalles(datos, compra.IdCompra);
@@ -286,16 +251,8 @@ namespace AppGestionNegocio.Negocio
 
                 foreach (DetalleCompraDto detalle in compra.Detalles)
                 {
-                    guardarDetalle(
-                        datos,
-                        compra.IdCompra,
-                        detalle);
-
-                    modificarStock(
-                        datos,
-                        detalle.IdArticulo,
-                        detalle.Cantidad,
-                        OperacionStock.Sumar);
+                    guardarDetalle(datos, compra.IdCompra, detalle);
+                    modificarStock(datos, detalle.IdArticulo, detalle.Cantidad, OperacionStock.Sumar);
                 }
 
                 datos.confirmarTransaccion();
@@ -315,26 +272,15 @@ namespace AppGestionNegocio.Negocio
         {
             datos.limpiarParametros();
 
-            datos.setearConsulta(@"UPDATE Compras
-                                   SET IdProveedor = @IdProveedor,
-                                       IdMedioPago = @IdMedioPago,
-                                       FechaCompra = @FechaCompra,
-                                       NumeroFactura = @NumeroFactura,
-                                       Observaciones = @Observaciones,
-                                       Total = @Total                                   
-                                   WHERE IdCompra = @IdCompra");
-
+            datos.setearConsulta("UPDATE Compras SET IdProveedor = @IdProveedor, IdMedioPago = @IdMedioPago, FechaCompra = @FechaCompra, NumeroFactura = @NumeroFactura, Observaciones = @Observaciones, Total = @Total WHERE IdCompra = @IdCompra");
             datos.setearParametro("@IdCompra", compra.IdCompra);
             datos.setearParametro("@IdProveedor", compra.IdProveedor);
             datos.setearParametro("@IdMedioPago", compra.IdMedioPago);
             datos.setearParametro("@FechaCompra", compra.FechaCompra);
             datos.setearParametro("@NumeroFactura", compra.NumeroComprobante);
-
-            datos.setearParametro("@Observaciones",string.IsNullOrWhiteSpace(compra.Observaciones)
-                    ? (object)DBNull.Value
-                    : compra.Observaciones);
-
+            datos.setearParametro("@Observaciones", string.IsNullOrWhiteSpace(compra.Observaciones) ? (object)DBNull.Value : compra.Observaciones);
             datos.setearParametro("@Total", compra.Total);
+
             datos.ejecutarAccionTransaccion();
         }
 
@@ -346,8 +292,7 @@ namespace AppGestionNegocio.Negocio
 
             try
             {
-                List<DetalleCompra> detalles =
-                    obtenerDetalles(idCompra);
+                List<DetalleCompra> detalles = obtenerDetalles(idCompra);
 
                 foreach (DetalleCompra detalle in detalles)
                 {
@@ -373,16 +318,11 @@ namespace AppGestionNegocio.Negocio
 
         private void modificarStock(AccesoDatos datos, int idArticulo, int cantidad, OperacionStock operacion)
         {
-            string operador = operacion == OperacionStock.Sumar
-                    ? "+"
-                    : "-";
+            string operador = operacion == OperacionStock.Sumar ? "+" : "-";
 
             datos.limpiarParametros();
 
-            datos.setearConsulta($@"UPDATE Articulos
-                                    SET Stock = Stock {operador} @Cantidad
-                                    WHERE IdArticulo = @IdArticulo");
-
+            datos.setearConsulta("UPDATE Articulos SET Stock = Stock " + operador + " @Cantidad WHERE IdArticulo = @IdArticulo");
             datos.setearParametro("@Cantidad", cantidad);
             datos.setearParametro("@IdArticulo", idArticulo);
 
@@ -393,9 +333,7 @@ namespace AppGestionNegocio.Negocio
         {
             datos.limpiarParametros();
 
-            datos.setearConsulta(@"DELETE FROM DetallesCompra
-                                   WHERE IdCompra = @IdCompra");
-
+            datos.setearConsulta("DELETE FROM DetallesCompra WHERE IdCompra = @IdCompra");
             datos.setearParametro("@IdCompra", idCompra);
 
             datos.ejecutarAccionTransaccion();
@@ -405,9 +343,7 @@ namespace AppGestionNegocio.Negocio
         {
             datos.limpiarParametros();
 
-            datos.setearConsulta(@"UPDATE Compras
-                                  SET Activo = 0
-                                  WHERE IdCompra = @IdCompra");
+            datos.setearConsulta("UPDATE Compras SET Activo = 0 WHERE IdCompra = @IdCompra");
             datos.setearParametro("@IdCompra", idCompra);
 
             datos.ejecutarAccionTransaccion();

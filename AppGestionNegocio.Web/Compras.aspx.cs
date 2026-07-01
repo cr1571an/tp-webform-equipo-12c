@@ -3,7 +3,6 @@ using AppGestionNegocio.Negocio;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -15,19 +14,33 @@ namespace AppGestionNegocio.Web
         {
             if (!IsPostBack)
             {
-
+                contenedorAnuladas.Visible = Seguridad.esAdmin(Session["usuario"]);
                 cargarCompras();
-
             }
         }
-
 
         private void cargarCompras()
         {
             try
             {
                 CompraNegocio negocio = new CompraNegocio();
-                List<Compra> lista = negocio.listar();
+
+                bool verAnuladas = Seguridad.esAdmin(Session["usuario"]) && chkVerAnuladas.Checked;
+
+                lnkRegistrarCompra.Visible = !verAnuladas;
+
+                if (verAnuladas)
+                {
+                    dgvCompras.EmptyDataText = "No hay compras anuladas registradas.";
+                }
+                else
+                {
+                    dgvCompras.EmptyDataText = "No se encontraron compras registradas.";
+                }
+
+                dgvCompras.Columns[5].Visible = !verAnuladas;
+
+                List<Compra> lista = negocio.listar(verAnuladas);
 
                 string filtro = txtFiltroCompra.Text.Trim();
 
@@ -46,9 +59,7 @@ namespace AppGestionNegocio.Web
             }
             catch (Exception ex)
             {
-                mostrarMensaje(
-                    "Error al cargar compras: " + ex.Message,
-                    true);
+                mostrarMensaje("Error al cargar compras: " + ex.Message, true);
             }
         }
 
@@ -60,6 +71,13 @@ namespace AppGestionNegocio.Web
             }
 
             return valor.IndexOf(filtro, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        protected void chkVerAnuladas_CheckedChanged(object sender, EventArgs e)
+        {
+            lblMensaje.Text = "";
+            dgvCompras.PageIndex = 0;
+            cargarCompras();
         }
 
         protected void btnFiltrar_Click(object sender, EventArgs e)
@@ -85,10 +103,7 @@ namespace AppGestionNegocio.Web
 
                 if (!int.TryParse(hfIdCompraEliminar.Value, out idCompra))
                 {
-                    mostrarMensaje(
-                        "No se pudo identificar la compra a eliminar.",
-                        true);
-
+                    mostrarMensaje("No se pudo identificar la compra a eliminar.", true);
                     return;
                 }
 
@@ -98,21 +113,18 @@ namespace AppGestionNegocio.Web
 
                 hfIdCompraEliminar.Value = "";
 
+                dgvCompras.PageIndex = 0;
                 cargarCompras();
 
-                mostrarMensaje(
-                    "Compra eliminada correctamente.",
-                    false);
+                mostrarMensaje("Compra eliminada correctamente.", false);
             }
             catch (Exception ex)
             {
-                mostrarMensaje(
-                    "Error al eliminar compra: " + ex.Message,
-                    true);
+                mostrarMensaje("Error al eliminar compra: " + ex.Message, true);
             }
         }
 
-        protected void dgvCompras_PageIndexChanging(object sender,GridViewPageEventArgs e)
+        protected void dgvCompras_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             dgvCompras.PageIndex = e.NewPageIndex;
 
@@ -135,51 +147,28 @@ namespace AppGestionNegocio.Web
 
                 if (e.CommandName == "AbrirModalEliminar")
                 {
-                    int idCompra = int.Parse(
-                        e.CommandArgument.ToString());
+                    int idCompra = int.Parse(e.CommandArgument.ToString());
 
-                    hfIdCompraEliminar.Value =
-                        idCompra.ToString();
+                    hfIdCompraEliminar.Value = idCompra.ToString();
 
-                    ScriptManager.RegisterStartupScript(
-                        this,
-                        GetType(),
-                        "abrirModalEliminarCompra",
-                        "$('#modalEliminarCompra').modal('show');",
-                        true
-                    );
+                    ScriptManager.RegisterStartupScript(this, GetType(), "abrirModalEliminarCompra", "$('#modalEliminarCompra').modal('show');", true);
                 }
             }
             catch (Exception ex)
             {
-                mostrarMensaje(
-                    "Error al seleccionar la compra: " + ex.Message,
-                    true);
+                mostrarMensaje("Error al seleccionar la compra: " + ex.Message, true);
             }
         }
 
         private void mostrarMensaje(string mensaje, bool esError)
         {
             lblMensaje.Text = mensaje;
-            lblMensaje.CssClass =
-                esError
-                    ? "message text-danger"
-                    : "message text-success";
+            lblMensaje.CssClass = esError ? "message text-danger d-block" : "message text-success d-block";
+            lblMensaje.Style["display"] = "block";
 
-            string script =
-                "setTimeout(function() {" +
-                "var mensaje = document.getElementById('" + lblMensaje.ClientID + "');" +
-                "if (mensaje) { mensaje.innerHTML = ''; }" +
-                "}, 4000);";
+            string script = "setTimeout(function() { var mensaje = document.getElementById('" + lblMensaje.ClientID + "'); if (mensaje) { mensaje.innerHTML = ''; mensaje.classList.remove('d-block'); mensaje.classList.add('d-none'); mensaje.style.display = 'none'; } }, 4000);";
 
-            ScriptManager.RegisterStartupScript(
-                this,
-                GetType(),
-                "ocultarMensajeCompra",
-                script,
-                true
-            );
+            ScriptManager.RegisterStartupScript(this, GetType(), "ocultarMensajeCompra", script, true);
         }
-
     }
 }
