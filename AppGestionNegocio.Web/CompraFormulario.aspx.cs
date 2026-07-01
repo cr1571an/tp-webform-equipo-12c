@@ -390,7 +390,7 @@ namespace AppGestionNegocio.Web
             {
                 CompraNegocio compraNegocio = new CompraNegocio();
 
-                compraNegocio.Guardar(compra);
+                compraNegocio.agregar(compra);
 
                 Session.Remove("DetallesCompra");
                 Session.Remove("ArticuloSeleccionado");
