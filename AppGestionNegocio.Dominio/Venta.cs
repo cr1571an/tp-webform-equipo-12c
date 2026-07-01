@@ -10,6 +10,7 @@ namespace AppGestionNegocio.Dominio
     {
         public int IdVenta { get; set; }
         public Cliente Cliente { get; set; }
+        public string TipoConsumidor { get; set; }
         public Usuario Usuario { get; set; }
         public MedioPago MedioPago { get; set; }
         public DateTime Fecha { get; set; }

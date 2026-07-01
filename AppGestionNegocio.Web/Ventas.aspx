@@ -73,7 +73,7 @@
                 <Columns>
                     <asp:TemplateField HeaderText="Fecha">
                         <ItemTemplate>
-                            <%# Eval("Fecha", "{0:dd/MM/yyyy HH:mm}") %>
+                            <%# Eval("Fecha", "{0:dd/MM/yyyy}") %>
                         </ItemTemplate>
                     </asp:TemplateField>
 

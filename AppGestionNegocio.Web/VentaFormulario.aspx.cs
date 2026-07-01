@@ -248,9 +248,37 @@ namespace AppGestionNegocio.Web
         protected void btnGuardarVenta_Click(object sender, EventArgs e)
         {
             lblMensaje.Text = "";
+            lblMensajeDetalle.Text = "";
             if (!validarVenta()) return;
 
-            // Falta la logica
+            List<DetalleVenta> detalles = (List<DetalleVenta>)Session["DetallesVenta"];
+
+            Venta ventaDto = new Venta
+            {
+                Usuario = new Usuario { IdUsuario = 1 },
+                Cliente = new Cliente { IdCliente = int.Parse(ddlCliente.SelectedValue) },
+                MedioPago = new MedioPago { IdMedioPago = int.Parse(ddlMedio.SelectedValue) },
+                NumeroFactura = txtNumeroComprobante.Text.Trim(),
+                Fecha = DateTime.Today,
+                DetallesVenta = detalles,
+                Total = detalles.Sum(x => x.Subtotal)
+            };
+
+            try
+            {
+                VentaNegocio ventaNegocio = new VentaNegocio();
+                ventaNegocio.agregar(ventaDto);
+
+                Session.Remove("DetallesVenta");
+                Session.Remove("ArticulosFiltrados");
+                Session.Remove("ArticuloSeleccionado");
+
+                Response.Redirect("Ventas.aspx?mensaje=Venta registrada correctamente");
+            }
+            catch (Exception ex)
+            {
+                MostrarMensaje(lblMensaje, ex.Message);
+            }
         }
 
         protected void btnCancelarVenta_Click(object sender, EventArgs e)
