@@ -227,7 +227,7 @@ namespace AppGestionNegocio.Negocio
 
             try
             {
-                string consulta = "SELECT a.IdArticulo, a.IdAlicuotaIva, a.Nombre, a.PrecioUnitario, a.Stock FROM ArticulosProveedor ap INNER JOIN Articulos a ON a.IdArticulo = ap.IdArticulo WHERE ap.IdProveedor = @IdProveedor AND ap.Activo = 1";
+                string consulta = "SELECT a.IdArticulo, a.IdAlicuotaIva, a.Nombre, a.PrecioUnitario, a.Stock FROM ArticulosProveedor ap INNER JOIN Articulos a ON a.IdArticulo = ap.IdArticulo WHERE ap.IdProveedor = @IdProveedor AND ap.Activo = 1 AND a.Activo = 1";
 
                 accesoDatos.setearConsulta(consulta);
                 accesoDatos.setearParametro("@IdProveedor", idProveedor);
